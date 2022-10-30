@@ -1,6 +1,5 @@
 #include "../../include/cryptography/SymmetricKey.hh"
-
-#include "RandomDataGenerator.hh"
+#include "../../include/cryptography/RandomDataGenerator.hh"
 
 #include <openssl/evp.h>
 

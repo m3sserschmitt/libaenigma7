@@ -4,6 +4,8 @@
 #include "Constants.hh"
 #include "Key.hh"
 
+#include <openssl/evp.h>
+
 class SymmetricKey : public Key
 {
     Bytes keyData;
