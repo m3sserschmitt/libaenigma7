@@ -17,7 +17,7 @@ public:
         this->ok = ok;
     }
 
-    bool isError()
+    bool isError() const
     {
         return not this->ok;
     }

@@ -1,42 +1,6 @@
 #include "../../include/cryptography/SymmetricKey.hh"
-#include "../../include/cryptography/RandomDataGenerator.hh"
 
 #include <openssl/evp.h>
-
-void SymmetricKey::initIV()
-{
-    EncrypterData *randomData = RandomDataGenerator::generate(IV_SIZE);
-    memcpy(this->ivData, randomData->getData(), IV_SIZE);
-
-    delete randomData;
-}
-
-void SymmetricKey::initIV(const Byte *ivData)
-{
-    memcpy(this->ivData, ivData, IV_SIZE);
-}
-
-void SymmetricKey::createCipherContext()
-{
-    this->freeCipherContext();
-
-    this->cipherContext = EVP_CIPHER_CTX_new();
-}
-
-void SymmetricKey::createBuffer(Size len)
-{
-    this->freeBuffer();
-
-    this->buffer = new Byte[len + 1];
-    this->bufferSize = len;
-}
-
-void SymmetricKey::initEncryption(Size bufferSize)
-{
-    this->createBuffer(bufferSize);
-    this->initIV();
-    this->createCipherContext();
-}
 
 void SymmetricKey::initDecryption(const EncrypterData *data)
 {
@@ -49,43 +13,24 @@ void SymmetricKey::initDecryption(const EncrypterData *data)
     this->initTagData(payload + data->getDataSize() - TAG_SIZE);
 }
 
-void SymmetricKey::freeCipherContext()
-{
-    if (this->cipherContext)
-    {
-        EVP_CIPHER_CTX_free(cipherContext);
-        this->cipherContext = nullptr;
-    }
-}
-
-void SymmetricKey::freeBuffer()
-{
-    if (this->buffer)
-    {
-        memset(this->buffer, 0, this->bufferSize);
-        delete[] this->buffer;
-        this->bufferSize = 0;
-        this->buffer = nullptr;
-    }
-}
-
-EncrypterResult *SymmetricKey::abort()
-{
-    this->freeCipherContext();
-    this->freeBuffer();
-
-    return new EncrypterResult(false);
-}
-
 EncrypterResult *SymmetricKey::prepareEncryptedBuffer()
 {
-    Bytes buffer = new Byte[this->bufferSize + IV_SIZE + TAG_SIZE + 1];
+    Size bufferSize = this->getBufferSize();
+    Size finalDataSize = bufferSize + IV_SIZE + TAG_SIZE;
 
-    memcpy(buffer, this->ivData, IV_SIZE);
-    memcpy(buffer + IV_SIZE, this->buffer, this->bufferSize);
-    memcpy(buffer + IV_SIZE + this->bufferSize, this->tagData, TAG_SIZE);
+    Bytes buffer = this->getBuffer();
 
-    return new EncrypterResult(buffer, this->bufferSize + IV_SIZE + TAG_SIZE);
+    Bytes finalData = new Byte[finalDataSize + 1];
+
+    memcpy(finalData, this->ivData, IV_SIZE);
+    memcpy(finalData + IV_SIZE, buffer, bufferSize);
+    memcpy(finalData + IV_SIZE + bufferSize, this->tagData, TAG_SIZE);
+
+    EncrypterResult *result = new EncrypterResult(finalData, finalDataSize);
+    memset(finalData, 0, finalDataSize);
+    delete[] finalData;
+
+    return result;
 }
 
 const EncrypterResult *SymmetricKey::lock(const EncrypterData *data)
@@ -96,6 +41,7 @@ const EncrypterResult *SymmetricKey::lock(const EncrypterData *data)
     }
 
     this->initEncryption(data->getDataSize());
+    Bytes buffer = this->getBuffer();
 
     if (EVP_EncryptInit_ex(this->cipherContext, EVP_aes_256_gcm(), NULL, this->keyData, this->ivData) != 1)
     {
@@ -104,14 +50,14 @@ const EncrypterResult *SymmetricKey::lock(const EncrypterData *data)
 
     int encrlen;
 
-    if (EVP_EncryptUpdate(cipherContext, this->buffer, &encrlen, data->getData(), data->getDataSize()) != 1)
+    if (EVP_EncryptUpdate(cipherContext, buffer, &encrlen, data->getData(), data->getDataSize()) != 1)
     {
         return this->abort();
     }
 
     int encrlen2;
 
-    if(EVP_EncryptFinal_ex(cipherContext, this->buffer + encrlen, &encrlen2) != 1)
+    if(EVP_EncryptFinal_ex(cipherContext, buffer + encrlen, &encrlen2) != 1)
     {
         return this->abort();
     }
@@ -130,8 +76,11 @@ const EncrypterResult *SymmetricKey::unlock(const EncrypterData *data)
     {
         return this->abort();
     }
-    
+
     this->initDecryption(data);
+
+    Bytes buffer = this->getBuffer();
+    Size bufferSize = this->getBufferSize();
 
     if (EVP_DecryptInit_ex(this->cipherContext, EVP_aes_256_gcm(), NULL, this->keyData, this->ivData) != 1)
     {
@@ -140,7 +89,7 @@ const EncrypterResult *SymmetricKey::unlock(const EncrypterData *data)
 
     int decrlen;
 
-    if (EVP_DecryptUpdate(cipherContext, this->buffer, &decrlen, data->getData() + IV_SIZE, this->bufferSize) != 1)
+    if (EVP_DecryptUpdate(cipherContext, buffer, &decrlen, data->getData() + IV_SIZE, bufferSize) != 1)
     {
         return this->abort();
     }
@@ -152,10 +101,10 @@ const EncrypterResult *SymmetricKey::unlock(const EncrypterData *data)
 
     int decrlen2;
 
-    if(EVP_DecryptFinal_ex(cipherContext, this->buffer + decrlen, &decrlen2) != 1)
+    if(EVP_DecryptFinal_ex(cipherContext, buffer + decrlen, &decrlen2) != 1)
     {
         return this->abort();
     }
 
-    return new EncrypterResult(this->buffer, this->bufferSize);
+    return new EncrypterResult(buffer, bufferSize);
 }

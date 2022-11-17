@@ -8,17 +8,12 @@ class CryptoMachine
 {
     Key *key;
     const EncrypterData *inData;
-    const EncrypterData *outData;
+    const EncrypterResult *outData;
 
     CryptoMachine(const CryptoMachine &);
     const CryptoMachine &operator=(const CryptoMachine &);
 
 protected:
-    Key *getKey() 
-    {
-        return this->key;
-    }
-
     void setResult(const EncrypterResult *result)
     {
         this->outData = result;
@@ -39,13 +34,16 @@ public:
 
     virtual ~CryptoMachine()
     {
-        delete this->key;
         delete this->inData;
         delete this->outData;
 
-        this->key = nullptr;
         this->inData = nullptr;
         this->outData = nullptr;
+    }
+
+    Key *getKey() 
+    {
+        return this->key;
     }
 
     void setKey(Key *key)
@@ -62,7 +60,7 @@ public:
         this->inData = new EncrypterData(in, inlen);
     }
 
-    const EncrypterData *getResult() const
+    const EncrypterResult *getResult() const
     {
         return this->outData;
     }

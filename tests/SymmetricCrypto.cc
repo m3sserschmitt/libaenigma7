@@ -10,25 +10,27 @@ int main()
 {
     const Byte *keyData = (const Byte *)"encryption key for testing 1234";
 
-    SymmetricKey symmetricKey;
-    EncryptionMachine encryptionMachine;
-    DecryptionMachine decryptionMachine;
+    Key *symmetricKey = new SymmetricKey;
+    CryptoMachine *encryptionMachine = new EncryptionMachine;
+    CryptoMachine *decryptionMachine = new DecryptionMachine;
 
-    symmetricKey.setKeyData(keyData);
+    symmetricKey->setKeyData(keyData, 32);
 
-    encryptionMachine.setData((const Byte *)"test", 4);
-    encryptionMachine.setKey(&symmetricKey);
+    encryptionMachine->setData((const Byte *)"test", 4);
+    encryptionMachine->setKey(symmetricKey);
 
     
 
-    encryptionMachine.run();
+    encryptionMachine->run();
 
-    const EncrypterData *encrypterData = encryptionMachine.getResult();
+    const EncrypterData *encrypterData = encryptionMachine->getResult();
 
-    decryptionMachine.setData(encrypterData->getData(), encrypterData->getDataSize());
-    decryptionMachine.setKey(&symmetricKey);
+    decryptionMachine->setData(encrypterData->getData(), encrypterData->getDataSize());
+    decryptionMachine->setKey(symmetricKey);
 
-    decryptionMachine.run();
+    decryptionMachine->run();
+
+    cout << "status:" << decryptionMachine->getResult()->isError() << "\ndecrypted data: "<< decryptionMachine->getResult()->getData() << "\n";
 
     return EXIT_SUCCESS;
 }
