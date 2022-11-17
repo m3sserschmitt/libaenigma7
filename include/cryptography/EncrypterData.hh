@@ -17,19 +17,15 @@ public:
     EncrypterData(const Byte *data, Size datalen)
     {
         this->datalen = datalen;
-
-        if (data)
-        {
-            this->data = new Byte[datalen + 1];
-
-            memcpy(this->data, data, datalen);
-        }
+        this->data = new Byte[datalen + 1];
+        memcpy(this->data, data, datalen);
     }
 
     virtual ~EncrypterData()
     {
         memset(this->data, 0, datalen);
         delete[] this->data;
+        this->data = nullptr;
     }
 
     Size getDataSize() const

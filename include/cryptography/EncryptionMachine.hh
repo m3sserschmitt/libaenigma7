@@ -5,6 +5,7 @@
 
 class EncryptionMachine : public CryptoMachine
 {
+public:
     void run() override
     {
         Key *key = this->getKey();

@@ -11,3 +11,6 @@ add_library(cryptography SHARED
 set_target_properties(cryptography PROPERTIES VERSION ${PROJECT_VERSION} SOVERSION 7)
 
 target_link_libraries(cryptography crypto)
+
+add_executable(symmetric_crypto_test ./tests/SymmetricCrypto.cc)
+target_link_libraries(symmetric_crypto_test cryptography)

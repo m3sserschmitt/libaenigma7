@@ -32,7 +32,7 @@ protected:
 public:
     CryptoMachine()
     {
-        this->key = 0;
+        this->key = nullptr;
         this->inData = nullptr;
         this->outData = nullptr;
     }
@@ -42,6 +42,10 @@ public:
         delete this->key;
         delete this->inData;
         delete this->outData;
+
+        this->key = nullptr;
+        this->inData = nullptr;
+        this->outData = nullptr;
     }
 
     void setKey(Key *key)
