@@ -1,36 +1,59 @@
 #include <iostream>
 
-#include "../include/cryptography/EncryptionMachine.hh"
-#include "../include/cryptography/DecryptionMachine.hh"
-#include "../include/cryptography/SymmetricKey.hh"
+#include "../include/cryptography/CryptoContext.hh"
 
 using namespace std;
 
+bool testSymmetricCrypto()
+{
+    const Byte *key = RandomDataGenerator::generate(SYMMETRIC_KEY_SIZE)->getData();
+    const Byte *data = RandomDataGenerator::generate(128)->getData();
+
+    CryptoContext *cryptoContext = new CryptoContext(SymmetricCryptography, Encrypt);
+
+    cryptoContext->setKey(key, SYMMETRIC_KEY_SIZE);
+    cryptoContext->setPlaintext(data, 128);
+    cryptoContext->run();
+
+    const EncrypterData *encr = cryptoContext->getCiphertext();
+    
+    if (encr->isError())
+    {
+        return false;
+    }
+
+    Size datalen = encr->getDataSize();
+    Bytes encrdata = new Byte[datalen + 1];
+    memcpy(encrdata, encr->getData(), datalen);
+
+    cryptoContext->init(SymmetricCryptography, Decrypt);
+    cryptoContext->setKey(key, SYMMETRIC_KEY_SIZE);
+    cryptoContext->setCiphertext(encrdata, datalen);
+
+    cryptoContext->run();
+
+    const EncrypterData *ciphertext = cryptoContext->getPlaintext();
+
+    if (ciphertext->isError())
+    {
+        return false;
+    }
+
+    return memcmp(data, ciphertext->getData(), 128) == 0;
+}
+
 int main()
 {
-    const Byte *keyData = (const Byte *)"encryption key for testing 1234";
+    bool success = testSymmetricCrypto();
 
-    Key *symmetricKey = new SymmetricKey;
-    CryptoMachine *encryptionMachine = new EncryptionMachine;
-    CryptoMachine *decryptionMachine = new DecryptionMachine;
-
-    symmetricKey->setKeyData(keyData, 32);
-
-    encryptionMachine->setData((const Byte *)"test", 4);
-    encryptionMachine->setKey(symmetricKey);
-
-    
-
-    encryptionMachine->run();
-
-    const EncrypterData *encrypterData = encryptionMachine->getResult();
-
-    decryptionMachine->setData(encrypterData->getData(), encrypterData->getDataSize());
-    decryptionMachine->setKey(symmetricKey);
-
-    decryptionMachine->run();
-
-    cout << "status:" << decryptionMachine->getResult()->isError() << "\ndecrypted data: "<< decryptionMachine->getResult()->getData() << "\n";
+    if (success)
+    {
+        cout << "Success!\n";
+    }
+    else
+    {
+        cout << "Failure!\n";
+    }
 
     return EXIT_SUCCESS;
 }

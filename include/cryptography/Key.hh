@@ -30,13 +30,13 @@ protected:
         this->bufferSize = bufferSize;
     }
 
-     void freeBuffer()
+    void freeBuffer()
     {
         if (this->buffer)
         {
             memset(this->buffer, 0, this->bufferSize);
             delete[] this->buffer;
-            
+
             this->buffer = nullptr;
         }
 

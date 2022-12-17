@@ -118,6 +118,16 @@ public:
     const EncrypterResult *lock(const EncrypterData *) override;
 
     const EncrypterResult *unlock(const EncrypterData *) override;
+
+    static Key *create(const Byte *keyData)
+    {
+        return new SymmetricKey(keyData);
+    }
+
+    static Key *create()
+    {
+        return new SymmetricKey();
+    }
 };
 
 #endif

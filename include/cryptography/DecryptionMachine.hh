@@ -9,9 +9,14 @@ public:
     void run() override
     {
         Key *key = this->getKey();
-        const EncrypterData *data = this->getData();
+        const EncrypterData *data = this->getIn();
 
-        this->setResult(key->unlock(data));
+        this->setOut(key->unlock(data));
+    }
+
+    static DecryptionMachine *create()
+    {
+        return new DecryptionMachine();
     }
 };
 

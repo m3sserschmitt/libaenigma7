@@ -7,38 +7,46 @@
 class CryptoMachine
 {
     Key *key;
-    const EncrypterData *inData;
-    const EncrypterResult *outData;
+
+    const EncrypterData *in;
+    const EncrypterData *out;
 
     CryptoMachine(const CryptoMachine &);
     const CryptoMachine &operator=(const CryptoMachine &);
 
 protected:
-    void setResult(const EncrypterResult *result)
+    
+
+    const EncrypterData *getIn() const
     {
-        this->outData = result;
+        return this->in;
     }
 
-    const EncrypterData *getData() const
+    void setOut(const EncrypterData *out)
     {
-        return this->inData;
+        this->out = out;
+    }
+
+    const EncrypterData *getOut() const
+    {
+        return this->out;
     }
 
 public:
     CryptoMachine()
     {
         this->key = nullptr;
-        this->inData = nullptr;
-        this->outData = nullptr;
+        this->in = nullptr;
+        this->out = nullptr;
     }
 
     virtual ~CryptoMachine()
     {
-        delete this->inData;
-        delete this->outData;
+        delete this->in;
+        delete this->out;
 
-        this->inData = nullptr;
-        this->outData = nullptr;
+        this->in = nullptr;
+        this->out = nullptr;
     }
 
     Key *getKey() 
@@ -53,16 +61,16 @@ public:
 
     virtual void run() = 0;
 
-    void setData(const Byte *in, Size inlen)
+    void setInput(const Byte *data, Size datalen)
     {
-        delete this->inData;
+        delete this->in;
 
-        this->inData = new EncrypterData(in, inlen);
+        this->in = new EncrypterData(data, datalen);
     }
 
-    const EncrypterResult *getResult() const
+    const EncrypterData *getOutput() const
     {
-        return this->outData;
+        return this->out;
     }
 };
 

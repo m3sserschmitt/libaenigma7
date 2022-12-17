@@ -37,6 +37,8 @@ public:
     {
         return this->data;
     }
+
+    virtual bool isError() const { return false; }
 };
 
 #endif
