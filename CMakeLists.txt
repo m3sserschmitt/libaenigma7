@@ -6,6 +6,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 add_library(cryptography SHARED 
 ./src/cryptography/SymmetricKey.cc
+./src/cryptography/AsymmetricKey.cc
 )
 
 set_target_properties(cryptography PROPERTIES VERSION ${PROJECT_VERSION} SOVERSION 7)
