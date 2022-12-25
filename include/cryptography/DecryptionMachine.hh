@@ -14,7 +14,7 @@ public:
         this->setOut(key->unlock(data));
     }
 
-    static DecryptionMachine *create()
+    static CryptoMachine *create()
     {
         return new DecryptionMachine();
     }

@@ -61,7 +61,7 @@ public:
 
     virtual void run() = 0;
 
-    void setInput(const Byte *data, Size datalen)
+    void setInput(ConstBytes data, Size datalen)
     {
         delete this->in;
 

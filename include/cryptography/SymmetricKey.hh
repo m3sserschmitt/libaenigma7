@@ -72,19 +72,19 @@ class SymmetricKey : public Key
     EncrypterResult *prepareEncryptedBuffer();
 
 public:
-    SymmetricKey() : Key(),
+    SymmetricKey() : Key(KeySymmetric),
                      keyData(new Byte[SYMMETRIC_KEY_SIZE + 1]),
                      ivData(new Byte[IV_SIZE + 1]),
                      tagData(new Byte[TAG_SIZE + 1]),
                      cipherContext(nullptr) {}
 
-    SymmetricKey(const Byte *keyData) : Key(),
-                                        ivData(new Byte[IV_SIZE + 1]),
-                                        tagData(new Byte[TAG_SIZE + 1]),
-                                        cipherContext(nullptr)
+    SymmetricKey(ConstBytes keyData) : Key(KeySymmetric),
+                                       ivData(new Byte[IV_SIZE + 1]),
+                                       tagData(new Byte[TAG_SIZE + 1]),
+                                       cipherContext(nullptr)
     {
         this->keyData = new Byte[SYMMETRIC_KEY_SIZE + 1];
-
+        this->setKeyType(KeySymmetric);
         this->setKeyData(keyData, SYMMETRIC_KEY_SIZE);
     }
 
@@ -103,9 +103,19 @@ public:
         this->tagData = nullptr;
     }
 
-    void setKeyData(const Byte *keyData, Size keylen) override
+    bool setKeyData(ConstBytes keyData, Size keylen, Plaintext passphrase = nullptr) override
     {
-        memcpy(this->keyData, keyData, keylen);
+        if (this->keyData)
+        {
+            memcpy(this->keyData, keyData, keylen);
+            return true;
+        }
+
+        return false;
+    }
+
+    bool readKeyFile(ConstPlaintext path, Plaintext passphrase = nullptr) override
+    {
     }
 
     void reset() override

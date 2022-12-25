@@ -4,6 +4,7 @@
 #include "EncryptionMachine.hh"
 #include "DecryptionMachine.hh"
 #include "SymmetricKey.hh"
+#include "AsymmetricKey.hh"
 
 enum CryptoType
 {
@@ -28,30 +29,111 @@ class CryptoContext
     CryptoContext(const CryptoContext &);
     const CryptoContext &operator=(const CryptoContext &);
 
-    void initKey(CryptoType cryptoType, CryptoOp cryptoOp)
+    void setCryptoType(CryptoType cryptoType) { this->cryptoType = cryptoType; }
+
+    void setCryptoOp(CryptoOp cryptoOp) { this->cryptoOp = cryptoOp; }
+
+    void setKey(Key *key) { this->key = key; }
+
+    Key *getKey() { return this->key; }
+
+    void setCryptoMachine(CryptoMachine *cryptoMachine) { this->cryptoMachine = cryptoMachine; }
+
+    CryptoMachine *getCryptoMachine() { return this->cryptoMachine; }
+
+    const CryptoMachine *getCryptoMachine() const { return this->cryptoMachine; }
+
+    bool cryptoMachineSet() const { return this->cryptoMachine != nullptr; }
+
+    bool keySet() const { return this->key != nullptr; }
+
+    void freeKey()
     {
-        this->cryptoType = cryptoType;
+        delete this->getKey();
+        this->setKey(nullptr);
+    }
 
-        delete this->key;
-
-        this->cryptoType == SymmetricCryptography and (this->key = SymmetricKey::create());
-
-        if (this->cryptoMachine)
+    bool allocateKey()
+    {
+        switch (this->getCryptoType())
         {
-            this->cryptoMachine->setKey(this->key);
+        case SymmetricCryptography:
+            this->setKey(SymmetricKey::create());
+            break;
+        case AsymmetricCryptography:
+            switch (this->getCryptoOp())
+            {
+            case Encrypt:
+                this->setKey(AsymmetricKey::create(PublicKey));
+                break;
+            case Decrypt:
+                this->setKey(AsymmetricKey::create(PrivateKey));
+                break;
+            default:
+                return false;
+            }
+            break;
+        default:
+            return false;
+        }
+
+        return this->keySet();
+    }
+
+    void cryptoMachineAssignKey()
+    {
+        if (this->cryptoMachineSet())
+        {
+            this->getCryptoMachine()->setKey(this->getKey());
         }
     }
 
-    void initCryptoMachine(CryptoOp cryptoOp)
+    bool initKey(CryptoType cryptoType, CryptoOp cryptoOp)
     {
-        this->cryptoOp = cryptoOp;
+        this->setCryptoType(cryptoType);
+        this->setCryptoOp(cryptoOp);
 
-        delete this->cryptoMachine;
+        this->freeKey();
+        bool ok = this->allocateKey();
 
-        this->cryptoOp == Decrypt and (this->cryptoMachine = new DecryptionMachine());
-        this->cryptoOp == Encrypt and (this->cryptoMachine = new EncryptionMachine());
+        this->cryptoMachineAssignKey();
 
-        this->cryptoMachine->setKey(this->key);
+        return ok;
+    }
+
+    void freeCryptoMachine()
+    {
+        delete this->getCryptoMachine();
+        this->setCryptoMachine(nullptr);
+    }
+
+    bool allocateCryptoMachine()
+    {
+        switch (this->getCryptoOp())
+        {
+        case Decrypt:
+            this->setCryptoMachine(DecryptionMachine::create());
+            break;
+        case Encrypt:
+            this->setCryptoMachine(EncryptionMachine::create());
+            break;
+        default:
+            return false;
+        }
+
+        return this->cryptoMachineSet();
+    }
+
+    bool initCryptoMachine(CryptoOp cryptoOp)
+    {
+        this->setCryptoOp(cryptoOp);
+
+        this->freeCryptoMachine();
+        bool ok = this->allocateCryptoMachine();
+
+        this->cryptoMachineAssignKey();
+
+        return ok;
     }
 
 public:
@@ -62,14 +144,13 @@ public:
 
     ~CryptoContext()
     {
-        delete this->key;
-        delete this->cryptoMachine;
+        this->cleanup();
     }
 
-    void init(CryptoType cryptoType, CryptoOp cryptoOp)
+    bool init(CryptoType cryptoType, CryptoOp cryptoOp)
     {
-        this->initKey(cryptoType, cryptoOp);
-        this->initCryptoMachine(cryptoOp);
+        return this->initKey(cryptoType, cryptoOp) and
+               this->initCryptoMachine(cryptoOp);
     }
 
     CryptoOp getCryptoOp() const
@@ -82,45 +163,72 @@ public:
         return this->cryptoType;
     }
 
-    void setKey(const Byte *key, Size keylen)
+    bool setKey(ConstBytes key, Size keylen)
     {
-        if (this->key)
+        if (this->keySet())
         {
-            this->key->setKeyData(key, keylen);
+            return this->getKey()->setKeyData(key, keylen);
+        }
+
+        return false;
+    }
+
+    bool readKey(ConstPlaintext path, Plaintext passphrase)
+    {
+        if(this->keySet())
+        {
+            return this->getKey()->readKeyFile(path, passphrase);
+        }
+
+        return false;
+    }
+
+    bool readKey(ConstPlaintext path)
+    {
+        return this->readKey(path, nullptr);
+    }
+
+    bool setForEncryption() const
+    {
+        return this->cryptoMachineSet() and this->getCryptoOp() == Encrypt;
+    }
+
+    void setPlaintext(ConstBytes data, Size datalen)
+    {
+        if (this->setForEncryption())
+        {
+            this->getCryptoMachine()->setInput(data, datalen);
         }
     }
 
-    void setPlaintext(const Byte *data, Size datalen)
+    bool setForDecryption() const
     {
-        if (this->cryptoMachine and this->cryptoOp == Encrypt)
-        {
-            this->cryptoMachine->setInput(data, datalen);
-        }
+        return this->cryptoMachineSet() and this->getCryptoOp() == Decrypt;
     }
 
     const EncrypterData *getPlaintext() const
     {
-        if(this->cryptoMachine and this->cryptoOp == Decrypt)
+        if (this->setForDecryption())
         {
-            return this->cryptoMachine->getOutput();
+            return this->getCryptoMachine()->getOutput();
         }
 
         return nullptr;
     }
 
-    void setCiphertext(const Byte *data, Size datalen)
+    void setCiphertext(ConstBytes data, Size datalen)
     {
-        if(this->cryptoMachine and this->cryptoOp == Decrypt)
+        if (this->setForDecryption())
         {
-            this->cryptoMachine->setInput(data, datalen);
+            this->getCryptoMachine()->setInput(data, datalen);
         }
     }
 
     const EncrypterData *getCiphertext() const
     {
-        if (this->cryptoMachine and this->cryptoOp == Encrypt)
+        if (this->setForEncryption())
         {
-            return this->cryptoMachine->getOutput();
+            return this->getCryptoMachine()->getOutput();
         }
 
         return nullptr;
@@ -128,19 +236,17 @@ public:
 
     void run()
     {
-        if (this->cryptoMachine)
+        if (this->cryptoMachineSet())
         {
-            this->cryptoMachine->run();
+            this->getCryptoMachine()->run();
         }
     }
 
-    /*void reset()
+    void cleanup()
     {
-        if (this->key)
-        {
-            this->key->reset();
-        }
-    }*/
+        this->freeCryptoMachine();
+        this->freeKey();
+    }
 };
 
 #endif

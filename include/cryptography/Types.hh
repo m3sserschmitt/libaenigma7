@@ -3,13 +3,19 @@
 
 typedef unsigned char Byte;
 
-typedef unsigned char * Bytes;
+typedef unsigned char *Bytes;
+
+typedef const unsigned char *ConstBytes;
 
 typedef char Character;
 
-typedef char * Plaintext;
+typedef char *Plaintext;
 
-typedef char * Base64;
+typedef const char *ConstPlaintext;
+
+typedef char *Base64;
+
+typedef const char *ConstBase64;
 
 typedef unsigned int Size;
 

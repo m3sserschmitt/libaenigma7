@@ -2,24 +2,67 @@
 #define ASYMMETRIC_KEY_HH
 
 #include "Key.hh"
+#include "File.hh"
+#include "CipherContext.hh"
+
+#include <openssl/pem.h>
 #include <string>
 
 class AsymmetricKey : public Key
 {
-    typedef struct bio_st BIO;
-    typedef struct rsa_st RSA;
-    typedef struct evp_pkey_st EVP_PKEY;
-    typedef RSA *(*pemReadBioPtr)(BIO *);
+    EVP_PKEY *key;
 
-    static BIO *getBIO(const char *PEM);
-    static RSA *getPubkeyRSA(BIO *bio);
-    static RSA *getPrivkeyRSA(BIO *bio);
-    static EVP_PKEY *getEvpPkey(const char *PEM, pemReadBioPtr ptr);
+    void init()
+    {
+        this->setKey(nullptr);
+    }
+
+    EVP_PKEY *getKey() { return this->key; }
+
+    void setKey(EVP_PKEY *key) { this->key = key; }
+
+    void freeKey()
+    {
+        EVP_PKEY_free(this->getKey());
+        this->setKey(nullptr);
+    }
+
+    bool keyStructureSet() const { return this->key != nullptr; }
 
 public:
+    AsymmetricKey() : Key() { this->init(); }
+
+    AsymmetricKey(KeyType keyType) : Key(keyType) { this->init(); }
+
+    /*AsymmetricKey(ConstBase64 key, Plaintext passphrase, KeyType keyType) : Key(keyType)
+    {
+        this->init();
+        this->setKeyData((ConstBytes)key, strlen(key), passphrase);
+    }*/
+
+    void setKeyType(KeyType keyType) override
+    {
+        this->freeKey();
+        Key::setKeyType(keyType);
+    }
+
     const EncrypterResult *lock(const EncrypterData *) override;
 
     const EncrypterResult *unlock(const EncrypterData *) override;
+
+    bool setKeyData(ConstBytes keyData, Size len, Plaintext passphrase = nullptr) override;
+
+    bool readKeyFile(ConstPlaintext path, Plaintext passphrase = nullptr) override;
+
+    static Key *create()
+    {
+        return new AsymmetricKey();
+    }
+
+    static Key *create(KeyType keyType)
+    {
+        return new AsymmetricKey(keyType);
+    }
 };
 
 #endif

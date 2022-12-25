@@ -3,64 +3,71 @@
 #include <string>
 #include <openssl/pem.h>
 
-BIO *AsymmetricKey::getBIO(const char *PEM)
+bool AsymmetricKey::setKeyData(ConstBytes keyData, Size len, Plaintext passphrase)
 {
-    return BIO_new_mem_buf(PEM, -1);
-}
+    this->freeKey();
 
-RSA *AsymmetricKey::getPubkeyRSA(BIO *bio)
-{
-    return PEM_read_bio_RSA_PUBKEY(bio, nullptr, nullptr, nullptr);
-}
+    BIO *bio = BIO_new_mem_buf((ConstBase64)keyData, len);
 
-RSA *AsymmetricKey::getPrivkeyRSA(BIO *bio)
-{
-    return PEM_read_bio_RSAPrivateKey(bio, nullptr, nullptr, nullptr);
-}
-
-EVP_PKEY *AsymmetricKey::getEvpPkey(const char *PEM, pemReadBioPtr ptr)
-{
-    BIO *bio = getBIO(PEM);
-
-    if (not bio)
+    if(not bio)
     {
-        return nullptr;
+        return false;
     }
 
-    RSA *rsa = ptr(bio);
-
-    if (not rsa)
+    switch (this->getKeyType())
     {
+    case PublicKey:
+        this->setKey(PEM_read_bio_PUBKEY(bio, nullptr, this->getKeyPassphraseCallback(), passphrase));
+        break;
+    case PrivateKey:
+        this->setKey(PEM_read_bio_PrivateKey(bio, nullptr, this->getKeyPassphraseCallback(), passphrase));
+    break;
+    default:
         BIO_free(bio);
-
-        return nullptr;
+        return false;
     }
 
-    EVP_PKEY *pkey = EVP_PKEY_new();
+    BIO_free(bio);
 
-    if (not pkey)
-    {
-        BIO_free(bio);
-        RSA_free(rsa);
-
-        return nullptr;
-    }
-
-    if (not EVP_PKEY_assign_RSA(pkey, rsa))
-    {
-        BIO_free(bio);
-        RSA_free(rsa);
-
-        return nullptr;
-    }
-
-    return pkey;
+    return this->keyStructureSet();
 }
 
-const EncrypterResult *AsymmetricKey::lock(const EncrypterData *)
+bool AsymmetricKey::readKeyFile(ConstPlaintext path, Plaintext passphrase)
 {
+    this->freeKey();
+
+    FILE *keyFile = fopen(path, "r");
+
+    if (not keyFile)
+    {
+        return false;
+    }
+
+    switch (this->getKeyType())
+    {
+    case PublicKey:
+        this->setKey(PEM_read_PUBKEY(keyFile, nullptr, this->getKeyPassphraseCallback(), passphrase));
+        break;
+    case PrivateKey:
+        this->setKey(PEM_read_PrivateKey(keyFile, nullptr, this->getKeyPassphraseCallback(), passphrase));
+        break;
+    default:
+        return false;
+    }
+
+    return this->keyStructureSet();
 }
 
-const EncrypterResult *AsymmetricKey::unlock(const EncrypterData *)
+const EncrypterResult *AsymmetricKey::lock(const EncrypterData *encrypterData)
 {
+    CipherContext cipherContext(this->getKey());
+
+    return cipherContext.sealEnvelope(encrypterData);
+}
+
+const EncrypterResult *AsymmetricKey::unlock(const EncrypterData *encrypterData)
+{
+    CipherContext cipherContext(this->getKey());
+
+    return cipherContext.openEnvelope(encrypterData);
 }
