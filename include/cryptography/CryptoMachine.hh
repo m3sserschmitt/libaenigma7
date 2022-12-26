@@ -60,6 +60,8 @@ protected:
         return this->out;
     }
 
+    bool notNullIn() const { return this->in != nullptr; }
+
     Cipher *getCipher() { return this->cipher; }
 
 public:
@@ -74,12 +76,13 @@ public:
         this->freeOut();
     }
 
-    virtual void run() = 0;
+    virtual bool run() = 0;
 
-    void setInput(ConstBytes data, Size datalen)
+    bool setInput(ConstBytes data, Size datalen)
     {
         this->freeIn();
         this->setIn(new EncrypterData(data, datalen));
+        return this->notNullIn();
     }
 
     const EncrypterData *getOutput() const

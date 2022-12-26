@@ -5,12 +5,17 @@
 
 class EncryptionMachine : public CryptoMachine
 {
+    EncryptionMachine(const EncryptionMachine &);
+    const EncryptionMachine &operator=(const EncryptionMachine &);
+    
 public:
     EncryptionMachine(Cipher *cipher) : CryptoMachine(cipher) {}
 
-    void run() override
+    bool run() override
     {
-        this->setOut(this->getCipher()->encrypt(this->getIn()));
+        EncrypterResult *result = this->getCipher()->encrypt(this->getIn());
+        this->setOut(result);
+        return not result->isError();
     }
 
     static CryptoMachine *create(Cipher *cipher)

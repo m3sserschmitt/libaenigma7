@@ -10,7 +10,7 @@ bool AsymmetricKey::setKeyData(ConstBytes keyData, Size len, Plaintext passphras
 
     BIO *bio = BIO_new_mem_buf((ConstBase64)keyData, len);
 
-    if(not bio)
+    if (not bio)
     {
         return false;
     }
@@ -18,11 +18,11 @@ bool AsymmetricKey::setKeyData(ConstBytes keyData, Size len, Plaintext passphras
     switch (this->getKeyType())
     {
     case PublicKey:
-        this->setKey(PEM_read_bio_PUBKEY(bio, nullptr, this->getKeyPassphraseCallback(), passphrase));
+        this->setPkey(PEM_read_bio_PUBKEY(bio, nullptr, this->getKeyPassphraseCallback(), passphrase));
         break;
     case PrivateKey:
-        this->setKey(PEM_read_bio_PrivateKey(bio, nullptr, this->getKeyPassphraseCallback(), passphrase));
-    break;
+        this->setPkey(PEM_read_bio_PrivateKey(bio, nullptr, this->getKeyPassphraseCallback(), passphrase));
+        break;
     default:
         BIO_free(bio);
         return false;
@@ -30,7 +30,7 @@ bool AsymmetricKey::setKeyData(ConstBytes keyData, Size len, Plaintext passphras
 
     BIO_free(bio);
 
-    return this->keyStructureSet();
+    return this->notNullPkey();
 }
 
 bool AsymmetricKey::readKeyFile(ConstPlaintext path, Plaintext passphrase)
@@ -47,28 +47,14 @@ bool AsymmetricKey::readKeyFile(ConstPlaintext path, Plaintext passphrase)
     switch (this->getKeyType())
     {
     case PublicKey:
-        this->setKey(PEM_read_PUBKEY(keyFile, nullptr, this->getKeyPassphraseCallback(), passphrase));
+        this->setPkey(PEM_read_PUBKEY(keyFile, nullptr, this->getKeyPassphraseCallback(), passphrase));
         break;
     case PrivateKey:
-        this->setKey(PEM_read_PrivateKey(keyFile, nullptr, this->getKeyPassphraseCallback(), passphrase));
+        this->setPkey(PEM_read_PrivateKey(keyFile, nullptr, this->getKeyPassphraseCallback(), passphrase));
         break;
     default:
         return false;
     }
 
-    return this->keyStructureSet();
+    return this->notNullPkey();
 }
-
-// const EncrypterResult *AsymmetricKey::lock(const EncrypterData *encrypterData)
-// {
-//     AsymmetricCipher cipherContext(this->getKey());
-
-//     return cipherContext.encrypt(encrypterData);
-// }
-
-// const EncrypterResult *AsymmetricKey::unlock(const EncrypterData *encrypterData)
-// {
-//     CipherContext cipherContext(this->getKey());
-
-//     return cipherContext.openEnvelope(encrypterData);
-// }

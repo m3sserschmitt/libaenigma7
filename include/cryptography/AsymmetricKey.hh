@@ -2,8 +2,6 @@
 #define ASYMMETRIC_KEY_HH
 
 #include "Key.hh"
-#include "File.hh"
-// #include "CipherContext.hh"
 
 #include <openssl/pem.h>
 #include <string>
@@ -12,33 +10,27 @@ class AsymmetricKey : public Key
 {
     EVP_PKEY *key;
 
-    void init()
-    {
-        this->setKey(nullptr);
-    }
+    AsymmetricKey(const AsymmetricKey &);
+    const AsymmetricKey &operator=(const AsymmetricKey &);
 
-    EVP_PKEY *getKey() { return this->key; }
+    void init() { this->setPkey(nullptr); }
 
-    void setKey(EVP_PKEY *key) { this->key = key; }
+    const EVP_PKEY *getPkey() const { return this->key; }
+
+    EVP_PKEY *getPkey() { return this->key; }
+
+    void setPkey(EVP_PKEY *key) { this->key = key; }
 
     void freeKey()
     {
-        EVP_PKEY_free(this->getKey());
-        this->setKey(nullptr);
+        EVP_PKEY_free(this->getPkey());
+        this->setPkey(nullptr);
     }
 
-    bool keyStructureSet() const { return this->key != nullptr; }
+    bool notNullPkey() const { return this->key != nullptr; }
 
 public:
-    AsymmetricKey() : Key() { this->init(); }
-
     AsymmetricKey(KeyType keyType) : Key(keyType) { this->init(); }
-
-    /*AsymmetricKey(ConstBase64 key, Plaintext passphrase, KeyType keyType) : Key(keyType)
-    {
-        this->init();
-        this->setKeyData((ConstBytes)key, strlen(key), passphrase);
-    }*/
 
     void setKeyType(KeyType keyType) override
     {
@@ -46,20 +38,11 @@ public:
         Key::setKeyType(keyType);
     }
 
-    // const EncrypterResult *lock(const EncrypterData *) override;
-
-    // const EncrypterResult *unlock(const EncrypterData *) override;
-
     bool setKeyData(ConstBytes keyData, Size len, Plaintext passphrase = nullptr) override;
 
     bool readKeyFile(ConstPlaintext path, Plaintext passphrase = nullptr) override;
 
-    void *getKeyMaterial() override { return this->getKey(); }
-
-    static Key *create()
-    {
-        return new AsymmetricKey();
-    }
+    const void *getKeyMaterial() const override { return this->getPkey(); }
 
     static Key *create(KeyType keyType)
     {

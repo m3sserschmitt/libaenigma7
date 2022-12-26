@@ -1,11 +1,8 @@
 #ifndef SYMMETRIC_KEY_HH
 #define SYMMETRIC_KEY_HH
 
-#include "RandomDataGenerator.hh"
 #include "Constants.hh"
 #include "Key.hh"
-
-#include <openssl/evp.h>
 
 class SymmetricKey : public Key
 {
@@ -60,10 +57,7 @@ public:
         this->writeKeyData(keyData);
     }
 
-    ~SymmetricKey()
-    {
-        this->freeKeyData();
-    }
+    ~SymmetricKey() { this->freeKeyData(); }
 
     bool setKeyData(ConstBytes keyData, Size keylen, Plaintext passphrase = nullptr) override
     {
@@ -75,22 +69,13 @@ public:
         return false;
     }
 
-    void reset()
-    {
-        this->freeKeyData();
-    }
+    void cleanup() { this->freeKeyData(); }
 
-    void *getKeyMaterial() override { return this->getKeyData(); }
+    const void *getKeyMaterial() const override { return this->getKeyData(); }
 
-    static Key *create(const Byte *keyData)
-    {
-        return new SymmetricKey(keyData);
-    }
+    static Key *create(const Byte *keyData) { return new SymmetricKey(keyData); }
 
-    static Key *create()
-    {
-        return new SymmetricKey();
-    }
+    static Key *create() { return new SymmetricKey(); }
 };
 
 #endif

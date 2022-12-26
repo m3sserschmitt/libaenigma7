@@ -6,6 +6,10 @@
 class EncrypterResult : public EncrypterData
 {
     bool ok;
+
+    EncrypterResult(const EncrypterResult &);
+    const EncrypterResult &operator=(const EncrypterResult &);
+    
 public:
     EncrypterResult(ConstBytes data, Size datalen) : EncrypterData(data, datalen) 
     {

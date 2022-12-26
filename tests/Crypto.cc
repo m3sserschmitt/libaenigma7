@@ -7,12 +7,12 @@ using namespace std;
 
 bool testSymmetricCrypto()
 {
-    const Byte *key = RandomDataGenerator::generate(SYMMETRIC_KEY_SIZE)->getData();
-    const Byte *data = RandomDataGenerator::generate(128)->getData();
+    const Byte *key = RandomDataGenerator::generate(SYMMETRIC_KEY_SIZE);
+    const Byte *data = RandomDataGenerator::generate(128);
 
     CryptoContext *cryptoContext = new CryptoContext(SymmetricCryptography, Encrypt);
 
-    cryptoContext->setKey(key, SYMMETRIC_KEY_SIZE);
+    cryptoContext->setKeyData(key, SYMMETRIC_KEY_SIZE);
     cryptoContext->setPlaintext(data, 128);
     cryptoContext->run();
 
@@ -28,7 +28,7 @@ bool testSymmetricCrypto()
     memcpy(encrdata, ciphertext->getData(), datalen);
 
     cryptoContext->setup(SymmetricCryptography, Decrypt);
-    cryptoContext->setKey(key, SYMMETRIC_KEY_SIZE);
+    cryptoContext->setKeyData(key, SYMMETRIC_KEY_SIZE);
     cryptoContext->setCiphertext(encrdata, datalen);
 
     cryptoContext->run();
@@ -45,11 +45,11 @@ bool testSymmetricCrypto()
 
 bool testAsymmetricCrypto()
 {
-    const Byte *data = RandomDataGenerator::generate(128)->getData();
+    const Byte *data = RandomDataGenerator::generate(128);
 
     CryptoContext *cryptoContext = new CryptoContext(AsymmetricCryptography, Encrypt);
 
-    cryptoContext->readKey("public.pem");
+    cryptoContext->readKeyData("public.pem");
     cryptoContext->setPlaintext(data, 128);
     cryptoContext->run();
 
@@ -65,7 +65,7 @@ bool testAsymmetricCrypto()
     memcpy(encrdata, ciphertext->getData(), datalen);
 
     cryptoContext->setup(AsymmetricCryptography, Decrypt);
-    cryptoContext->readKey("private.pem", "test");
+    cryptoContext->readKeyData("private.pem", (Plaintext)"test");
     cryptoContext->setCiphertext(encrdata, datalen);
 
     cryptoContext->run();

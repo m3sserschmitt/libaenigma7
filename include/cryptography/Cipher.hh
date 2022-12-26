@@ -34,13 +34,12 @@ class Cipher
 
     void setKey(Key *key) { this->key = key; }
 
+    void setCipherContext(EVP_CIPHER_CTX *cipherContext) { this->cipherContext = cipherContext; }
+
 protected:
-    
-    Key *getKey() { return this->key; }
+    const Key *getKey() const { return this->key; }
 
     EVP_CIPHER_CTX *getCipherContext() { return this->cipherContext; }
-
-    void setCipherContext(EVP_CIPHER_CTX *cipherContext) { this->cipherContext = cipherContext; }
 
     void freeCipherContext()
     {
@@ -58,6 +57,8 @@ protected:
 
     Bytes getTag() { return this->tag; }
 
+    const Bytes getTag() const { return this->tag; }
+
     void setTag(Bytes tag) { this->tag = tag; }
 
     bool writeTag(ConstBytes tag)
@@ -74,6 +75,8 @@ protected:
 
     Bytes getOutBuffer() { return this->outBuffer; }
 
+    const Bytes getOutBuffer() const { return this->outBuffer; }
+
     void setOutBuffer(Bytes outBuffer) { this->outBuffer = outBuffer; }
 
     void setOutBufferSize(Size outBufferSize) { this->outBufferSize = outBufferSize; }
@@ -85,6 +88,8 @@ protected:
     void setIV(Bytes iv) { this->iv = iv; }
 
     Bytes getIV() { return this->iv; }
+
+    const Bytes getIV() const { return this->iv; }
 
     bool writeIV(ConstBytes iv)
     {
@@ -124,9 +129,11 @@ protected:
 
     bool generateIV()
     {
-        ConstBytes randomData = RandomDataGenerator::generate(IV_SIZE)->getData();
+        ConstBytes randomData = RandomDataGenerator::generate(IV_SIZE);
+        bool ok = this->writeIV(randomData);
+        delete[] randomData;
 
-        return this->writeIV(randomData);
+        return ok;
     }
 
     void freeOutBuffer()
@@ -179,7 +186,7 @@ protected:
         return true;
     }
 
-    virtual void reset()
+    virtual void cleanup()
     {
         this->freeCipherContext();
         this->freeIV();
@@ -189,7 +196,7 @@ protected:
 
     EncrypterResult *abort()
     {
-        this->reset();
+        this->cleanup();
         return new EncrypterResult(false);
     }
 
