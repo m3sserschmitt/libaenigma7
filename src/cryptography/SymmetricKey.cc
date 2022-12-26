@@ -1,7 +1,9 @@
 #include "../../include/cryptography/SymmetricKey.hh"
+#include "../../include/cryptography/CipherContext.hh"
 
 #include <openssl/evp.h>
 
+/*
 void SymmetricKey::initDecryption(const EncrypterData *data)
 {
     Size encrlen = data->getDataSize() - IV_SIZE - TAG_SIZE;
@@ -32,79 +34,17 @@ EncrypterResult *SymmetricKey::prepareEncryptedBuffer()
 
     return result;
 }
-
+*/
 const EncrypterResult *SymmetricKey::lock(const EncrypterData *data)
 {
-    if (not data)
-    {
-        return this->abort();
-    }
+    CipherContext cipherContext(this->getKeyData());
 
-    this->initEncryption(data->getDataSize());
-    Bytes buffer = this->getBuffer();
-
-    if (EVP_EncryptInit_ex(this->cipherContext, EVP_aes_256_gcm(), NULL, this->keyData, this->ivData) != 1)
-    {
-        return this->abort();
-    }
-
-    int encrlen;
-
-    if (EVP_EncryptUpdate(cipherContext, buffer, &encrlen, data->getData(), data->getDataSize()) != 1)
-    {
-        return this->abort();
-    }
-
-    int encrlen2;
-
-    if(EVP_EncryptFinal_ex(cipherContext, buffer + encrlen, &encrlen2) != 1)
-    {
-        return this->abort();
-    }
-
-    if(EVP_CIPHER_CTX_ctrl(cipherContext, EVP_CTRL_GCM_GET_TAG, TAG_SIZE, this->tagData) != 1)
-    {
-        return this->abort();
-    }
-
-    return prepareEncryptedBuffer();
+    return cipherContext.encrypt(data);
 }
 
 const EncrypterResult *SymmetricKey::unlock(const EncrypterData *data)
 {
-    if (not data)
-    {
-        return this->abort();
-    }
+    CipherContext cipherContext(this->getKeyData());
 
-    this->initDecryption(data);
-
-    Bytes buffer = this->getBuffer();
-    Size bufferSize = this->getBufferSize();
-
-    if (EVP_DecryptInit_ex(this->cipherContext, EVP_aes_256_gcm(), NULL, this->keyData, this->ivData) != 1)
-    {
-        return this->abort();
-    }
-
-    int decrlen;
-
-    if (EVP_DecryptUpdate(cipherContext, buffer, &decrlen, data->getData() + IV_SIZE, bufferSize) != 1)
-    {
-        return this->abort();
-    }
-
-    if(EVP_CIPHER_CTX_ctrl(cipherContext, EVP_CTRL_GCM_SET_TAG, TAG_SIZE, tagData) != 1)
-    {
-        return this->abort();
-    }
-
-    int decrlen2;
-
-    if(EVP_DecryptFinal_ex(cipherContext, buffer + decrlen, &decrlen2) != 1)
-    {
-        return this->abort();
-    }
-
-    return new EncrypterResult(buffer, bufferSize);
+    return cipherContext.decrypt(data);
 }

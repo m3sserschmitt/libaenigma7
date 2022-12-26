@@ -136,18 +136,24 @@ class CryptoContext
         return ok;
     }
 
+    void init()
+    {
+        this->setCryptoMachine(nullptr);
+        this->setKey(nullptr);
+    }
+
 public:
     CryptoContext(CryptoType cryptoType, CryptoOp cryptoOp)
     {
-        this->init(cryptoType, cryptoOp);
+        this->init();
+        this->setup(cryptoType, cryptoOp);
     }
 
-    ~CryptoContext()
-    {
-        this->cleanup();
-    }
+    CryptoContext() { this->init(); }
 
-    bool init(CryptoType cryptoType, CryptoOp cryptoOp)
+    ~CryptoContext() { this->cleanup(); }
+
+    bool setup(CryptoType cryptoType, CryptoOp cryptoOp)
     {
         return this->initKey(cryptoType, cryptoOp) and
                this->initCryptoMachine(cryptoOp);
@@ -175,7 +181,7 @@ public:
 
     bool readKey(ConstPlaintext path, Plaintext passphrase)
     {
-        if(this->keySet())
+        if (this->keySet())
         {
             return this->getKey()->readKeyFile(path, passphrase);
         }

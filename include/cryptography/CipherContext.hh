@@ -4,12 +4,15 @@
 #include "Constants.hh"
 #include "EncrypterData.hh"
 #include "EncrypterResult.hh"
+#include "RandomDataGenerator.hh"
 
 #include <openssl/evp.h>
 
 class CipherContext
 {
     EVP_PKEY *pkey;
+    ConstBytes keyData;
+
     EVP_CIPHER_CTX *cipherContext;
 
     Bytes encryptedKey;
@@ -22,9 +25,10 @@ class CipherContext
 
     Bytes tag;
 
-    void init(EVP_PKEY *pkey)
+    void init(EVP_PKEY *pkey, Bytes keyData)
     {
         this->setPkey(pkey);
+        this->setKeyData(keyData);
         this->setCipherContext(nullptr);
         this->setEncryptedKey(nullptr);
         this->setEncryptedKeyLength(0);
@@ -33,6 +37,10 @@ class CipherContext
         this->setOutBufferSize(0);
         this->setTag(nullptr);
     }
+
+    void setKeyData(Bytes keyData) { this->keyData = keyData; }
+
+    ConstBytes getKeyData() const { return this->keyData; }
 
     Bytes getTag() { return this->tag; }
 
@@ -149,6 +157,13 @@ class CipherContext
         return true;
     }
 
+    bool generateIV()
+    {
+        ConstBytes randomData = RandomDataGenerator::generate(IV_SIZE)->getData();
+
+        return this->writeIV(randomData);
+    }
+
     void freeEncryptedKey()
     {
         Bytes encryptedKey = this->getEncryptedKey();
@@ -253,6 +268,17 @@ class CipherContext
         return this->allocateCipherContext() and this->allocateEncryptedKey() and this->allocateIV() and this->allocateOutBuffer(outBufferSize) and this->allocateTag();
     }
 
+    bool encryptionAllocateMemory(const EncrypterData *in)
+    {
+        return this->allocateCipherContext() and this->allocateIV() and this->allocateOutBuffer(in->getDataSize()) and this->allocateTag();
+    }
+
+    bool decryptionAllocateMemory(const EncrypterData *in)
+    {
+        Size outBufferSize = in->getDataSize() - IV_SIZE - TAG_SIZE;
+        return this->allocateCipherContext() and this->allocateIV() and this->allocateOutBuffer(outBufferSize) and this->allocateTag();
+    }
+
     EncrypterResult *abort()
     {
         this->reset();
@@ -293,16 +319,27 @@ class CipherContext
         memcpy(envelope + N + IV_SIZE, this->getOutBuffer(), P);
         memcpy(envelope + N + IV_SIZE + P, this->getTag(), TAG_SIZE);
 
-        return new EncrypterResult(envelope, envelopeSize);
+        EncrypterResult *result = new EncrypterResult(envelope, envelopeSize);
+
+        memset(envelope, 0, envelopeSize);
+        delete[] envelope;
+
+        return result;
     }
 
     ConstBytes readEnvelope(const EncrypterData *in, Size &cipherlen)
     {
+        cipherlen = 0;
+
+        if(not in or not in->getData())
+        {
+            return nullptr;
+        }
+
         Size N = this->getPkeySize();
         Size envelopeSize = in->getDataSize();
         ConstBytes envelope = in->getData();
-
-        cipherlen = 0;
+        
         if (not this->writeEncryptedKey(envelope) or not this->writeIV(envelope + N) or not this->writeTag(envelope + envelopeSize - TAG_SIZE))
         {
             return nullptr;
@@ -312,8 +349,50 @@ class CipherContext
         return envelope + N + IV_SIZE;
     }
 
+    EncrypterResult *createEncryptedData()
+    {
+        Size bufferSize = this->getOutBufferSize();
+        Size finalDataSize = bufferSize + IV_SIZE + TAG_SIZE;
+
+        Bytes finalData = new Byte[finalDataSize + 1];
+
+        memcpy(finalData, this->getIV(), IV_SIZE);
+        memcpy(finalData + IV_SIZE, this->getOutBuffer(), bufferSize);
+        memcpy(finalData + IV_SIZE + bufferSize, this->getTag(), TAG_SIZE);
+
+        EncrypterResult *result = new EncrypterResult(finalData, finalDataSize);
+
+        memset(finalData, 0, finalDataSize);
+        delete[] finalData;
+
+        return result;
+    }
+
+    ConstBytes readEncryptedData(const EncrypterData *in, Size &cipherlen)
+    {
+        cipherlen = 0;
+
+        if(not in or not in->getData())
+        {
+            return nullptr;
+        }
+
+        Size dataSize = in->getDataSize();
+        ConstBytes data = in->getData();
+
+        if(not this->writeIV(data) or not this->writeTag(data + dataSize - TAG_SIZE))
+        {
+            return nullptr;
+        }
+
+        cipherlen = dataSize - IV_SIZE - TAG_SIZE;
+        return data + IV_SIZE;
+    }
+
 public:
-    CipherContext(EVP_PKEY *pkey) { this->init(pkey); }
+    CipherContext(EVP_PKEY *pkey) { this->init(pkey, nullptr); }
+
+    CipherContext(Bytes keyData) { this->init(nullptr, keyData); }
 
     EncrypterResult *sealEnvelope(const EncrypterData *in)
     {
@@ -415,6 +494,103 @@ public:
         int len2;
 
         if (EVP_OpenFinal(this->getCipherContext(), this->getOutBuffer() + len, &len2) != 1)
+        {
+            return this->abort();
+        }
+
+        this->setOutBufferSize(len + len2);
+
+        EncrypterResult *result = new EncrypterResult(this->getOutBuffer(), this->getOutBufferSize());
+
+        this->reset();
+
+        return result;
+    }
+
+    EncrypterResult *encrypt(const EncrypterData *in)
+    {
+        if (not in or not in->getData())
+        {
+            return this->abort();
+        }
+
+        this->reset();
+
+        if (not this->encryptionAllocateMemory(in) or not this->generateIV())
+        {
+            return this->abort();
+        }
+
+        if (EVP_EncryptInit_ex(this->getCipherContext(), EVP_aes_256_gcm(), NULL, this->getKeyData(), this->getIV()) != 1)
+        {
+            return this->abort();
+        }
+
+        int len;
+
+        if (EVP_EncryptUpdate(this->getCipherContext(), this->getOutBuffer(), &len, in->getData(), in->getDataSize()) != 1)
+        {
+            return this->abort();
+        }
+
+        int len2;
+
+        if (EVP_EncryptFinal_ex(this->getCipherContext(), this->getOutBuffer() + len, &len2) != 1)
+        {
+            return this->abort();
+        }
+
+        this->setOutBufferSize(len + len2);
+
+        if (EVP_CIPHER_CTX_ctrl(this->getCipherContext(), EVP_CTRL_GCM_GET_TAG, TAG_SIZE, this->getTag()) != 1)
+        {
+            return this->abort();
+        }
+
+        EncrypterResult *result = this->createEncryptedData();
+
+        this->reset();
+
+        return result;
+    }
+
+    EncrypterResult *decrypt(const EncrypterData *in)
+    {
+        if (not in or not in->getData())
+        {
+            return this->abort();
+        }
+
+        this->reset();
+
+        if (not this->decryptionAllocateMemory(in))
+        {
+            return this->abort();
+        }
+
+        Size cipherlen;
+        ConstBytes ciphertext = this->readEncryptedData(in, cipherlen);
+
+        if (EVP_DecryptInit_ex(this->getCipherContext(), EVP_aes_256_gcm(), NULL, this->getKeyData(), this->getIV()) != 1)
+        {
+            return this->abort();
+        }
+
+        int len;
+
+        if (EVP_DecryptUpdate(this->getCipherContext(), this->getOutBuffer(), &len, ciphertext, cipherlen) != 1)
+        {
+            return this->abort();
+        }
+
+        if (EVP_CIPHER_CTX_ctrl(this->getCipherContext(), EVP_CTRL_GCM_SET_TAG, TAG_SIZE, this->getTag()) != 1)
+        {
+            return this->abort();
+        }
+
+        int len2;
+
+        if (EVP_DecryptFinal_ex(cipherContext, this->getOutBuffer() + len, &len2) != 1)
         {
             return this->abort();
         }

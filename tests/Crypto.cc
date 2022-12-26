@@ -16,31 +16,31 @@ bool testSymmetricCrypto()
     cryptoContext->setPlaintext(data, 128);
     cryptoContext->run();
 
-    const EncrypterData *encr = cryptoContext->getCiphertext();
-
-    if (encr->isError())
-    {
-        return false;
-    }
-
-    Size datalen = encr->getDataSize();
-    Bytes encrdata = new Byte[datalen + 1];
-    memcpy(encrdata, encr->getData(), datalen);
-
-    cryptoContext->init(SymmetricCryptography, Decrypt);
-    cryptoContext->setKey(key, SYMMETRIC_KEY_SIZE);
-    cryptoContext->setCiphertext(encrdata, datalen);
-
-    cryptoContext->run();
-
-    const EncrypterData *ciphertext = cryptoContext->getPlaintext();
+    const EncrypterData *ciphertext = cryptoContext->getCiphertext();
 
     if (ciphertext->isError())
     {
         return false;
     }
 
-    return memcmp(data, ciphertext->getData(), 128) == 0;
+    Size datalen = ciphertext->getDataSize();
+    Bytes encrdata = new Byte[datalen + 1];
+    memcpy(encrdata, ciphertext->getData(), datalen);
+
+    cryptoContext->setup(SymmetricCryptography, Decrypt);
+    cryptoContext->setKey(key, SYMMETRIC_KEY_SIZE);
+    cryptoContext->setCiphertext(encrdata, datalen);
+
+    cryptoContext->run();
+
+    const EncrypterData *plaintext = cryptoContext->getPlaintext();
+
+    if (plaintext->isError())
+    {
+        return false;
+    }
+
+    return memcmp(data, plaintext->getData(), 128) == 0;
 }
 
 bool testAsymmetricCrypto()
@@ -53,31 +53,31 @@ bool testAsymmetricCrypto()
     cryptoContext->setPlaintext(data, 128);
     cryptoContext->run();
 
-    const EncrypterData *encr = cryptoContext->getCiphertext();
-
-    if (encr->isError())
-    {
-        return false;
-    }
-
-    Size datalen = encr->getDataSize();
-    Bytes encrdata = new Byte[datalen + 1];
-    memcpy(encrdata, encr->getData(), datalen);
-
-    cryptoContext->init(AsymmetricCryptography, Decrypt);
-    cryptoContext->readKey("private.pem", "test");
-    cryptoContext->setCiphertext(encrdata, datalen);
-
-    cryptoContext->run();
-
-    const EncrypterData *ciphertext = cryptoContext->getPlaintext();
+    const EncrypterData *ciphertext = cryptoContext->getCiphertext();
 
     if (ciphertext->isError())
     {
         return false;
     }
 
-    return memcmp(data, ciphertext->getData(), 128) == 0;
+    Size datalen = ciphertext->getDataSize();
+    Bytes encrdata = new Byte[datalen + 1];
+    memcpy(encrdata, ciphertext->getData(), datalen);
+
+    cryptoContext->setup(AsymmetricCryptography, Decrypt);
+    cryptoContext->readKey("private.pem", "test");
+    cryptoContext->setCiphertext(encrdata, datalen);
+
+    cryptoContext->run();
+
+    const EncrypterData *plaintext = cryptoContext->getPlaintext();
+
+    if (plaintext->isError())
+    {
+        return false;
+    }
+
+    return memcmp(data, plaintext->getData(), 128) == 0;
 }
 
 int main()
