@@ -37,7 +37,7 @@ class SymmetricKey : public Key
 
     void cleanKeyData()
     {
-        if(this->notNullKeyData())
+        if (this->notNullKeyData())
         {
             memset(this->getKeyData(), 0, SYMMETRIC_KEY_SIZE);
         }
@@ -75,14 +75,12 @@ public:
         return false;
     }
 
-    void reset() override
+    void reset()
     {
         this->freeKeyData();
     }
 
-    const EncrypterResult *lock(const EncrypterData *) override;
-
-    const EncrypterResult *unlock(const EncrypterData *) override;
+    void *getKeyMaterial() override { return this->getKeyData(); }
 
     static Key *create(const Byte *keyData)
     {

@@ -6,17 +6,16 @@
 class DecryptionMachine : public CryptoMachine
 {
 public:
+    DecryptionMachine(Cipher *cipher) : CryptoMachine(cipher) {}
+
     void run() override
     {
-        Key *key = this->getKey();
-        const EncrypterData *data = this->getIn();
-
-        this->setOut(key->unlock(data));
+        this->setOut(this->getCipher()->decrypt(this->getIn()));
     }
 
-    static CryptoMachine *create()
+    static CryptoMachine *create(Cipher *cipher)
     {
-        return new DecryptionMachine();
+        return new DecryptionMachine(cipher);
     }
 };
 

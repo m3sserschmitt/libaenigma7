@@ -2,11 +2,12 @@
 #define CRYPTO_MACHINE_HH
 
 #include "Key.hh"
+#include "Cipher.hh"
 #include "EncrypterResult.hh"
 
 class CryptoMachine
 {
-    Key *key;
+    Cipher *cipher;
 
     const EncrypterData *in;
     const EncrypterData *out;
@@ -14,9 +15,36 @@ class CryptoMachine
     CryptoMachine(const CryptoMachine &);
     const CryptoMachine &operator=(const CryptoMachine &);
 
-protected:
-    
+    void setIn(const EncrypterData *in)
+    {
+        this->in = in;
+    }
 
+    void freeIn()
+    {
+        delete this->getIn();
+        this->setIn(nullptr);
+    }
+
+    void freeOut()
+    {
+        delete this->getOut();
+        this->setOut(nullptr);
+    }
+
+    void setCipher(Cipher *cipher)
+    {
+        this->cipher = cipher;
+    }
+
+    void init(Cipher *cipher)
+    {
+        this->setIn(nullptr);
+        this->setOut(nullptr);
+        this->setCipher(cipher);
+    }
+
+protected:
     const EncrypterData *getIn() const
     {
         return this->in;
@@ -32,40 +60,26 @@ protected:
         return this->out;
     }
 
+    Cipher *getCipher() { return this->cipher; }
+
 public:
-    CryptoMachine()
+    CryptoMachine(Cipher *cipher)
     {
-        this->key = nullptr;
-        this->in = nullptr;
-        this->out = nullptr;
+        this->init(cipher);
     }
 
     virtual ~CryptoMachine()
     {
-        delete this->in;
-        delete this->out;
-
-        this->in = nullptr;
-        this->out = nullptr;
-    }
-
-    Key *getKey() 
-    {
-        return this->key;
-    }
-
-    void setKey(Key *key)
-    {
-        this->key = key;
+        this->freeIn();
+        this->freeOut();
     }
 
     virtual void run() = 0;
 
     void setInput(ConstBytes data, Size datalen)
     {
-        delete this->in;
-
-        this->in = new EncrypterData(data, datalen);
+        this->freeIn();
+        this->setIn(new EncrypterData(data, datalen));
     }
 
     const EncrypterData *getOutput() const

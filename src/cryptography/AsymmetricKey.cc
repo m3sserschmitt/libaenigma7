@@ -1,4 +1,5 @@
 #include "../../include/cryptography/AsymmetricKey.hh"
+#include "../../include/cryptography/AsymmetricCipher.hh"
 #include <openssl/bio.h>
 #include <string>
 #include <openssl/pem.h>
@@ -58,16 +59,16 @@ bool AsymmetricKey::readKeyFile(ConstPlaintext path, Plaintext passphrase)
     return this->keyStructureSet();
 }
 
-const EncrypterResult *AsymmetricKey::lock(const EncrypterData *encrypterData)
-{
-    CipherContext cipherContext(this->getKey());
+// const EncrypterResult *AsymmetricKey::lock(const EncrypterData *encrypterData)
+// {
+//     AsymmetricCipher cipherContext(this->getKey());
 
-    return cipherContext.sealEnvelope(encrypterData);
-}
+//     return cipherContext.encrypt(encrypterData);
+// }
 
-const EncrypterResult *AsymmetricKey::unlock(const EncrypterData *encrypterData)
-{
-    CipherContext cipherContext(this->getKey());
+// const EncrypterResult *AsymmetricKey::unlock(const EncrypterData *encrypterData)
+// {
+//     CipherContext cipherContext(this->getKey());
 
-    return cipherContext.openEnvelope(encrypterData);
-}
+//     return cipherContext.openEnvelope(encrypterData);
+// }

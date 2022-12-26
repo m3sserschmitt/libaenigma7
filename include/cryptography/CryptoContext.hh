@@ -5,6 +5,8 @@
 #include "DecryptionMachine.hh"
 #include "SymmetricKey.hh"
 #include "AsymmetricKey.hh"
+#include "AsymmetricCipher.hh"
+#include "SymmetricCipher.hh"
 
 enum CryptoType
 {
@@ -24,6 +26,7 @@ class CryptoContext
     CryptoOp cryptoOp;
 
     Key *key;
+    Cipher *cipher;
     CryptoMachine *cryptoMachine;
 
     CryptoContext(const CryptoContext &);
@@ -43,9 +46,15 @@ class CryptoContext
 
     const CryptoMachine *getCryptoMachine() const { return this->cryptoMachine; }
 
+    Cipher *getCipher() { return this->cipher; }
+
+    void setCipher(Cipher *cipher) { this->cipher = cipher; }
+
     bool cryptoMachineSet() const { return this->cryptoMachine != nullptr; }
 
     bool keySet() const { return this->key != nullptr; }
+
+    bool cipherSet() const { return this->cipher != nullptr; }
 
     void freeKey()
     {
@@ -80,25 +89,44 @@ class CryptoContext
         return this->keySet();
     }
 
-    void cryptoMachineAssignKey()
+    bool initKey()
     {
-        if (this->cryptoMachineSet())
-        {
-            this->getCryptoMachine()->setKey(this->getKey());
-        }
+        this->freeKey();
+        return this->allocateKey();
     }
 
-    bool initKey(CryptoType cryptoType, CryptoOp cryptoOp)
+    void freeCipher()
     {
-        this->setCryptoType(cryptoType);
-        this->setCryptoOp(cryptoOp);
+        delete this->getCipher();
+        this->setCipher(nullptr);
+    }
 
-        this->freeKey();
-        bool ok = this->allocateKey();
+    bool allocateCipher()
+    {
+        if (not this->keySet())
+        {
+            return false;
+        }
 
-        this->cryptoMachineAssignKey();
+        switch (this->getCryptoType())
+        {
+        case SymmetricCryptography:
+            this->setCipher(SymmetricCipher::create(this->getKey()));
+            break;
+        case AsymmetricCryptography:
+            this->setCipher(AsymmetricCipher::create(this->getKey()));
+            break;
+        default:
+            return false;
+        }
 
-        return ok;
+        return this->cipherSet();
+    }
+
+    bool initCipher()
+    {
+        this->freeCipher();
+        return this->allocateCipher();
     }
 
     void freeCryptoMachine()
@@ -109,13 +137,18 @@ class CryptoContext
 
     bool allocateCryptoMachine()
     {
+        if(not this->cipherSet())
+        {
+            return false;
+        }
+
         switch (this->getCryptoOp())
         {
         case Decrypt:
-            this->setCryptoMachine(DecryptionMachine::create());
+            this->setCryptoMachine(DecryptionMachine::create(this->getCipher()));
             break;
         case Encrypt:
-            this->setCryptoMachine(EncryptionMachine::create());
+            this->setCryptoMachine(EncryptionMachine::create(this->getCipher()));
             break;
         default:
             return false;
@@ -124,22 +157,17 @@ class CryptoContext
         return this->cryptoMachineSet();
     }
 
-    bool initCryptoMachine(CryptoOp cryptoOp)
+    bool initCryptoMachine()
     {
-        this->setCryptoOp(cryptoOp);
-
         this->freeCryptoMachine();
-        bool ok = this->allocateCryptoMachine();
-
-        this->cryptoMachineAssignKey();
-
-        return ok;
+        return this->allocateCryptoMachine();
     }
 
     void init()
     {
         this->setCryptoMachine(nullptr);
         this->setKey(nullptr);
+        this->setCipher(nullptr);
     }
 
 public:
@@ -155,8 +183,12 @@ public:
 
     bool setup(CryptoType cryptoType, CryptoOp cryptoOp)
     {
-        return this->initKey(cryptoType, cryptoOp) and
-               this->initCryptoMachine(cryptoOp);
+        this->setCryptoType(cryptoType);
+        this->setCryptoOp(cryptoOp);
+
+        return this->initKey() and
+               this->initCipher() and
+               this->initCryptoMachine();
     }
 
     CryptoOp getCryptoOp() const

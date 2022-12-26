@@ -17,22 +17,22 @@ typedef int (*KeyPassphraseCallback)(char *buf, int size, int rwflag, void *u);
 
 class Key
 {
-    Bytes buffer;
-    Size bufferSize;
+    //Bytes buffer;
+    //Size bufferSize;
 
     KeyType keyType;
     KeyPassphraseCallback passphraseCallback;
 
     void init(KeyType keyType)
     {
-        this->setBuffer(nullptr);
-        this->setBufferSize(0);
+        //this->setBuffer(nullptr);
+        //this->setBufferSize(0);
         this->setKeyType(keyType);
         this->setKeyPassphraseCallback(nullptr);
     }
 
 protected:
-    Bytes getBuffer()
+    /*Bytes getBuffer()
     {
         return this->buffer;
     }
@@ -76,7 +76,7 @@ protected:
         this->setBuffer(new Byte[size + 1]);
         this->setBufferSize(size);
     }
-
+*/
 public:
     Key() { this->init(UndefinedKey); }
 
@@ -84,7 +84,7 @@ public:
 
     virtual ~Key()
     {
-        this->freeBuffer();
+        //this->freeBuffer();
     }
 
     virtual void setKeyType(KeyType keyType)
@@ -139,24 +139,25 @@ public:
 
     KeyPassphraseCallback getKeyPassphraseCallback() { return this->passphraseCallback; }
 
+    virtual void *getKeyMaterial() = 0;
     /**
      * @brief Perform encryption after successful initialization
      *
      * @return const EncrypterResult* Structure containing encrypted buffer, size and error flag
      */
-    virtual const EncrypterResult *lock(const EncrypterData *) = 0;
+    //virtual const EncrypterResult *lock(const EncrypterData *) = 0;
 
     /**
      * @brief Perform decryption after successful initialization
      *
      * @return const EncrypterResult* Structure containing decrypted buffer, size and error flag
      */
-    virtual const EncrypterResult *unlock(const EncrypterData *) = 0;
+    //virtual const EncrypterResult *unlock(const EncrypterData *) = 0;
 
-    virtual void reset()
-    {
-        this->freeBuffer();
-    }
+    //virtual void reset()
+    //{
+        //this->freeBuffer();
+    //}
 };
 
 #endif

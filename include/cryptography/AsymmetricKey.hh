@@ -3,7 +3,7 @@
 
 #include "Key.hh"
 #include "File.hh"
-#include "CipherContext.hh"
+// #include "CipherContext.hh"
 
 #include <openssl/pem.h>
 #include <string>
@@ -46,13 +46,15 @@ public:
         Key::setKeyType(keyType);
     }
 
-    const EncrypterResult *lock(const EncrypterData *) override;
+    // const EncrypterResult *lock(const EncrypterData *) override;
 
-    const EncrypterResult *unlock(const EncrypterData *) override;
+    // const EncrypterResult *unlock(const EncrypterData *) override;
 
     bool setKeyData(ConstBytes keyData, Size len, Plaintext passphrase = nullptr) override;
 
     bool readKeyFile(ConstPlaintext path, Plaintext passphrase = nullptr) override;
+
+    void *getKeyMaterial() override { return this->getKey(); }
 
     static Key *create()
     {
