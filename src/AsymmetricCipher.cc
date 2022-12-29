@@ -1,4 +1,4 @@
-#include "../../include/cryptography/AsymmetricCipher.hh"
+#include "cryptography/AsymmetricCipher.hh"
 
 EncrypterResult *AsymmetricCipher::createEnvelope() const
 {

@@ -1,7 +1,6 @@
 #ifndef SYMMETRIC_KEY_HH
 #define SYMMETRIC_KEY_HH
 
-#include "Constants.hh"
 #include "Key.hh"
 
 class SymmetricKey : public Key

@@ -2,9 +2,6 @@
 #define CIPHER_CONTEXT_HH
 
 #include "Cipher.hh"
-#include "SymmetricKey.hh"
-
-#include <openssl/evp.h>
 
 class SymmetricCipher : Cipher
 {

@@ -5,7 +5,6 @@
 #include "exceptions/InvalidKey.hh"
 
 #include <openssl/pem.h>
-#include <string>
 
 class AsymmetricKey : public Key
 {

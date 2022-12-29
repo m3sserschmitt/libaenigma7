@@ -1,4 +1,4 @@
-#include "../../include/cryptography/CryptoContext.hh"
+#include "cryptography/CryptoContext.hh"
 
 bool CryptoContext::allocateKey()
 {

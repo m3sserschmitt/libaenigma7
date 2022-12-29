@@ -1,9 +1,7 @@
 #ifndef KEY_HH
 #define KEY_HH
 
-#include "EncrypterData.hh"
-#include "EncrypterResult.hh"
-#include "File.hh"
+#include "Types.hh"
 
 enum KeyType
 {

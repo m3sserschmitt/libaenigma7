@@ -5,22 +5,22 @@ project(libcryptography VERSION 7.0.0)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 add_library(cryptography SHARED 
-./src/cryptography/AsymmetricKey.cc
-./src/cryptography/AsymmetricCipher.cc
-./src/cryptography/SymmetricCipher.cc
-./src/cryptography/CryptoContext.cc
+./src/AsymmetricKey.cc
+./src/AsymmetricCipher.cc
+./src/SymmetricCipher.cc
+./src/CryptoContext.cc
 )
 
-add_library(cryptography7 STATIC 
-./src/cryptography/AsymmetricKey.cc
-./src/cryptography/AsymmetricCipher.cc
-./src/cryptography/SymmetricCipher.cc
-./src/cryptography/CryptoContext.cc
-)
+#add_library(cryptography7 STATIC 
+#./src/cryptography/AsymmetricKey.cc
+#./src/cryptography/AsymmetricCipher.cc
+#./src/cryptography/SymmetricCipher.cc
+#./src/cryptography/CryptoContext.cc
+#)
 
 set_target_properties(cryptography PROPERTIES VERSION ${PROJECT_VERSION} SOVERSION 7)
 
 target_link_libraries(cryptography crypto)
 
-add_executable(symmetric_crypto_test ./tests/Crypto.cc)
-target_link_libraries(symmetric_crypto_test cryptography)
+add_executable(libcryptography_test ./tests/Crypto.cc)
+target_link_libraries(libcryptography_test cryptography)

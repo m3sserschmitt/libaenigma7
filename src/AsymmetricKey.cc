@@ -1,7 +1,6 @@
-#include "../../include/cryptography/AsymmetricKey.hh"
-#include "../../include/cryptography/AsymmetricCipher.hh"
+#include "cryptography/AsymmetricKey.hh"
+#include "cryptography/AsymmetricCipher.hh"
 #include <openssl/bio.h>
-#include <string>
 #include <openssl/pem.h>
 
 bool AsymmetricKey::setKeyData(ConstBytes keyData, Size len, Plaintext passphrase)

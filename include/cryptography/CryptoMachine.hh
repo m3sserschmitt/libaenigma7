@@ -1,9 +1,7 @@
 #ifndef CRYPTO_MACHINE_HH
 #define CRYPTO_MACHINE_HH
 
-#include "Key.hh"
 #include "Cipher.hh"
-#include "EncrypterResult.hh"
 
 class CryptoMachine
 {

@@ -1,4 +1,4 @@
-#include "../../include/cryptography/SymmetricCipher.hh"
+#include "cryptography/SymmetricCipher.hh"
 
 EncrypterResult *SymmetricCipher::createEncryptedData() const
 {

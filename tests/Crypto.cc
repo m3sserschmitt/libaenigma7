@@ -1,7 +1,6 @@
 #include <iostream>
 
-#include "../include/cryptography/CryptoContext.hh"
-#include "../include/cryptography/AsymmetricKey.hh"
+#include "cryptography/CryptoContext.hh"
 
 using namespace std;
 
@@ -65,7 +64,7 @@ bool testAsymmetricCrypto()
     memcpy(encrdata, ciphertext->getData(), datalen);
 
     cryptoContext->setup(AsymmetricCryptography, Decrypt);
-    cryptoContext->readKeyData("private.pem", (Plaintext)"test");
+    cryptoContext->readKeyData("private.pem");
     cryptoContext->setCiphertext(encrdata, datalen);
 
     cryptoContext->run();

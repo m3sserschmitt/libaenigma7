@@ -2,7 +2,6 @@
 #define ASYMMETRIC_CIPHER_HH
 
 #include "Cipher.hh"
-#include "AsymmetricKey.hh"
 
 class AsymmetricCipher : Cipher
 {
