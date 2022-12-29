@@ -9,6 +9,7 @@ add_library(cryptography SHARED
 ./src/AsymmetricCipher.cc
 ./src/SymmetricCipher.cc
 ./src/CryptoContext.cc
+./src/File.cc
 )
 
 #add_library(cryptography7 STATIC 
