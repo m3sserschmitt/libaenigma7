@@ -2,6 +2,7 @@
 #define ASYMMETRIC_KEY_HH
 
 #include "Key.hh"
+#include "exceptions/InvalidKey.hh"
 
 #include <openssl/pem.h>
 #include <string>
@@ -29,11 +30,26 @@ class AsymmetricKey : public Key
 
     bool notNullPkey() const { return this->key != nullptr; }
 
+    static bool validate(KeyType keyType) { return keyType == PublicKey or keyType == PrivateKey or keyType == UndefinedKey; }
+
 public:
-    AsymmetricKey(KeyType keyType) : Key(keyType) { this->init(); }
+    AsymmetricKey(KeyType keyType) : Key(keyType)
+    {
+        if (not AsymmetricKey::validate(keyType))
+        {
+            throw InvalidKey("Invalid Key Type used for object initialization");
+        }
+
+        this->init();
+    }
 
     void setKeyType(KeyType keyType) override
     {
+        if (not AsymmetricKey::validate(keyType))
+        {
+            throw InvalidKey("Invalid Key Type");
+        }
+
         this->freeKey();
         Key::setKeyType(keyType);
     }
