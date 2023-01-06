@@ -1,44 +1,25 @@
-#ifndef CIPHER_HH
-#define CIPHER_HH
+#ifndef EVP_CIPHER_CONTEXT_HH
+#define EVP_CIPHER_CONTEXT_HH
 
-#include "Constants.hh"
-#include "EncrypterData.hh"
-#include "EncrypterResult.hh"
-#include "RandomDataGenerator.hh"
-#include "Key.hh"
+#include "EvpContext.hh"
 
-#include <openssl/evp.h>
-
-class Cipher
+class EvpCipherContext : public EvpContext
 {
-    Key *key;
-
     EVP_CIPHER_CTX *cipherContext;
-
+    
     Bytes iv;
-
-    Bytes outBuffer;
-    int outBufferSize;
-
     Bytes tag;
-
-    void init(Key *key)
-    {
-        this->setKey(key);
-        this->setCipherContext(nullptr);
-        this->setIV(nullptr);
-        this->setOutBuffer(nullptr);
-        this->setOutBufferSize(0);
-        this->setTag(nullptr);
-    }
-
-    void setKey(Key *key) { this->key = key; }
 
     void setCipherContext(EVP_CIPHER_CTX *cipherContext) { this->cipherContext = cipherContext; }
 
-protected:
-    const Key *getKey() const { return this->key; }
+    void init()
+    {
+        this->setCipherContext(nullptr);
+        this->setIV(nullptr);
+        this->setTag(nullptr);
+    }
 
+protected:
     EVP_CIPHER_CTX *getCipherContext() { return this->cipherContext; }
 
     void freeCipherContext()
@@ -72,18 +53,6 @@ protected:
 
         return false;
     }
-
-    Bytes getOutBuffer() { return this->outBuffer; }
-
-    const Bytes getOutBuffer() const { return this->outBuffer; }
-
-    void setOutBuffer(Bytes outBuffer) { this->outBuffer = outBuffer; }
-
-    void setOutBufferSize(Size outBufferSize) { this->outBufferSize = outBufferSize; }
-
-    Size getOutBufferSize() const { return this->outBufferSize; }
-
-    int *getOutBufferSizePtr() { return &this->outBufferSize; }
 
     void setIV(Bytes iv) { this->iv = iv; }
 
@@ -136,32 +105,6 @@ protected:
         return ok;
     }
 
-    void freeOutBuffer()
-    {
-        Bytes outBuffer = this->getOutBuffer();
-
-        if (outBuffer)
-        {
-            memset(outBuffer, 0, this->getOutBufferSize());
-            delete[] outBuffer;
-            this->setOutBuffer(nullptr);
-            this->setOutBufferSize(0);
-        }
-    }
-
-    bool allocateOutBuffer(Size len)
-    {
-        if (not this->getOutBuffer())
-        {
-            this->setOutBuffer(new Byte[len + 1]);
-            this->setOutBufferSize(0);
-
-            return this->getOutBuffer() != nullptr;
-        }
-
-        return true;
-    }
-
     void freeTag()
     {
         Bytes tag = this->getTag();
@@ -186,26 +129,17 @@ protected:
         return true;
     }
 
-    virtual void cleanup()
+    void cleanup() override
     {
+        EvpContext::cleanup();
+
         this->freeCipherContext();
         this->freeIV();
-        this->freeOutBuffer();
         this->freeTag();
     }
 
-    EncrypterResult *abort()
-    {
-        this->cleanup();
-        return new EncrypterResult(false);
-    }
-
 public:
-    Cipher(Key *key) { this->init(key); }
-
-    virtual EncrypterResult *encrypt(const EncrypterData *in) = 0;
-
-    virtual EncrypterResult *decrypt(const EncrypterData *in) = 0;
+    EvpCipherContext(Key *key) : EvpContext(key) { this->init(); }
 };
 
 #endif

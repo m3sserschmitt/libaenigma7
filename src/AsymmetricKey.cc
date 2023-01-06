@@ -1,5 +1,5 @@
 #include "cryptography/AsymmetricKey.hh"
-#include "cryptography/AsymmetricCipher.hh"
+
 #include <openssl/bio.h>
 #include <openssl/pem.h>
 

@@ -1,6 +1,6 @@
-#include "cryptography/SymmetricCipher.hh"
+#include "cryptography/SymmetricEvpCipherContext.hh"
 
-EncrypterResult *SymmetricCipher::createEncryptedData() const
+EncrypterResult *SymmetricEvpCipherContext::createEncryptedData() const
 {
     Size bufferSize = this->getOutBufferSize();
     Size finalDataSize = bufferSize + IV_SIZE + TAG_SIZE;
@@ -19,7 +19,7 @@ EncrypterResult *SymmetricCipher::createEncryptedData() const
     return result;
 }
 
-ConstBytes SymmetricCipher::readEncryptedData(const EncrypterData *in, Size &cipherlen)
+ConstBytes SymmetricEvpCipherContext::readEncryptedData(const EncrypterData *in, Size &cipherlen)
 {
     cipherlen = 0;
 
@@ -40,7 +40,7 @@ ConstBytes SymmetricCipher::readEncryptedData(const EncrypterData *in, Size &cip
     return data + IV_SIZE;
 }
 
-EncrypterResult *SymmetricCipher::encrypt(const EncrypterData *in)
+EncrypterResult *SymmetricEvpCipherContext::encrypt(const EncrypterData *in)
 {
     if (not in or not in->getData())
     {
@@ -87,7 +87,7 @@ EncrypterResult *SymmetricCipher::encrypt(const EncrypterData *in)
     return result;
 }
 
-EncrypterResult *SymmetricCipher::decrypt(const EncrypterData *in)
+EncrypterResult *SymmetricEvpCipherContext::decrypt(const EncrypterData *in)
 {
     if (not in or not in->getData())
     {

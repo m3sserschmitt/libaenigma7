@@ -9,7 +9,7 @@ class DecryptionMachine : public CryptoMachine
     const DecryptionMachine &operator=(const DecryptionMachine &);
 
 public:
-    DecryptionMachine(Cipher *cipher) : CryptoMachine(cipher) {}
+    DecryptionMachine(EvpContext *cipher) : CryptoMachine(cipher) {}
 
     bool run() override
     {
@@ -18,7 +18,7 @@ public:
         return not result->isError();
     }
 
-    static CryptoMachine *create(Cipher *cipher)
+    static CryptoMachine *create(EvpContext *cipher)
     {
         return new DecryptionMachine(cipher);
     }

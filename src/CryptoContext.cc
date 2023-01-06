@@ -1,4 +1,6 @@
 #include "cryptography/CryptoContext.hh"
+#include "cryptography/SymmetricEvpCipherContext.hh"
+#include "cryptography/AsymmetricEvpCipherContext.hh"
 
 bool CryptoContext::allocateKey()
 {
@@ -37,10 +39,10 @@ bool CryptoContext::allocateCipher()
     switch (this->getCryptoType())
     {
     case SymmetricCryptography:
-        this->setCipher(SymmetricCipher::create(this->getKey()));
+        this->setCipher(SymmetricEvpCipherContext::create(this->getKey()));
         break;
     case AsymmetricCryptography:
-        this->setCipher(AsymmetricCipher::create(this->getKey()));
+        this->setCipher(AsymmetricEvpCipherContext::create(this->getKey()));
         break;
     default:
         return false;

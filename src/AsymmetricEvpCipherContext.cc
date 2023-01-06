@@ -1,6 +1,6 @@
-#include "cryptography/AsymmetricCipher.hh"
+#include "cryptography/AsymmetricEvpCipherContext.hh"
 
-EncrypterResult *AsymmetricCipher::createEnvelope() const
+EncrypterResult *AsymmetricEvpCipherContext::createEnvelope() const
 {
     Size envelopeSize = this->calculateEnvelopeSize();
     Bytes envelope = new Byte[envelopeSize + 1];
@@ -21,7 +21,7 @@ EncrypterResult *AsymmetricCipher::createEnvelope() const
     return result;
 }
 
-ConstBytes AsymmetricCipher::readEnvelope(const EncrypterData *in, Size &cipherlen)
+ConstBytes AsymmetricEvpCipherContext::readEnvelope(const EncrypterData *in, Size &cipherlen)
 {
     cipherlen = 0;
 
@@ -43,7 +43,7 @@ ConstBytes AsymmetricCipher::readEnvelope(const EncrypterData *in, Size &cipherl
     return envelope + N + IV_SIZE;
 }
 
-EncrypterResult *AsymmetricCipher::decrypt(const EncrypterData *in)
+EncrypterResult *AsymmetricEvpCipherContext::decrypt(const EncrypterData *in)
 {
     if (not in or not in->getData())
     {
@@ -105,7 +105,7 @@ EncrypterResult *AsymmetricCipher::decrypt(const EncrypterData *in)
     return result;
 }
 
-EncrypterResult *AsymmetricCipher::encrypt(const EncrypterData *in)
+EncrypterResult *AsymmetricEvpCipherContext::encrypt(const EncrypterData *in)
 {
     if (not in or not in->getData())
     {

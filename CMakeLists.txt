@@ -6,8 +6,8 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 add_library(cryptography SHARED 
 ./src/AsymmetricKey.cc
-./src/AsymmetricCipher.cc
-./src/SymmetricCipher.cc
+./src/AsymmetricEvpCipherContext.cc
+./src/SymmetricEvpCipherContext.cc
 ./src/CryptoContext.cc
 ./src/File.cc
 )

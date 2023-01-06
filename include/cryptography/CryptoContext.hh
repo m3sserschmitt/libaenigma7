@@ -5,8 +5,6 @@
 #include "DecryptionMachine.hh"
 #include "SymmetricKey.hh"
 #include "AsymmetricKey.hh"
-#include "AsymmetricCipher.hh"
-#include "SymmetricCipher.hh"
 
 enum CryptoType
 {
@@ -26,7 +24,7 @@ class CryptoContext
     CryptoOp cryptoOp;
 
     Key *key;
-    Cipher *cipher;
+    EvpContext *cipher;
     CryptoMachine *cryptoMachine;
 
     CryptoContext(const CryptoContext &);
@@ -46,9 +44,9 @@ class CryptoContext
 
     const CryptoMachine *getCryptoMachine() const { return this->cryptoMachine; }
 
-    Cipher *getCipher() { return this->cipher; }
+    EvpContext *getCipher() { return this->cipher; }
 
-    void setCipher(Cipher *cipher) { this->cipher = cipher; }
+    void setCipher(EvpContext *cipher) { this->cipher = cipher; }
 
     bool notNullCryptoMachine() const { return this->cryptoMachine != nullptr; }
 

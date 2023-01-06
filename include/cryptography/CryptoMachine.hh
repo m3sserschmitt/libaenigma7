@@ -1,11 +1,11 @@
 #ifndef CRYPTO_MACHINE_HH
 #define CRYPTO_MACHINE_HH
 
-#include "Cipher.hh"
+#include "EvpContext.hh"
 
 class CryptoMachine
 {
-    Cipher *cipher;
+    EvpContext *cipher;
 
     const EncrypterData *in;
     const EncrypterData *out;
@@ -30,12 +30,12 @@ class CryptoMachine
         this->setOut(nullptr);
     }
 
-    void setCipher(Cipher *cipher)
+    void setCipher(EvpContext *cipher)
     {
         this->cipher = cipher;
     }
 
-    void init(Cipher *cipher)
+    void init(EvpContext *cipher)
     {
         this->setIn(nullptr);
         this->setOut(nullptr);
@@ -60,10 +60,10 @@ protected:
 
     bool notNullIn() const { return this->in != nullptr; }
 
-    Cipher *getCipher() { return this->cipher; }
+    EvpContext *getCipher() { return this->cipher; }
 
 public:
-    CryptoMachine(Cipher *cipher)
+    CryptoMachine(EvpContext *cipher)
     {
         this->init(cipher);
     }

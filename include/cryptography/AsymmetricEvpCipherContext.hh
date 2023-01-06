@@ -1,15 +1,15 @@
 #ifndef ASYMMETRIC_CIPHER_HH
 #define ASYMMETRIC_CIPHER_HH
 
-#include "Cipher.hh"
+#include "EvpCipherContext.hh"
 
-class AsymmetricCipher : Cipher
+class AsymmetricEvpCipherContext : public EvpCipherContext
 {
     Bytes encryptedKey;
     int encryptedKeyLength;
 
-    AsymmetricCipher(const AsymmetricCipher &);
-    const AsymmetricCipher *operator=(const AsymmetricCipher &);
+    AsymmetricEvpCipherContext(const AsymmetricEvpCipherContext &);
+    const AsymmetricEvpCipherContext *operator=(const AsymmetricEvpCipherContext &);
 
     const EVP_PKEY *getPkey() const { return (EVP_PKEY *)this->getKey()->getKeyMaterial(); }
 
@@ -114,7 +114,7 @@ class AsymmetricCipher : Cipher
 
     void cleanup() override
     {
-        Cipher::cleanup();
+        EvpCipherContext::cleanup();
         this->freeEncryptedKey();
     }
 
@@ -125,13 +125,13 @@ class AsymmetricCipher : Cipher
     }
 
 public:
-    AsymmetricCipher(Key *key) : Cipher(key) { this->init(); }
+    AsymmetricEvpCipherContext(Key *key) : EvpCipherContext(key) { this->init(); }
 
     EncrypterResult *encrypt(const EncrypterData *in) override;
 
     EncrypterResult *decrypt(const EncrypterData *in) override;
 
-    static Cipher *create(Key *key) { return new AsymmetricCipher(key); }
+    static EvpContext *create(Key *key) { return new AsymmetricEvpCipherContext(key); }
 };
 
 #endif

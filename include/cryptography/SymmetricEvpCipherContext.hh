@@ -1,12 +1,12 @@
-#ifndef CIPHER_CONTEXT_HH
-#define CIPHER_CONTEXT_HH
+#ifndef SYMMETRIC_EVP_CIPHER_CONTEXT_HH
+#define SYMMETRIC_EVP_CIPHER_CONTEXT_HH
 
-#include "Cipher.hh"
+#include "EvpCipherContext.hh"
 
-class SymmetricCipher : Cipher
+class SymmetricEvpCipherContext : EvpCipherContext
 {
-    SymmetricCipher(const SymmetricCipher &);
-    const SymmetricCipher &operator=(const SymmetricCipher &);
+    SymmetricEvpCipherContext(const SymmetricEvpCipherContext &);
+    const SymmetricEvpCipherContext &operator=(const SymmetricEvpCipherContext &);
     
     Bytes getKeyData() { return (Bytes)this->getKey()->getKeyMaterial(); }
 
@@ -26,13 +26,13 @@ class SymmetricCipher : Cipher
     ConstBytes readEncryptedData(const EncrypterData *in, Size &cipherlen);
 
 public:
-    SymmetricCipher(Key *key) : Cipher(key) {}
+    SymmetricEvpCipherContext(Key *key) : EvpCipherContext(key) {}
 
     EncrypterResult *encrypt(const EncrypterData *in) override;
 
     EncrypterResult *decrypt(const EncrypterData *in) override;
 
-    static Cipher *create(Key *key) { return new SymmetricCipher(key); }
+    static EvpContext *create(Key *key) { return new SymmetricEvpCipherContext(key); }
 };
 
 #endif
