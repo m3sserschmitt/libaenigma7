@@ -11,16 +11,6 @@ class AsymmetricEvpCipherContext : public EvpCipherContext
     AsymmetricEvpCipherContext(const AsymmetricEvpCipherContext &);
     const AsymmetricEvpCipherContext *operator=(const AsymmetricEvpCipherContext &);
 
-    const EVP_PKEY *getPkey() const { return (EVP_PKEY *)this->getKey()->getKeyMaterial(); }
-
-    EVP_PKEY *getPkey() { return (EVP_PKEY *)this->getKey()->getKeyMaterial(); }
-
-    int getPkeySize() const
-    {
-        const EVP_PKEY *pkey = this->getPkey();
-        return pkey ? EVP_PKEY_size(pkey) : -1;
-    }
-
     void setEncryptedKey(Bytes encryptedKey) { this->encryptedKey = encryptedKey; }
 
     void setEncryptedKeyLength(Size len) { this->encryptedKeyLength = len; }
@@ -126,6 +116,8 @@ class AsymmetricEvpCipherContext : public EvpCipherContext
 
 public:
     AsymmetricEvpCipherContext(Key *key) : EvpCipherContext(key) { this->init(); }
+
+    ~AsymmetricEvpCipherContext() { this->freeEncryptedKey(); }
 
     EncrypterResult *encrypt(const EncrypterData *in) override;
 

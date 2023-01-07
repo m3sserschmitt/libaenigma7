@@ -79,6 +79,43 @@ bool testAsymmetricCrypto()
     return memcmp(data, plaintext->getData(), 128) == 0;
 }
 
+bool testSignature()
+{
+    const Byte *data = RandomDataGenerator::generate(128);
+
+    CryptoContext *cryptoContext = new CryptoContext(AsymmetricCryptography, Sign);
+
+    cryptoContext->readKeyData("private.pem");
+    cryptoContext->setPlaintext(data, 128);
+    cryptoContext->run();
+
+    const EncrypterData *ciphertext = cryptoContext->getCiphertext();
+
+    if (ciphertext->isError())
+    {
+        return false;
+    }
+
+    Size datalen = ciphertext->getDataSize();
+    Bytes encrdata = new Byte[datalen + 1];
+    memcpy(encrdata, ciphertext->getData(), datalen);
+
+    cryptoContext->setup(AsymmetricCryptography, SignVerify);
+    cryptoContext->readKeyData("public.pem");
+    cryptoContext->setCiphertext(encrdata, datalen);
+
+    cryptoContext->run();
+
+    const EncrypterData *plaintext = cryptoContext->getPlaintext();
+
+    if (plaintext->isError())
+    {
+        return false;
+    }
+
+    return true;
+}
+
 int main()
 {
     bool success = testSymmetricCrypto();
@@ -86,6 +123,9 @@ int main()
 
     success = testAsymmetricCrypto();
     success and cout << "Asymmetric crypto test successful!\n";
+
+    success = testSignature();
+    success and cout << "Signature test successful!\n";
 
     return EXIT_SUCCESS;
 }

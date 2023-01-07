@@ -15,7 +15,9 @@ enum CryptoType
 enum CryptoOp
 {
     Encrypt,
-    Decrypt
+    Decrypt,
+    Sign,
+    SignVerify
 };
 
 class CryptoContext
@@ -145,29 +147,39 @@ public:
         return this->notNullCryptoMachine() and this->getCryptoOp() == Encrypt;
     }
 
-    bool setPlaintext(ConstBytes data, Size datalen)
+    bool isSetForSigning() const
     {
-        return this->isSetForEncryption() and this->getCryptoMachine()->setInput(data, datalen);
+        return this->notNullCryptoMachine() and this->getCryptoOp() == Sign;
     }
 
-    bool setForDecryption() const
+    bool setPlaintext(ConstBytes data, Size datalen)
+    {
+        return (this->isSetForEncryption() or this->isSetForSigning()) and this->getCryptoMachine()->setInput(data, datalen);
+    }
+
+    bool isSetForDecryption() const
     {
         return this->notNullCryptoMachine() and this->getCryptoOp() == Decrypt;
     }
 
+    bool isSetForVerifying() const
+    {
+        return this->notNullCryptoMachine() and this->getCryptoOp() == SignVerify;
+    }
+
     const EncrypterData *getPlaintext() const
     {
-        return this->setForDecryption() ? this->getCryptoMachine()->getOutput() : nullptr;
+        return this->isSetForDecryption() or this->isSetForVerifying() ? this->getCryptoMachine()->getOutput() : nullptr;
     }
 
     bool setCiphertext(ConstBytes data, Size datalen)
     {
-        return this->setForDecryption() and this->getCryptoMachine()->setInput(data, datalen);
+        return (this->isSetForDecryption() or this->isSetForVerifying()) and this->getCryptoMachine()->setInput(data, datalen);
     }
 
     const EncrypterData *getCiphertext() const
     {
-        return this->isSetForEncryption() ? this->getCryptoMachine()->getOutput() : nullptr;
+        return this->isSetForEncryption() or this->isSetForSigning() ? this->getCryptoMachine()->getOutput() : nullptr;
     }
 
     bool run() { return this->notNullCryptoMachine() and this->getCryptoMachine()->run(); }

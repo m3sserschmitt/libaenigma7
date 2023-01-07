@@ -3,12 +3,12 @@
 
 #include "EvpCipherContext.hh"
 
-class SymmetricEvpCipherContext : EvpCipherContext
+class SymmetricEvpCipherContext : public EvpCipherContext
 {
     SymmetricEvpCipherContext(const SymmetricEvpCipherContext &);
     const SymmetricEvpCipherContext &operator=(const SymmetricEvpCipherContext &);
-    
-    Bytes getKeyData() { return (Bytes)this->getKey()->getKeyMaterial(); }
+
+    Bytes getKeyBytes() { return (Bytes)this->getKey()->getKeyMaterial(); }
 
     bool encryptionAllocateMemory(const EncrypterData *in)
     {
@@ -27,6 +27,8 @@ class SymmetricEvpCipherContext : EvpCipherContext
 
 public:
     SymmetricEvpCipherContext(Key *key) : EvpCipherContext(key) {}
+
+    ~SymmetricEvpCipherContext() {}
 
     EncrypterResult *encrypt(const EncrypterData *in) override;
 

@@ -18,8 +18,8 @@ class EvpContext
 
     void init(Key *key)
     {
-        this->setKey(key);    
-        
+        this->setKey(key);
+
         this->setOutBuffer(nullptr);
         this->setOutBufferSize(0);
     }
@@ -28,6 +28,16 @@ class EvpContext
 
 protected:
     const Key *getKey() const { return this->key; }
+
+    const EVP_PKEY *getPkey() const { return (EVP_PKEY *)this->getKey()->getKeyMaterial(); }
+
+    EVP_PKEY *getPkey() { return (EVP_PKEY *)this->getKey()->getKeyMaterial(); }
+
+    int getPkeySize() const
+    {
+        const EVP_PKEY *pkey = this->getPkey();
+        return pkey ? EVP_PKEY_size(pkey) : -1;
+    }
 
     Bytes getOutBuffer() { return this->outBuffer; }
 
@@ -80,6 +90,8 @@ protected:
 
 public:
     EvpContext(Key *key) { this->init(key); }
+
+    virtual ~EvpContext() { this->freeOutBuffer(); }
 
     virtual EncrypterResult *encrypt(const EncrypterData *in) = 0;
 

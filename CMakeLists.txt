@@ -8,6 +8,7 @@ add_library(cryptography SHARED
 ./src/AsymmetricKey.cc
 ./src/AsymmetricEvpCipherContext.cc
 ./src/SymmetricEvpCipherContext.cc
+./src/EvpMdContext.cc
 ./src/CryptoContext.cc
 ./src/File.cc
 )

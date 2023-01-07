@@ -1,6 +1,7 @@
 #include "cryptography/CryptoContext.hh"
 #include "cryptography/SymmetricEvpCipherContext.hh"
 #include "cryptography/AsymmetricEvpCipherContext.hh"
+#include "cryptography/EvpMdContext.hh"
 
 bool CryptoContext::allocateKey()
 {
@@ -13,9 +14,11 @@ bool CryptoContext::allocateKey()
         switch (this->getCryptoOp())
         {
         case Encrypt:
+        case SignVerify:
             this->setKey(AsymmetricKey::create(PublicKey));
             break;
         case Decrypt:
+        case Sign:
             this->setKey(AsymmetricKey::create(PrivateKey));
             break;
         default:
@@ -42,7 +45,20 @@ bool CryptoContext::allocateCipher()
         this->setCipher(SymmetricEvpCipherContext::create(this->getKey()));
         break;
     case AsymmetricCryptography:
-        this->setCipher(AsymmetricEvpCipherContext::create(this->getKey()));
+        switch (this->getCryptoOp())
+        {
+        case Encrypt:
+        case Decrypt:
+            this->setCipher(AsymmetricEvpCipherContext::create(this->getKey()));
+            break;
+        case Sign:
+        case SignVerify:
+            this->setCipher(EvpMdContext::create(this->getKey()));
+            break;
+        default:
+            return false;
+        }
+
         break;
     default:
         return false;
@@ -61,9 +77,11 @@ bool CryptoContext::allocateCryptoMachine()
     switch (this->getCryptoOp())
     {
     case Decrypt:
+    case SignVerify:
         this->setCryptoMachine(DecryptionMachine::create(this->getCipher()));
         break;
     case Encrypt:
+    case Sign:
         this->setCryptoMachine(EncryptionMachine::create(this->getCipher()));
         break;
     default:

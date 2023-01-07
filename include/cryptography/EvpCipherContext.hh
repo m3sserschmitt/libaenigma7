@@ -6,7 +6,7 @@
 class EvpCipherContext : public EvpContext
 {
     EVP_CIPHER_CTX *cipherContext;
-    
+
     Bytes iv;
     Bytes tag;
 
@@ -140,6 +140,13 @@ protected:
 
 public:
     EvpCipherContext(Key *key) : EvpContext(key) { this->init(); }
+
+    ~EvpCipherContext()
+    {
+        this->freeCipherContext();
+        this->freeIV();
+        this->freeTag();
+    }
 };
 
 #endif
