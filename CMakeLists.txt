@@ -11,6 +11,7 @@ add_library(cryptography SHARED
 ./src/EvpMdContext.cc
 ./src/CryptoContext.cc
 ./src/File.cc
+./src/Libcryptography.cc
 )
 
 #add_library(cryptography7 STATIC 
@@ -24,5 +25,5 @@ set_target_properties(cryptography PROPERTIES VERSION ${PROJECT_VERSION} SOVERSI
 
 target_link_libraries(cryptography crypto)
 
-add_executable(libcryptography_test ./tests/Crypto.cc)
-target_link_libraries(libcryptography_test cryptography)
+add_executable(libcryptography_wrapper_test ./tests/Cryptowrapper.cc)
+target_link_libraries(libcryptography_wrapper_test cryptography)

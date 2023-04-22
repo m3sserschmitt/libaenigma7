@@ -5,22 +5,11 @@
 #include "DecryptionMachine.hh"
 #include "SymmetricKey.hh"
 #include "AsymmetricKey.hh"
+#include "enums/CryptoOp.hh"
+#include "enums/CryptoType.hh"
+#include "contracts/ICryptoContext.hh"
 
-enum CryptoType
-{
-    SymmetricCryptography,
-    AsymmetricCryptography
-};
-
-enum CryptoOp
-{
-    Encrypt,
-    Decrypt,
-    Sign,
-    SignVerify
-};
-
-class CryptoContext
+class CryptoContext : public ICryptoContext
 {
     CryptoType cryptoType;
     CryptoOp cryptoOp;
@@ -31,10 +20,6 @@ class CryptoContext
 
     CryptoContext(const CryptoContext &);
     const CryptoContext &operator=(const CryptoContext &);
-
-    void setCryptoType(CryptoType cryptoType) { this->cryptoType = cryptoType; }
-
-    void setCryptoOp(CryptoOp cryptoOp) { this->cryptoOp = cryptoOp; }
 
     void setKey(Key *key) { this->key = key; }
 
@@ -105,42 +90,48 @@ class CryptoContext
         this->setCipher(nullptr);
     }
 
-public:
     CryptoContext(CryptoType cryptoType, CryptoOp cryptoOp)
     {
         this->init();
-        this->setup(cryptoType, cryptoOp);
+        this->setCryptoType(cryptoType);
+        this->setCryptoOp(cryptoOp);
+        this->setup();
     }
 
     CryptoContext() { this->init(); }
 
+public:
     ~CryptoContext() { this->cleanup(); }
-
-    bool setup(CryptoType cryptoType, CryptoOp cryptoOp)
-    {
-        this->setCryptoType(cryptoType);
-        this->setCryptoOp(cryptoOp);
-
-        return this->initKey() and
-               this->initCipher() and
-               this->initCryptoMachine();
-    }
 
     CryptoOp getCryptoOp() const { return this->cryptoOp; }
 
     CryptoType getCryptoType() const { return this->cryptoType; }
 
-    bool setKeyData(ConstBytes key, Size keylen)
+    void setCryptoType(CryptoType cryptoType) { this->cryptoType = cryptoType; }
+
+    void setCryptoOp(CryptoOp cryptoOp) { this->cryptoOp = cryptoOp; }
+
+    bool setup()
     {
-        return this->notNullKey() and this->getKey()->setKeyData(key, keylen);
+        return this->initKey() and
+               this->initCipher() and
+               this->initCryptoMachine();
     }
 
-    bool readKeyData(ConstPlaintext path, Plaintext passphrase)
+    bool setKey256(ConstBytes key)
+    {
+        return this->notNullKey() and this->getKey()->setKeyData(key, SYMMETRIC_KEY_SIZE);
+    }
+
+    bool setKeyData(ConstPlaintext key, char *plaintext = nullptr)
+    {
+        return this->notNullKey() and this->getKey()->setKeyData((ConstBytes)key, strlen(key));
+    }
+
+    bool readKeyFile(ConstPlaintext path, Plaintext passphrase = nullptr)
     {
         return this->notNullKey() and this->getKey()->readKeyFile(path, passphrase);
     }
-
-    bool readKeyData(ConstPlaintext path) { return this->readKeyData(path, nullptr); }
 
     bool isSetForEncryption() const
     {
@@ -188,6 +179,41 @@ public:
     {
         this->freeCryptoMachine();
         this->freeKey();
+    }
+
+    static CryptoContext *createAesEncryptionContext()
+    {
+        return new CryptoContext(SymmetricCryptography, Encrypt);
+    }
+
+    static CryptoContext *CreateAesDecryptionContext()
+    {
+        return new CryptoContext(SymmetricCryptography, Decrypt);
+    }
+
+    static CryptoContext *createRsaEncryptionContext()
+    {
+        return new CryptoContext(AsymmetricCryptography, Encrypt);
+    }
+
+    static CryptoContext *createRsaDecryptionContext()
+    {
+        return new CryptoContext(AsymmetricCryptography, Decrypt);
+    }
+
+    static CryptoContext *createRsaSignatureContext()
+    {
+        return new CryptoContext(AsymmetricCryptography, Sign);
+    }
+
+    static CryptoContext *createRsaSignatureVerificationContext()
+    {
+        return new CryptoContext(AsymmetricCryptography, SignVerify);
+    }
+
+    static CryptoContext *CreateCryptoContext()
+    {
+        return new CryptoContext();
     }
 };
 

@@ -1,6 +1,7 @@
 #ifndef RANDOM_DATA_GENERATOR_HH
 #define RANDOM_DATA_GENERATOR_HH
 
+#include "Constants.hh"
 #include <random>
 
 class RandomDataGenerator
@@ -20,6 +21,11 @@ public:
         }
 
         return data;
+    }
+
+    static Bytes generateKey()
+    {
+        return generate(SYMMETRIC_KEY_SIZE);
     }
 };
 
