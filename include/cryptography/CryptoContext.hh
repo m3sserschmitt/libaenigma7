@@ -123,9 +123,9 @@ public:
         return this->notNullKey() and this->getKey()->setKeyData(key, SYMMETRIC_KEY_SIZE);
     }
 
-    bool setKeyData(ConstPlaintext key, char *plaintext = nullptr)
+    bool setKeyData(ConstPlaintext key, char *passphrase = nullptr)
     {
-        return this->notNullKey() and this->getKey()->setKeyData((ConstBytes)key, strlen(key));
+        return this->notNullKey() and this->getKey()->setKeyData((ConstBytes)key, strlen(key), passphrase);
     }
 
     bool readKeyFile(ConstPlaintext path, Plaintext passphrase = nullptr)

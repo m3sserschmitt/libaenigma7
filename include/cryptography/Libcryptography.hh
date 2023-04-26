@@ -29,4 +29,6 @@ extern "C" unsigned int GetAesGcmCiphertextSize(unsigned int plaintext);
 
 extern "C" unsigned int GetAesGcmPlaintextSize(unsigned int ciphertext);
 
-extern "C" unsigned int GetRsaSize(unsigned int keySizeBits);
+extern "C" unsigned int GetEnvelopeSize(unsigned int pkeySizeBits, unsigned int plaintextLen);
+
+extern "C" unsigned int GetOpenEnvelopeSize(unsigned int pkeySizeBits, unsigned int envelopeSize);

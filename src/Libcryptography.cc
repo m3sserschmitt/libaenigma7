@@ -57,8 +57,8 @@ extern "C"
     {
         return CryptoContextBuilder::Create()
         ->useRsa()
-        ->useEncryption()
-        ->noPlaintext()
+        ->useDecryption()
+        ->noCiphertext()
         ->readKeyData(file, passphrase)
         ->build();
     }
@@ -141,8 +141,13 @@ extern "C"
         return plaintext->getData();
     }
 
-    unsigned int GetRsaSize(unsigned int keySizeBits)
+    unsigned int GetEnvelopeSize(unsigned int pkeySizeBits, unsigned int plaintextLen)
     {
-        return keySizeBits / 8;
+        return pkeySizeBits / 8 + IV_SIZE + TAG_SIZE + plaintextLen;
+    }
+
+    unsigned int GetOpenEnvelopeSize(unsigned int pkeySizeBits, unsigned int envelopeSize)
+    {
+        return envelopeSize - pkeySizeBits / 8 - IV_SIZE - TAG_SIZE; 
     }
 }
