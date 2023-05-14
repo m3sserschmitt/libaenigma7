@@ -113,7 +113,8 @@ int main()
     encrctx = CreateAsymmetricEncryptionContextFromFile("./public.pem");
     decrctx = CreateAsymmetricDecryptionContextFromFile("./private.pem");
 
-    for(int i = 0; i < 500 and success; i ++)
+    int i;
+    for(i = 0; i < 500 and success; i ++)
     {
         success = testAsymmetricCryptoWrapper(encrctx, decrctx);
     }
@@ -124,7 +125,7 @@ int main()
     encrctx = CreateAsymmetricEncryptionContext(publicKey);
     decrctx = CreateAsymmetricDecryptionContext(privateKey, (char *)"12345678");
 
-    for(int i = 0; i < 500 and success; i ++)
+    for(i = 0; i < 500 and success; i ++)
     {
         success = testAsymmetricCryptoWrapper(encrctx, decrctx);
     }

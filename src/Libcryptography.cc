@@ -63,6 +63,11 @@ extern "C"
         ->build();
     }
 
+    void FreeContext(ICryptoContext *context)
+    {
+        delete context;
+    }
+
     const unsigned char *AesGcmEncrypt(ICryptoContext *ctx, const unsigned char *plaintext, unsigned int plaintextLen)
     {
         if (not ctx or not ctx->setPlaintext(plaintext, plaintextLen) or not ctx->run())

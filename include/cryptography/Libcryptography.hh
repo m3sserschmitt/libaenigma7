@@ -14,6 +14,8 @@ extern "C" ICryptoContext *CreateAsymmetricEncryptionContextFromFile(const char 
 
 extern "C" ICryptoContext *CreateAsymmetricDecryptionContextFromFile(const char *key, char *passphrase = nullptr);
 
+extern "C" void FreeContext(ICryptoContext *context);
+
 
 extern "C" const unsigned char *AesGcmEncrypt(ICryptoContext *ctx, const unsigned char *plaintext, unsigned int plaintextLen);
 
