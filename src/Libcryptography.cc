@@ -36,31 +36,71 @@ extern "C"
     ICryptoContext *CreateAsymmetricEncryptionContext(const char *key)
     {
         return CryptoContextBuilder::Create()
-        ->useRsa()
-        ->useEncryption()
-        ->noPlaintext()
-        ->setKey(key)
-        ->build();
+            ->useRsa()
+            ->useEncryption()
+            ->noPlaintext()
+            ->setKey(key)
+            ->build();
     }
 
     ICryptoContext *CreateAsymmetricEncryptionContextFromFile(const char *path)
     {
         return CryptoContextBuilder::Create()
-        ->useRsa()
-        ->useEncryption()
-        ->noPlaintext()
-        ->readKeyData(path)
-        ->build();
+            ->useRsa()
+            ->useEncryption()
+            ->noPlaintext()
+            ->readKeyData(path)
+            ->build();
     }
 
     ICryptoContext *CreateAsymmetricDecryptionContextFromFile(const char *file, char *passphrase)
     {
         return CryptoContextBuilder::Create()
-        ->useRsa()
-        ->useDecryption()
-        ->noCiphertext()
-        ->readKeyData(file, passphrase)
-        ->build();
+            ->useRsa()
+            ->useDecryption()
+            ->noCiphertext()
+            ->readKeyData(file, passphrase)
+            ->build();
+    }
+
+    ICryptoContext *CreateSignatureContext(const char *key, char *passphrase)
+    {
+        return CryptoContextBuilder::Create()
+            ->useRsa()
+            ->useSignature()
+            ->noPlaintext()
+            ->setKey(key, passphrase)
+            ->build();
+    }
+
+    ICryptoContext *CreateVerificationContext(const char *key)
+    {
+        return CryptoContextBuilder::Create()
+            ->useRsa()
+            ->useSignatureVerification()
+            ->noCiphertext()
+            ->setKey(key)
+            ->build();
+    }
+
+    ICryptoContext *CreateSignatureContextFromFile(const char *path, char *passphrase)
+    {
+        return CryptoContextBuilder::Create()
+            ->useRsa()
+            ->useSignature()
+            ->noPlaintext()
+            ->readKeyData(path, passphrase)
+            ->build();
+    }
+
+    ICryptoContext *CreateVerificationContextFromFile(const char *path)
+    {
+        return CryptoContextBuilder::Create()
+            ->useRsa()
+            ->useSignatureVerification()
+            ->noCiphertext()
+            ->readKeyData(path)
+            ->build();
     }
 
     void FreeContext(ICryptoContext *context)
@@ -68,14 +108,19 @@ extern "C"
         delete context;
     }
 
-    const unsigned char *AesGcmEncrypt(ICryptoContext *ctx, const unsigned char *plaintext, unsigned int plaintextLen)
+    const EncrypterData *encrypt(ICryptoContext *ctx, const unsigned char *plaintext, unsigned int plaintextLen)
     {
         if (not ctx or not ctx->setPlaintext(plaintext, plaintextLen) or not ctx->run())
         {
             return nullptr;
         }
 
-        const EncrypterData *ciphertext = ctx->getCiphertext();
+        return ctx->getCiphertext();
+    }
+
+    const unsigned char *EncryptData(ICryptoContext *ctx, const unsigned char *plaintext, unsigned int plaintextLen)
+    {
+        const EncrypterData *ciphertext = encrypt(ctx, plaintext, plaintextLen);
 
         if (not ciphertext or ciphertext->isError())
         {
@@ -85,14 +130,19 @@ extern "C"
         return ciphertext->getData();
     }
 
-    const unsigned char *AesGcmDecrypt(ICryptoContext *ctx, const unsigned char *ciphertext, unsigned int cipherLen)
+    const EncrypterData *decrypt(ICryptoContext *ctx, const unsigned char *ciphertext, unsigned int cipherLen)
     {
         if (not ctx or not ctx->setCiphertext(ciphertext, cipherLen) or not ctx->run())
         {
             return nullptr;
         }
 
-        const EncrypterData *plaintext = ctx->getPlaintext();
+        return ctx->getPlaintext();
+    }
+
+    const unsigned char *DecryptData(ICryptoContext *ctx, const unsigned char *ciphertext, unsigned int cipherLen)
+    {
+        const EncrypterData *plaintext = decrypt(ctx, ciphertext, cipherLen);
 
         if (not plaintext or plaintext->isError())
         {
@@ -112,38 +162,16 @@ extern "C"
         return ciphertext - TAG_SIZE - IV_SIZE;
     }
 
-    const unsigned char *RsaEncrypt(ICryptoContext *ctx, const unsigned char *plaintext, unsigned int plaintextLen)
+    const unsigned char *SignData(ICryptoContext *ctx, const unsigned char *plaintext, unsigned int plaintextLen)
     {
-        if (not ctx or not ctx->setPlaintext(plaintext, plaintextLen) or not ctx->run())
-        {
-            return nullptr;
-        }
-
-        const EncrypterData *ciphertext = ctx->getCiphertext();
-
-        if (not ciphertext or ciphertext->isError())
-        {
-            return nullptr;
-        }
-
-        return ciphertext->getData();
+        return EncryptData(ctx, plaintext, plaintextLen);
     }
 
-    const unsigned char *RsaDecrypt(ICryptoContext *ctx, const unsigned char *ciphertext, unsigned int cipherLen)
+    bool VerifySignature(ICryptoContext *ctx, const unsigned char *ciphertext, unsigned int cipherLen)
     {
-        if (not ctx or not ctx->setCiphertext(ciphertext, cipherLen) or not ctx->run())
-        {
-            return nullptr;
-        }
+        const EncrypterData *plaintext = decrypt(ctx, ciphertext, cipherLen);
 
-        const EncrypterData *plaintext = ctx->getPlaintext();
-
-        if (not plaintext or plaintext->isError())
-        {
-            return nullptr;
-        }
-
-        return plaintext->getData();
+        return plaintext != nullptr and not plaintext->isError();
     }
 
     unsigned int GetEnvelopeSize(unsigned int pkeySizeBits, unsigned int plaintextLen)
@@ -153,6 +181,6 @@ extern "C"
 
     unsigned int GetOpenEnvelopeSize(unsigned int pkeySizeBits, unsigned int envelopeSize)
     {
-        return envelopeSize - pkeySizeBits / 8 - IV_SIZE - TAG_SIZE; 
+        return envelopeSize - pkeySizeBits / 8 - IV_SIZE - TAG_SIZE;
     }
 }

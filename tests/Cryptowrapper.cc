@@ -10,7 +10,7 @@ bool testSymmetricCryptoWrapper(ICryptoContext *encrctx, ICryptoContext *decrctx
 {
     unsigned int dataSize = (unsigned int)(*RandomDataGenerator::generate(1));
     unsigned char *data = RandomDataGenerator::generate(dataSize);
-    const unsigned char *ciphertext = AesGcmEncrypt(encrctx, data, dataSize);
+    const unsigned char *ciphertext = EncryptData(encrctx, data, dataSize);
 
     if (not ciphertext)
     {
@@ -18,7 +18,7 @@ bool testSymmetricCryptoWrapper(ICryptoContext *encrctx, ICryptoContext *decrctx
     }
 
     unsigned int cipherlen = GetAesGcmCiphertextSize(dataSize);
-    const unsigned char *plaintext = AesGcmDecrypt(decrctx, ciphertext, cipherlen);
+    const unsigned char *plaintext = DecryptData(decrctx, ciphertext, cipherlen);
 
     if (not plaintext)
     {
@@ -33,7 +33,7 @@ bool testAsymmetricCryptoWrapper(ICryptoContext *encrctx, ICryptoContext *decrct
     unsigned int dataSize = (unsigned int)(*RandomDataGenerator::generate(1));
     unsigned char *data = RandomDataGenerator::generate(dataSize);
     
-    const unsigned char *ciphertext = RsaEncrypt(encrctx, data, dataSize);
+    const unsigned char *ciphertext = EncryptData(encrctx, data, dataSize);
 
     if (not ciphertext)
     {
@@ -41,7 +41,7 @@ bool testAsymmetricCryptoWrapper(ICryptoContext *encrctx, ICryptoContext *decrct
     }
 
     int cipherlen = GetEnvelopeSize(2048, dataSize);
-    const unsigned char *plaintext = RsaDecrypt(decrctx, ciphertext, cipherlen);
+    const unsigned char *plaintext = DecryptData(decrctx, ciphertext, cipherlen);
 
     if (not plaintext)
     {
