@@ -10,7 +10,12 @@ class EvpMdContext : public EvpContext
     Bytes inSig;
     Size inSiglen;
 
-    void init() { this->setMdContext(nullptr); }
+    void init() 
+    { 
+        this->setMdContext(nullptr); 
+        this->setInSig(nullptr);
+        this->setInSiglen(0);
+    }
 
     void setMdContext(EVP_MD_CTX *mdContext) { this->mdContext = mdContext; }
 

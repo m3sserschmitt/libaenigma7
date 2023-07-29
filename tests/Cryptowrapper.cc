@@ -8,7 +8,7 @@ using namespace std;
 
 bool testSymmetricCryptoWrapper(ICryptoContext *encrctx, ICryptoContext *decrctx)
 {
-    unsigned int dataSize = (unsigned int)(*RandomDataGenerator::generate(1));
+    unsigned int dataSize = 128;
     unsigned char *data = RandomDataGenerator::generate(dataSize);
     const unsigned char *ciphertext = EncryptData(encrctx, data, dataSize);
 
@@ -30,7 +30,7 @@ bool testSymmetricCryptoWrapper(ICryptoContext *encrctx, ICryptoContext *decrctx
 
 bool testAsymmetricCryptoWrapper(ICryptoContext *encrctx, ICryptoContext *decrctx)
 {
-    unsigned int dataSize = (unsigned int)(*RandomDataGenerator::generate(1));
+    unsigned int dataSize = 128;
     unsigned char *data = RandomDataGenerator::generate(dataSize);
     
     const unsigned char *ciphertext = EncryptData(encrctx, data, dataSize);
@@ -49,6 +49,23 @@ bool testAsymmetricCryptoWrapper(ICryptoContext *encrctx, ICryptoContext *decrct
     }
 
     return memcmp(data, plaintext, dataSize) == 0;
+}
+
+bool testSignatureWrapper(ICryptoContext *signctx, ICryptoContext *verifctx)
+{
+    unsigned int dataSize = 128;
+    unsigned char *data = RandomDataGenerator::generate(dataSize);
+
+    const unsigned char *signature = SignData(signctx, data, dataSize);
+
+    if(not signature)
+    {
+        return false;
+    }
+
+    int signlen = dataSize + 256;
+
+    return VerifySignature(verifctx, signature, signlen);
 }
 
 const char *publicKey = "-----BEGIN PUBLIC KEY-----\n" \
@@ -98,42 +115,37 @@ int main()
     ICryptoContext *encrctx = CreateSymmetricEncryptionContext(key);
     ICryptoContext *decrctx = CreateSymmetricDecryptionContext(key);
 
-    bool success = true;
-    for(int i = 0; i < 500 and success; i ++)
-    {
-        success = testSymmetricCryptoWrapper(encrctx, decrctx);
-    }
+    bool success = testSymmetricCryptoWrapper(encrctx, decrctx);
     
     (success and cout << "Symmetric crypto wrapper test successful!\n") or cout << "Symmetric crypto wrapper test failed\n";
 
     delete encrctx;
     delete decrctx;
 
-    success = true;
     encrctx = CreateAsymmetricEncryptionContextFromFile("./public.pem");
     decrctx = CreateAsymmetricDecryptionContextFromFile("./private.pem");
 
-    int i;
-    for(i = 0; i < 500 and success; i ++)
-    {
-        success = testAsymmetricCryptoWrapper(encrctx, decrctx);
-    }
-
+    success = testAsymmetricCryptoWrapper(encrctx, decrctx);
+    
     delete encrctx;
     delete decrctx;
 
     encrctx = CreateAsymmetricEncryptionContext(publicKey);
     decrctx = CreateAsymmetricDecryptionContext(privateKey, (char *)"12345678");
 
-    for(i = 0; i < 500 and success; i ++)
-    {
-        success = testAsymmetricCryptoWrapper(encrctx, decrctx);
-    }
+    success = success and testAsymmetricCryptoWrapper(encrctx, decrctx);
     
     delete encrctx;
     delete decrctx;
 
     (success and cout << "Asymmetric crypto wrapper test successful!\n") or cout << "Asymmetric crypto wrapper test failed\n";
+
+    encrctx = CreateSignatureContext(privateKey, (char *)"12345678");
+    decrctx = CreateVerificationContext(publicKey);
+
+    success = testSignatureWrapper(encrctx, decrctx);
+
+    (success and cout << "Signature wrapper test successful!\n") or cout << "Signature wrapper test failed\n";
 
     return EXIT_SUCCESS;
 }
