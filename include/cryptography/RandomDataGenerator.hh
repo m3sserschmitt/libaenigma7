@@ -1,14 +1,13 @@
 #ifndef RANDOM_DATA_GENERATOR_HH
 #define RANDOM_DATA_GENERATOR_HH
 
-#include "EncrypterData.hh"
-
+#include "Constants.hh"
 #include <random>
 
 class RandomDataGenerator
 {
 public:
-    static EncrypterData *generate(Size len)
+    static Bytes generate(Size len)
     {
         std::random_device dev;
         std::mt19937 rng(dev());
@@ -21,7 +20,12 @@ public:
             data[i] = dist(rng);
         }
 
-        return new EncrypterData(data, len);
+        return data;
+    }
+
+    static Bytes generateKey()
+    {
+        return generate(SYMMETRIC_KEY_SIZE);
     }
 };
 

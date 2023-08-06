@@ -2,24 +2,67 @@
 #define ASYMMETRIC_KEY_HH
 
 #include "Key.hh"
-#include <string>
+#include "exceptions/InvalidKey.hh"
+
+#include <openssl/pem.h>
 
 class AsymmetricKey : public Key
 {
-    typedef struct bio_st BIO;
-    typedef struct rsa_st RSA;
-    typedef struct evp_pkey_st EVP_PKEY;
-    typedef RSA *(*pemReadBioPtr)(BIO *);
+    EVP_PKEY *key;
 
-    static BIO *getBIO(const char *PEM);
-    static RSA *getPubkeyRSA(BIO *bio);
-    static RSA *getPrivkeyRSA(BIO *bio);
-    static EVP_PKEY *getEvpPkey(const char *PEM, pemReadBioPtr ptr);
+    AsymmetricKey(const AsymmetricKey &);
+    const AsymmetricKey &operator=(const AsymmetricKey &);
+
+    void init() { this->setPkey(nullptr); }
+
+    const EVP_PKEY *getPkey() const { return this->key; }
+
+    EVP_PKEY *getPkey() { return this->key; }
+
+    void setPkey(EVP_PKEY *key) { this->key = key; }
+
+    void freeKey()
+    {
+        EVP_PKEY_free(this->getPkey());
+        this->setPkey(nullptr);
+    }
+
+    bool notNullPkey() const { return this->key != nullptr; }
+
+    static bool validate(KeyType keyType) { return keyType == PublicKey or keyType == PrivateKey or keyType == UndefinedKey; }
 
 public:
-    const EncrypterResult *lock(const EncrypterData *) override;
+    AsymmetricKey(KeyType keyType) : Key(keyType)
+    {
+        if (not AsymmetricKey::validate(keyType))
+        {
+            throw InvalidKey("Invalid Key Type used for object initialization");
+        }
 
-    const EncrypterResult *unlock(const EncrypterData *) override;
+        this->init();
+    }
+
+    void setKeyType(KeyType keyType) override
+    {
+        if (not AsymmetricKey::validate(keyType))
+        {
+            throw InvalidKey("Invalid Key Type");
+        }
+
+        this->freeKey();
+        Key::setKeyType(keyType);
+    }
+
+    bool setKeyData(ConstBytes keyData, Size len, Plaintext passphrase = nullptr) override;
+
+    bool readKeyFile(ConstPlaintext path, Plaintext passphrase = nullptr) override;
+
+    const void *getKeyMaterial() const override { return this->getPkey(); }
+
+    static Key *create(KeyType keyType)
+    {
+        return new AsymmetricKey(keyType);
+    }
 };
 
 #endif

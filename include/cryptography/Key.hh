@@ -1,78 +1,91 @@
 #ifndef KEY_HH
 #define KEY_HH
 
-#include "EncrypterData.hh"
-#include "EncrypterResult.hh"
+#include "Types.hh"
+
+enum KeyType
+{
+    KeySymmetric,
+    PublicKey,
+    PrivateKey,
+    UndefinedKey
+};
+
+typedef int (*KeyPassphraseCallback)(char *buf, int size, int rwflag, void *u);
 
 class Key
 {
-    Bytes buffer;
-    Size bufferSize;
+    KeyType keyType;
+    KeyPassphraseCallback passphraseCallback;
+
+    void init(KeyType keyType)
+    {
+        this->setKeyType(keyType);
+        this->setKeyPassphraseCallback(nullptr);
+    }
 
 protected:
-    Bytes getBuffer()
+
+    virtual void setKeyType(KeyType keyType)
     {
-        return this->buffer;
-    }
-
-    void setBuffer(Bytes buffer)
-    {
-        this->buffer = buffer;
-    }
-
-    Size getBufferSize()
-    {
-        return this->bufferSize;
-    }
-
-    void setBufferSize(Size bufferSize)
-    {
-        this->bufferSize = bufferSize;
-    }
-
-    void freeBuffer()
-    {
-        if (this->buffer)
-        {
-            memset(this->buffer, 0, this->bufferSize);
-            delete[] this->buffer;
-
-            this->buffer = nullptr;
-        }
-
-        this->bufferSize = 0;
-    }
-
-    void createBuffer(Size size)
-    {
-        this->freeBuffer();
-
-        this->buffer = new Byte[size + 1];
-        this->bufferSize = size;
+        this->keyType = keyType;
     }
 
 public:
-    Key()
+    Key() { this->init(UndefinedKey); }
+
+    Key(KeyType keyType) { this->init(keyType); }
+
+    virtual ~Key() {}
+
+    KeyType getKeyType() const
     {
-        this->buffer = nullptr;
-        this->bufferSize = 0;
+        return this->keyType;
     }
 
-    virtual ~Key()
+    bool isPublicKey() const
     {
-        this->freeBuffer();
+        return this->getKeyType() == PublicKey;
     }
 
-    virtual void setKeyData(const Byte *keyData, Size keylen) = 0;
-
-    virtual const EncrypterResult *lock(const EncrypterData *) = 0;
-
-    virtual const EncrypterResult *unlock(const EncrypterData *) = 0;
-
-    virtual void reset()
+    bool isPrivateKey() const
     {
-        this->freeBuffer();
+        return this->getKeyType() == PrivateKey;
     }
+
+    bool isSymmetricKey() const
+    {
+        return this->getKeyType() == KeySymmetric;
+    }
+
+    /**
+     * @brief Initialize encryption / decryption key from buffer. This method should be overriden into any derived class
+     * to achieve desired behavior.
+     *
+     * @param keyData Key material for initialization
+     * @param len Size initialization buffer
+     * @param passphrase Passphrase for key file decryption (usually for reading private keys)
+     * @return true If initialization successful
+     * @return false If initialization failed
+     */
+    virtual bool setKeyData(ConstBytes keyData, Size len, Plaintext passphrase = nullptr) = 0;
+
+    /**
+     * @brief Read encryption / decryption key material from file (especially useful for public/private key pairs). Override
+     * this method into any derived class to achieve desired behavior
+     *
+     * @param path Path to file which contains key material for initialization
+     * @param passphrase Passphrase for key file decryption (usually for reading private keys)
+     * @return true If initialization successful
+     * @return false If initialization failed
+     */
+    virtual bool readKeyFile(ConstPlaintext path, Plaintext passphrase = nullptr) = 0;
+
+    void setKeyPassphraseCallback(KeyPassphraseCallback passphraseCallback) { this->passphraseCallback = passphraseCallback; }
+
+    const KeyPassphraseCallback getKeyPassphraseCallback() const { return this->passphraseCallback; }
+
+    virtual const void *getKeyMaterial() const = 0;
 };
 
 #endif

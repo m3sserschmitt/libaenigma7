@@ -14,7 +14,7 @@ class EncrypterData
     const EncrypterData &operator=(const EncrypterData &);
 
 public:
-    EncrypterData(const Byte *data, Size datalen)
+    EncrypterData(ConstBytes data, Size datalen)
     {
         this->datalen = datalen;
         this->data = new Byte[datalen + 1];

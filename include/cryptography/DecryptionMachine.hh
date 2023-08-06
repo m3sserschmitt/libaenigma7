@@ -5,18 +5,22 @@
 
 class DecryptionMachine : public CryptoMachine
 {
-public:
-    void run() override
-    {
-        Key *key = this->getKey();
-        const EncrypterData *data = this->getIn();
+    DecryptionMachine(const DecryptionMachine &);
+    const DecryptionMachine &operator=(const DecryptionMachine &);
 
-        this->setOut(key->unlock(data));
+public:
+    DecryptionMachine(EvpContext *cipher) : CryptoMachine(cipher) {}
+
+    bool run() override
+    {
+        EncrypterResult *result = this->getCipher()->decrypt(this->getIn());
+        this->setOut(result);
+        return not result->isError();
     }
 
-    static DecryptionMachine *create()
+    static CryptoMachine *create(EvpContext *cipher)
     {
-        return new DecryptionMachine();
+        return new DecryptionMachine(cipher);
     }
 };
 

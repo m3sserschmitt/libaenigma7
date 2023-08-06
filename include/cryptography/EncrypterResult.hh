@@ -6,8 +6,12 @@
 class EncrypterResult : public EncrypterData
 {
     bool ok;
+
+    EncrypterResult(const EncrypterResult &);
+    const EncrypterResult &operator=(const EncrypterResult &);
+    
 public:
-    EncrypterResult(const Byte *data, Size datalen) : EncrypterData(data, datalen) 
+    EncrypterResult(ConstBytes data, Size datalen) : EncrypterData(data, datalen) 
     {
         this->ok = true;
     }

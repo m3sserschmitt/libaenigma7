@@ -1,133 +1,80 @@
 #ifndef SYMMETRIC_KEY_HH
 #define SYMMETRIC_KEY_HH
 
-#include "RandomDataGenerator.hh"
-#include "Constants.hh"
 #include "Key.hh"
-
-#include <openssl/evp.h>
 
 class SymmetricKey : public Key
 {
     Bytes keyData;
-    Bytes ivData;
-    Bytes tagData;
-
-    EVP_CIPHER_CTX *cipherContext;
 
     SymmetricKey(const SymmetricKey &);
     const SymmetricKey &operator=(const SymmetricKey &);
 
-    void initIV()
+    void setKeyData(Bytes keyData) { this->keyData = keyData; }
+
+    Bytes getKeyData() { return this->keyData; }
+
+    const Bytes getKeyData() const { return this->keyData; }
+
+    bool writeKeyData(ConstBytes keyData)
     {
-        EncrypterData *randomData = RandomDataGenerator::generate(IV_SIZE);
-        memcpy(this->ivData, randomData->getData(), IV_SIZE);
+        Bytes localKeyData = this->getKeyData();
 
-        delete randomData;
-    }
-
-    void initIV(const Byte *ivData)
-    {
-        memcpy(this->ivData, ivData, IV_SIZE);
-    }
-
-    void initTagData(const Byte *tagData)
-    {
-        memcpy(this->tagData, tagData, TAG_SIZE);
-    }
-
-    void createCipherContext()
-    {
-        this->freeCipherContext();
-
-        this->cipherContext = EVP_CIPHER_CTX_new();
-    }
-
-    void initEncryption(Size bufferSize)
-    {
-        this->createBuffer(bufferSize);
-        this->initIV();
-        this->createCipherContext();
-    }
-
-    void initDecryption(const EncrypterData *data);
-
-    void freeCipherContext()
-    {
-        if (this->cipherContext)
+        if (keyData and localKeyData)
         {
-            EVP_CIPHER_CTX_free(cipherContext);
-            this->cipherContext = nullptr;
+            memcpy(localKeyData, keyData, SYMMETRIC_KEY_SIZE);
+            return true;
+        }
+
+        return false;
+    }
+
+    bool notNullKeyData() const { return this->getKeyData() != nullptr; }
+
+    void cleanKeyData()
+    {
+        if (this->notNullKeyData())
+        {
+            memset(this->getKeyData(), 0, SYMMETRIC_KEY_SIZE);
         }
     }
 
-    EncrypterResult *abort()
+    void freeKeyData()
     {
-        this->freeCipherContext();
-        this->freeBuffer();
-
-        return new EncrypterResult(false);
+        this->cleanKeyData();
+        delete this->getKeyData();
+        this->setKeyData(nullptr);
     }
-
-    EncrypterResult *prepareEncryptedBuffer();
 
 public:
-    SymmetricKey() : Key(),
-                     keyData(new Byte[SYMMETRIC_KEY_SIZE + 1]),
-                     ivData(new Byte[IV_SIZE + 1]),
-                     tagData(new Byte[TAG_SIZE + 1]),
-                     cipherContext(nullptr) {}
+    SymmetricKey() : Key(KeySymmetric),
+                     keyData(new Byte[SYMMETRIC_KEY_SIZE + 1]) {}
 
-    SymmetricKey(const Byte *keyData) : Key(),
-                                        ivData(new Byte[IV_SIZE + 1]),
-                                        tagData(new Byte[TAG_SIZE + 1]),
-                                        cipherContext(nullptr)
+    SymmetricKey(ConstBytes keyData) : Key(KeySymmetric),
+                                       keyData(new Byte[SYMMETRIC_KEY_SIZE + 1])
     {
-        this->keyData = new Byte[SYMMETRIC_KEY_SIZE + 1];
-
-        this->setKeyData(keyData, SYMMETRIC_KEY_SIZE);
+        this->writeKeyData(keyData);
     }
 
-    ~SymmetricKey()
+    ~SymmetricKey() { this->freeKeyData(); }
+
+    bool setKeyData(ConstBytes keyData, Size keylen, Plaintext passphrase = nullptr) override
     {
-        memset(this->keyData, 0, SYMMETRIC_KEY_SIZE);
-        memset(this->ivData, 0, IV_SIZE);
-        memset(this->tagData, 0, TAG_SIZE);
-
-        delete[] this->keyData;
-        delete[] this->ivData;
-        delete[] this->tagData;
-
-        this->keyData = nullptr;
-        this->ivData = nullptr;
-        this->tagData = nullptr;
+        return this->writeKeyData(keyData);
     }
 
-    void setKeyData(const Byte *keyData, Size keylen) override
+    bool readKeyFile(ConstPlaintext path, Plaintext passphrase = nullptr) override
     {
-        memcpy(this->keyData, keyData, keylen);
+        return false;
     }
 
-    void reset() override
-    {
-        Key::reset();
-        memset(this->ivData, 0, IV_SIZE);
-        memset(this->tagData, 0, TAG_SIZE);
-    }
+    void cleanup() { this->freeKeyData(); }
 
-    const EncrypterResult *lock(const EncrypterData *) override;
+    const void *getKeyMaterial() const override { return this->getKeyData(); }
 
-    const EncrypterResult *unlock(const EncrypterData *) override;
+    static Key *create(const Byte *keyData) { return new SymmetricKey(keyData); }
 
-    static Key *create(const Byte *keyData)
-    {
-        return new SymmetricKey(keyData);
-    }
-
-    static Key *create()
-    {
-        return new SymmetricKey();
-    }
+    static Key *create() { return new SymmetricKey(); }
 };
 
 #endif

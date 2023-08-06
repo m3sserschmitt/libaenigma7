@@ -4,143 +4,217 @@
 #include "EncryptionMachine.hh"
 #include "DecryptionMachine.hh"
 #include "SymmetricKey.hh"
+#include "AsymmetricKey.hh"
+#include "enums/CryptoOp.hh"
+#include "enums/CryptoType.hh"
+#include "contracts/ICryptoContext.hh"
 
-enum CryptoType
-{
-    SymmetricCryptography,
-    AsymmetricCryptography
-};
-
-enum CryptoOp
-{
-    Encrypt,
-    Decrypt
-};
-
-class CryptoContext
+class CryptoContext : public ICryptoContext
 {
     CryptoType cryptoType;
     CryptoOp cryptoOp;
 
     Key *key;
+    EvpContext *cipher;
     CryptoMachine *cryptoMachine;
 
     CryptoContext(const CryptoContext &);
     const CryptoContext &operator=(const CryptoContext &);
 
-    void initKey(CryptoType cryptoType, CryptoOp cryptoOp)
+    void setKey(Key *key) { this->key = key; }
+
+    Key *getKey() { return this->key; }
+
+    void setCryptoMachine(CryptoMachine *cryptoMachine) { this->cryptoMachine = cryptoMachine; }
+
+    CryptoMachine *getCryptoMachine() { return this->cryptoMachine; }
+
+    const CryptoMachine *getCryptoMachine() const { return this->cryptoMachine; }
+
+    EvpContext *getCipher() { return this->cipher; }
+
+    void setCipher(EvpContext *cipher) { this->cipher = cipher; }
+
+    bool notNullCryptoMachine() const { return this->cryptoMachine != nullptr; }
+
+    bool notNullKey() const { return this->key != nullptr; }
+
+    bool notNullCipher() const { return this->cipher != nullptr; }
+
+    void freeKey()
     {
-        this->cryptoType = cryptoType;
-
-        delete this->key;
-
-        this->cryptoType == SymmetricCryptography and (this->key = SymmetricKey::create());
-
-        if (this->cryptoMachine)
-        {
-            this->cryptoMachine->setKey(this->key);
-        }
+        delete this->getKey();
+        this->setKey(nullptr);
     }
 
-    void initCryptoMachine(CryptoOp cryptoOp)
+    bool allocateKey();
+
+    bool initKey()
     {
-        this->cryptoOp = cryptoOp;
-
-        delete this->cryptoMachine;
-
-        this->cryptoOp == Decrypt and (this->cryptoMachine = new DecryptionMachine());
-        this->cryptoOp == Encrypt and (this->cryptoMachine = new EncryptionMachine());
-
-        this->cryptoMachine->setKey(this->key);
+        this->freeKey();
+        return this->allocateKey();
     }
 
-public:
+    void freeCipher()
+    {
+        delete this->getCipher();
+        this->setCipher(nullptr);
+    }
+
+    bool allocateCipher();
+
+    bool initCipher()
+    {
+        this->freeCipher();
+        return this->allocateCipher();
+    }
+
+    void freeCryptoMachine()
+    {
+        delete this->getCryptoMachine();
+        this->setCryptoMachine(nullptr);
+    }
+
+    bool allocateCryptoMachine();
+
+    bool initCryptoMachine()
+    {
+        this->freeCryptoMachine();
+        return this->allocateCryptoMachine();
+    }
+
+    void init()
+    {
+        this->setCryptoMachine(nullptr);
+        this->setKey(nullptr);
+        this->setCipher(nullptr);
+    }
+
     CryptoContext(CryptoType cryptoType, CryptoOp cryptoOp)
     {
-        this->init(cryptoType, cryptoOp);
+        this->init();
+        this->setCryptoType(cryptoType);
+        this->setCryptoOp(cryptoOp);
+        this->setup();
     }
 
-    ~CryptoContext()
+    CryptoContext() { this->init(); }
+
+public:
+    ~CryptoContext() { this->cleanup(); }
+
+    CryptoOp getCryptoOp() const { return this->cryptoOp; }
+
+    CryptoType getCryptoType() const { return this->cryptoType; }
+
+    void setCryptoType(CryptoType cryptoType) { this->cryptoType = cryptoType; }
+
+    void setCryptoOp(CryptoOp cryptoOp) { this->cryptoOp = cryptoOp; }
+
+    bool setup()
     {
-        delete this->key;
-        delete this->cryptoMachine;
+        return this->initKey() and
+               this->initCipher() and
+               this->initCryptoMachine();
     }
 
-    void init(CryptoType cryptoType, CryptoOp cryptoOp)
+    bool setKey256(ConstBytes key)
     {
-        this->initKey(cryptoType, cryptoOp);
-        this->initCryptoMachine(cryptoOp);
+        return this->notNullKey() and this->getKey()->setKeyData(key, SYMMETRIC_KEY_SIZE);
     }
 
-    CryptoOp getCryptoOp() const
+    bool setKeyData(ConstPlaintext key, char *passphrase = nullptr)
     {
-        return this->cryptoOp;
+        return this->notNullKey() and this->getKey()->setKeyData((ConstBytes)key, strlen(key), passphrase);
     }
 
-    CryptoType getCryptoType() const
+    bool readKeyFile(ConstPlaintext path, Plaintext passphrase = nullptr)
     {
-        return this->cryptoType;
+        return this->notNullKey() and this->getKey()->readKeyFile(path, passphrase);
     }
 
-    void setKey(const Byte *key, Size keylen)
+    bool isSetForEncryption() const
     {
-        if (this->key)
-        {
-            this->key->setKeyData(key, keylen);
-        }
+        return this->notNullCryptoMachine() and this->getCryptoOp() == Encrypt;
     }
 
-    void setPlaintext(const Byte *data, Size datalen)
+    bool isSetForSigning() const
     {
-        if (this->cryptoMachine and this->cryptoOp == Encrypt)
-        {
-            this->cryptoMachine->setInput(data, datalen);
-        }
+        return this->notNullCryptoMachine() and this->getCryptoOp() == Sign;
+    }
+
+    bool setPlaintext(ConstBytes data, Size datalen)
+    {
+        return (this->isSetForEncryption() or this->isSetForSigning()) and this->getCryptoMachine()->setInput(data, datalen);
+    }
+
+    bool isSetForDecryption() const
+    {
+        return this->notNullCryptoMachine() and this->getCryptoOp() == Decrypt;
+    }
+
+    bool isSetForVerifying() const
+    {
+        return this->notNullCryptoMachine() and this->getCryptoOp() == SignVerify;
     }
 
     const EncrypterData *getPlaintext() const
     {
-        if(this->cryptoMachine and this->cryptoOp == Decrypt)
-        {
-            return this->cryptoMachine->getOutput();
-        }
-
-        return nullptr;
+        return this->isSetForDecryption() or this->isSetForVerifying() ? this->getCryptoMachine()->getOutput() : nullptr;
     }
 
-    void setCiphertext(const Byte *data, Size datalen)
+    bool setCiphertext(ConstBytes data, Size datalen)
     {
-        if(this->cryptoMachine and this->cryptoOp == Decrypt)
-        {
-            this->cryptoMachine->setInput(data, datalen);
-        }
+        return (this->isSetForDecryption() or this->isSetForVerifying()) and this->getCryptoMachine()->setInput(data, datalen);
     }
 
     const EncrypterData *getCiphertext() const
     {
-        if (this->cryptoMachine and this->cryptoOp == Encrypt)
-        {
-            return this->cryptoMachine->getOutput();
-        }
-
-        return nullptr;
+        return this->isSetForEncryption() or this->isSetForSigning() ? this->getCryptoMachine()->getOutput() : nullptr;
     }
 
-    void run()
+    bool run() { return this->notNullCryptoMachine() and this->getCryptoMachine()->run(); }
+
+    void cleanup()
     {
-        if (this->cryptoMachine)
-        {
-            this->cryptoMachine->run();
-        }
+        this->freeCryptoMachine();
+        this->freeKey();
     }
 
-    /*void reset()
+    static CryptoContext *createAesEncryptionContext()
     {
-        if (this->key)
-        {
-            this->key->reset();
-        }
-    }*/
+        return new CryptoContext(SymmetricCryptography, Encrypt);
+    }
+
+    static CryptoContext *CreateAesDecryptionContext()
+    {
+        return new CryptoContext(SymmetricCryptography, Decrypt);
+    }
+
+    static CryptoContext *createRsaEncryptionContext()
+    {
+        return new CryptoContext(AsymmetricCryptography, Encrypt);
+    }
+
+    static CryptoContext *createRsaDecryptionContext()
+    {
+        return new CryptoContext(AsymmetricCryptography, Decrypt);
+    }
+
+    static CryptoContext *createRsaSignatureContext()
+    {
+        return new CryptoContext(AsymmetricCryptography, Sign);
+    }
+
+    static CryptoContext *createRsaSignatureVerificationContext()
+    {
+        return new CryptoContext(AsymmetricCryptography, SignVerify);
+    }
+
+    static CryptoContext *CreateCryptoContext()
+    {
+        return new CryptoContext();
+    }
 };
 
 #endif
