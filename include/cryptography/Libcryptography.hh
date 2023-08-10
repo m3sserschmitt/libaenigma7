@@ -24,9 +24,15 @@ extern "C" void FreeContext(ICryptoContext *context);
 
 extern "C" const unsigned char *EncryptData(ICryptoContext *ctx, const unsigned char *plaintext, unsigned int plaintextLen);
 
+extern "C" const EncrypterData *EncryptDataEx(ICryptoContext *ctx, const unsigned char *plaintext, unsigned int plaintextLen);
+
 extern "C" const unsigned char *DecryptData(ICryptoContext *ctx, const unsigned char *ciphertext, unsigned int cipherLen);
 
+extern "C" const EncrypterData *DecryptDataEx(ICryptoContext *ctx, const unsigned char *ciphertext, unsigned int cipherLen);
+
 extern "C" const unsigned char *SignData(ICryptoContext *ctx, const unsigned char *plaintext, unsigned int plaintextLen);
+
+extern "C" const EncrypterData *SignDataEx(ICryptoContext *ctx, const unsigned char *plaintext, unsigned int plaintextLen);
 
 extern "C" bool VerifySignature(ICryptoContext *ctx, const unsigned char *ciphertext, unsigned int cipherLen);
 
