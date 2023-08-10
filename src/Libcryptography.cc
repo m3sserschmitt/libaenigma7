@@ -108,7 +108,7 @@ extern "C"
         delete context;
     }
 
-    const EncrypterData *encrypt(ICryptoContext *ctx, const unsigned char *plaintext, unsigned int plaintextLen)
+    const EncrypterData *EncryptDataEx(ICryptoContext *ctx, const unsigned char *plaintext, unsigned int plaintextLen)
     {
         if (not ctx or not ctx->setPlaintext(plaintext, plaintextLen) or not ctx->run())
         {
@@ -120,7 +120,7 @@ extern "C"
 
     const unsigned char *EncryptData(ICryptoContext *ctx, const unsigned char *plaintext, unsigned int plaintextLen)
     {
-        const EncrypterData *ciphertext = encrypt(ctx, plaintext, plaintextLen);
+        const EncrypterData *ciphertext = EncryptDataEx(ctx, plaintext, plaintextLen);
 
         if (not ciphertext or ciphertext->isError())
         {
@@ -130,7 +130,7 @@ extern "C"
         return ciphertext->getData();
     }
 
-    const EncrypterData *decrypt(ICryptoContext *ctx, const unsigned char *ciphertext, unsigned int cipherLen)
+    const EncrypterData *DecryptDataEx(ICryptoContext *ctx, const unsigned char *ciphertext, unsigned int cipherLen)
     {
         if (not ctx or not ctx->setCiphertext(ciphertext, cipherLen) or not ctx->run())
         {
@@ -142,7 +142,7 @@ extern "C"
 
     const unsigned char *DecryptData(ICryptoContext *ctx, const unsigned char *ciphertext, unsigned int cipherLen)
     {
-        const EncrypterData *plaintext = decrypt(ctx, ciphertext, cipherLen);
+        const EncrypterData *plaintext = DecryptDataEx(ctx, ciphertext, cipherLen);
 
         if (not plaintext or plaintext->isError())
         {
@@ -167,9 +167,14 @@ extern "C"
         return EncryptData(ctx, plaintext, plaintextLen);
     }
 
+    const EncrypterData *SignDataEx(ICryptoContext *ctx, const unsigned char *plaintext, unsigned int plaintextLen)
+    {
+        return EncryptDataEx(ctx, plaintext, plaintextLen);
+    }
+
     bool VerifySignature(ICryptoContext *ctx, const unsigned char *ciphertext, unsigned int cipherLen)
     {
-        const EncrypterData *plaintext = decrypt(ctx, ciphertext, cipherLen);
+        const EncrypterData *plaintext = DecryptDataEx(ctx, ciphertext, cipherLen);
 
         return plaintext != nullptr and not plaintext->isError();
     }
