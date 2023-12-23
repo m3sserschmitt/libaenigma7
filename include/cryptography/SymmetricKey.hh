@@ -8,73 +8,68 @@ class SymmetricKey : public Key
     Bytes keyData;
 
     SymmetricKey(const SymmetricKey &);
+
     const SymmetricKey &operator=(const SymmetricKey &);
 
-    void setKeyData(Bytes keyData) { this->keyData = keyData; }
+    SymmetricKey() : Key(KeySymmetric),
+                     keyData(new Byte[SYMMETRIC_KEY_SIZE + 1]) {}
 
-    Bytes getKeyData() { return this->keyData; }
-
-    const Bytes getKeyData() const { return this->keyData; }
-
-    bool writeKeyData(ConstBytes keyData)
+    SymmetricKey(const unsigned char *keyData) : Key(KeySymmetric),
+                                                 keyData(new Byte[SYMMETRIC_KEY_SIZE + 1])
     {
-        Bytes localKeyData = this->getKeyData();
+        this->writeKeyData(keyData);
+    }
 
-        if (keyData and localKeyData)
+    bool writeKeyData(const unsigned char *keyData)
+    {
+        if (keyData and this->keyData)
         {
-            memcpy(localKeyData, keyData, SYMMETRIC_KEY_SIZE);
+            memcpy(this->keyData, keyData, SYMMETRIC_KEY_SIZE);
             return true;
         }
 
         return false;
     }
 
-    bool notNullKeyData() const { return this->getKeyData() != nullptr; }
-
     void cleanKeyData()
     {
         if (this->notNullKeyData())
         {
-            memset(this->getKeyData(), 0, SYMMETRIC_KEY_SIZE);
+            memset(this->keyData, 0, SYMMETRIC_KEY_SIZE);
         }
     }
 
-    void freeKeyData()
-    {
-        this->cleanKeyData();
-        delete this->getKeyData();
-        this->setKeyData(nullptr);
-    }
-
 public:
-    SymmetricKey() : Key(KeySymmetric),
-                     keyData(new Byte[SYMMETRIC_KEY_SIZE + 1]) {}
+    ~SymmetricKey() { this->freeKey(); }
 
-    SymmetricKey(ConstBytes keyData) : Key(KeySymmetric),
-                                       keyData(new Byte[SYMMETRIC_KEY_SIZE + 1])
-    {
-        this->writeKeyData(keyData);
-    }
-
-    ~SymmetricKey() { this->freeKeyData(); }
-
-    bool setKeyData(ConstBytes keyData, Size keylen, Plaintext passphrase = nullptr) override
+    bool setKeyData(const unsigned char *keyData, unsigned int keylen, char *passphrase = nullptr) override
     {
         return this->writeKeyData(keyData);
     }
 
-    bool readKeyFile(ConstPlaintext path, Plaintext passphrase = nullptr) override
+    bool readKeyFile(const char *path, char *passphrase = nullptr) override
     {
         return false;
     }
 
-    void cleanup() { this->freeKeyData(); }
+    const void *getKeyData() const override { return this->keyData; }
 
-    const void *getKeyMaterial() const override { return this->getKeyData(); }
+    unsigned int getSize() const override { return SYMMETRIC_KEY_SIZE; }
 
-    static Key *create(const Byte *keyData) { return new SymmetricKey(keyData); }
+    void freeKey() override
+    {
+        this->cleanKeyData();
+        delete this->keyData;
+        this->keyData = nullptr;
+    }
 
-    static Key *create() { return new SymmetricKey(); }
+    class Factory
+    {
+    public:
+        static Key *create(const unsigned char *keyData) { return new SymmetricKey(keyData); }
+
+        static Key *create() { return new SymmetricKey(); }
+    };
 };
 
 #endif

@@ -29,9 +29,9 @@ class EvpContext
 protected:
     const Key *getKey() const { return this->key; }
 
-    const EVP_PKEY *getPkey() const { return (EVP_PKEY *)this->getKey()->getKeyMaterial(); }
+    const EVP_PKEY *getPkey() const { return (EVP_PKEY *)this->getKey()->getKeyData(); }
 
-    EVP_PKEY *getPkey() { return (EVP_PKEY *)this->getKey()->getKeyMaterial(); }
+    EVP_PKEY *getPkey() { return (EVP_PKEY *)this->getKey()->getKeyData(); }
 
     int getPkeySize() const
     {

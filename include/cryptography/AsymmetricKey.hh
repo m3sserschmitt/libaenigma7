@@ -11,58 +11,139 @@ class AsymmetricKey : public Key
     EVP_PKEY *key;
 
     AsymmetricKey(const AsymmetricKey &);
+
     const AsymmetricKey &operator=(const AsymmetricKey &);
 
-    void init() { this->setPkey(nullptr); }
-
-    const EVP_PKEY *getPkey() const { return this->key; }
-
-    EVP_PKEY *getPkey() { return this->key; }
-
-    void setPkey(EVP_PKEY *key) { this->key = key; }
-
-    void freeKey()
-    {
-        EVP_PKEY_free(this->getPkey());
-        this->setPkey(nullptr);
-    }
-
-    bool notNullPkey() const { return this->key != nullptr; }
-
-    static bool validate(KeyType keyType) { return keyType == PublicKey or keyType == PrivateKey or keyType == UndefinedKey; }
-
-public:
     AsymmetricKey(KeyType keyType) : Key(keyType)
     {
-        if (not AsymmetricKey::validate(keyType))
+        this->setKeyType(keyType);
+        this->key = nullptr;
+    }
+
+public:
+    ~AsymmetricKey() { this->freeKey(); }
+
+    bool setKeyData(const unsigned char *keyData, unsigned int len, char *passphrase = nullptr) override;
+
+    bool readKeyFile(const char *path, char *passphrase = nullptr) override;
+
+    unsigned int getSize() const override { return EVP_PKEY_size(this->key); }
+
+    const void *getKeyData() const override { return this->key; }
+
+    void freeKey() override
+    {
+        EVP_PKEY_free(this->key);
+        this->key = nullptr;
+    }
+
+    class Factory
+    {
+    public:
+        /**
+         * @brief Create an uninitialized Public Key object.
+         *
+         * @return AsymmetricKey* pointer to newly created object.
+         */
+        static AsymmetricKey *createPublicKey()
         {
-            throw InvalidKey("Invalid Key Type used for object initialization");
+            return new AsymmetricKey(PublicKey);
         }
 
-        this->init();
-    }
-
-    void setKeyType(KeyType keyType) override
-    {
-        if (not AsymmetricKey::validate(keyType))
+        /**
+         * @brief Create an uninitialized Private Key object.
+         *
+         * @return AsymmetricKey* pointer to newly created object
+         */
+        static AsymmetricKey *createPrivateKey()
         {
-            throw InvalidKey("Invalid Key Type");
+            return new AsymmetricKey(PrivateKey);
         }
 
-        this->freeKey();
-        Key::setKeyType(keyType);
-    }
+        /**
+         * @brief Create a Public Key object using a public key in PEM format.
+         *
+         * @param keyData public key in PEM format
+         * @param keylen size of keyData string
+         * @param passphrase [Optional] passphrase to unlock the key
+         * @return AsymmetricKey* pointer to newly created object
+         */
+        static AsymmetricKey *createPublicKeyFromPem(const char *keyData, unsigned int keylen, char *passphrase = nullptr)
+        {
+            AsymmetricKey *key = createPublicKey();
 
-    bool setKeyData(ConstBytes keyData, Size len, Plaintext passphrase = nullptr) override;
+            if (!key->setKeyData((const unsigned char *)keyData, keylen, passphrase))
+            {
+                delete key;
+                return nullptr;
+            }
 
-    bool readKeyFile(ConstPlaintext path, Plaintext passphrase = nullptr) override;
+            return key;
+        }
 
-    const void *getKeyMaterial() const override { return this->getPkey(); }
+        /**
+         * @brief Create a Private Key object using a private key in PEM format.
+         *
+         * @param keyData private key in PEM format
+         * @param keylen size of keyData string
+         * @param passphrase [Optional] passphrase to unlock the key
+         * @return AsymmetricKey* pointer to newly created object
+         */
+        static AsymmetricKey *createPrivateKeyFromPem(const char *keyData, unsigned int keylen, char *passphrase = nullptr)
+        {
+            AsymmetricKey *key = createPrivateKey();
 
-    static Key *create(KeyType keyType)
-    {
-        return new AsymmetricKey(keyType);
-    }
+            if (!key->setKeyData((const unsigned char *)keyData, keylen, passphrase))
+            {
+                delete key;
+                return nullptr;
+            }
+
+            return key;
+        }
+
+        /**
+         * @brief Create a Public Key object using a public key file in PEM format.
+         *
+         * @param keyData public key in PEM format
+         * @param keylen size of keyData string
+         * @param passphrase [Optional] passphrase to unlock the key
+         * @return AsymmetricKey* pointer to newly created object
+         */
+        static AsymmetricKey *createPublicKeyFromFile(const char *path, char *passphrase = nullptr)
+        {
+            AsymmetricKey *key = createPublicKey();
+
+            if (!key->readKeyFile(path, passphrase))
+            {
+                delete key;
+                return nullptr;
+            }
+
+            return key;
+        }
+
+        /**
+         * @brief Create a Private Key object using a private key file in PEM format.
+         *
+         * @param keyData private key in PEM format
+         * @param keylen size of keyData string
+         * @param passphrase [Optional] passphrase to unlock the key
+         * @return AsymmetricKey* pointer to newly created object
+         */
+        static AsymmetricKey *createPrivateKeyFromFile(const char *path, char *passphrase = nullptr)
+        {
+            AsymmetricKey *key = createPrivateKey();
+
+            if (!key->readKeyFile(path, passphrase))
+            {
+                delete key;
+                return nullptr;
+            }
+
+            return key;
+        }
+    };
 };
 
 #endif

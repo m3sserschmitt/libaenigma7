@@ -3,11 +3,11 @@
 #include <openssl/bio.h>
 #include <openssl/pem.h>
 
-bool AsymmetricKey::setKeyData(ConstBytes keyData, Size len, Plaintext passphrase)
+bool AsymmetricKey::setKeyData(const unsigned char *keyData, unsigned int len, char *passphrase)
 {
     this->freeKey();
 
-    BIO *bio = BIO_new_mem_buf((ConstBase64)keyData, len);
+    BIO *bio = BIO_new_mem_buf((const char*)keyData, len);
 
     if (not bio)
     {
@@ -17,10 +17,10 @@ bool AsymmetricKey::setKeyData(ConstBytes keyData, Size len, Plaintext passphras
     switch (this->getKeyType())
     {
     case PublicKey:
-        this->setPkey(PEM_read_bio_PUBKEY(bio, nullptr, this->getKeyPassphraseCallback(), passphrase));
+        this->key = PEM_read_bio_PUBKEY(bio, nullptr, nullptr, passphrase);
         break;
     case PrivateKey:
-        this->setPkey(PEM_read_bio_PrivateKey(bio, nullptr, this->getKeyPassphraseCallback(), passphrase));
+        this->key = PEM_read_bio_PrivateKey(bio, nullptr, nullptr, passphrase);
         break;
     default:
         BIO_free(bio);
@@ -29,10 +29,10 @@ bool AsymmetricKey::setKeyData(ConstBytes keyData, Size len, Plaintext passphras
 
     BIO_free(bio);
 
-    return this->notNullPkey();
+    return this->notNullKeyData();
 }
 
-bool AsymmetricKey::readKeyFile(ConstPlaintext path, Plaintext passphrase)
+bool AsymmetricKey::readKeyFile(const char *path, char *passphrase)
 {
     this->freeKey();
 
@@ -46,14 +46,17 @@ bool AsymmetricKey::readKeyFile(ConstPlaintext path, Plaintext passphrase)
     switch (this->getKeyType())
     {
     case PublicKey:
-        this->setPkey(PEM_read_PUBKEY(keyFile, nullptr, this->getKeyPassphraseCallback(), passphrase));
+        this->key = PEM_read_PUBKEY(keyFile, nullptr, nullptr, passphrase);
         break;
     case PrivateKey:
-        this->setPkey(PEM_read_PrivateKey(keyFile, nullptr, this->getKeyPassphraseCallback(), passphrase));
+        this->key = PEM_read_PrivateKey(keyFile, nullptr, nullptr, passphrase);
         break;
     default:
+        fclose(keyFile);
         return false;
     }
 
-    return this->notNullPkey();
+    fclose(keyFile);
+
+    return this->notNullKeyData();
 }

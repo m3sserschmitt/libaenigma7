@@ -8,7 +8,7 @@ class SymmetricEvpCipherContext : public EvpCipherContext
     SymmetricEvpCipherContext(const SymmetricEvpCipherContext &);
     const SymmetricEvpCipherContext &operator=(const SymmetricEvpCipherContext &);
 
-    Bytes getKeyBytes() { return (Bytes)this->getKey()->getKeyMaterial(); }
+    Bytes getKeyBytes() { return (Bytes)this->getKey()->getKeyData(); }
 
     bool encryptionAllocateMemory(const EncrypterData *in)
     {

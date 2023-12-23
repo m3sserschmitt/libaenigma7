@@ -8,18 +8,18 @@ bool CryptoContext::allocateKey()
     switch (this->getCryptoType())
     {
     case SymmetricCryptography:
-        this->setKey(SymmetricKey::create());
+        this->setKey(SymmetricKey::Factory::create());
         break;
     case AsymmetricCryptography:
         switch (this->getCryptoOp())
         {
         case Encrypt:
         case SignVerify:
-            this->setKey(AsymmetricKey::create(PublicKey));
+            this->setKey(AsymmetricKey::Factory::createPublicKey());
             break;
         case Decrypt:
         case Sign:
-            this->setKey(AsymmetricKey::create(PrivateKey));
+            this->setKey(AsymmetricKey::Factory::createPrivateKey());
             break;
         default:
             return false;

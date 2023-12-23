@@ -1,42 +1,26 @@
 #ifndef KEY_HH
 #define KEY_HH
 
-#include "Types.hh"
-
-enum KeyType
-{
-    KeySymmetric,
-    PublicKey,
-    PrivateKey,
-    UndefinedKey
-};
-
-typedef int (*KeyPassphraseCallback)(char *buf, int size, int rwflag, void *u);
+#include "enums/KeyType.hh"
 
 class Key
 {
     KeyType keyType;
-    KeyPassphraseCallback passphraseCallback;
-
-    void init(KeyType keyType)
-    {
-        this->setKeyType(keyType);
-        this->setKeyPassphraseCallback(nullptr);
-    }
 
 protected:
 
-    virtual void setKeyType(KeyType keyType)
+    void setKeyType(KeyType keyType)
     {
         this->keyType = keyType;
     }
 
+    Key(KeyType keyType) { this->setKeyType(keyType); }
+
+    bool notNullKeyData() const { return this->getKeyData() != nullptr; }
+
 public:
-    Key() { this->init(UndefinedKey); }
 
-    Key(KeyType keyType) { this->init(keyType); }
-
-    virtual ~Key() {}
+    virtual ~Key() { }
 
     KeyType getKeyType() const
     {
@@ -68,7 +52,7 @@ public:
      * @return true If initialization successful
      * @return false If initialization failed
      */
-    virtual bool setKeyData(ConstBytes keyData, Size len, Plaintext passphrase = nullptr) = 0;
+    virtual bool setKeyData(const unsigned char *keyData, unsigned int len, char *passphrase = nullptr) = 0;
 
     /**
      * @brief Read encryption / decryption key material from file (especially useful for public/private key pairs). Override
@@ -79,13 +63,29 @@ public:
      * @return true If initialization successful
      * @return false If initialization failed
      */
-    virtual bool readKeyFile(ConstPlaintext path, Plaintext passphrase = nullptr) = 0;
+    virtual bool readKeyFile(const char *path, char *passphrase = nullptr) = 0;
 
-    void setKeyPassphraseCallback(KeyPassphraseCallback passphraseCallback) { this->passphraseCallback = passphraseCallback; }
+    /**
+     * @brief release all memory related to the key
+     * 
+     */
+    virtual void freeKey() = 0;
 
-    const KeyPassphraseCallback getKeyPassphraseCallback() const { return this->passphraseCallback; }
+    /**
+     * @brief Get the Size of key. For symmetric key, it shall return SYMMETRIC_KEY_SIZE.
+     * For Asymmetric keys the returned size depends on the key material used for initialization.
+     * 
+     * @return Size Size of the key in bytes
+     */
+    virtual unsigned int getSize() const = 0;
 
-    virtual const void *getKeyMaterial() const = 0;
+    /**
+     * @brief Returns a pointer to the underlying key structure: for symmetric keys it will be an array of
+     * unsigned chars; for asymmetric keys an EVP_PKEY structure.
+     * 
+     * @return const void* pointer to underlying key structure.
+     */
+    virtual const void *getKeyData() const = 0;
 };
 
 #endif
