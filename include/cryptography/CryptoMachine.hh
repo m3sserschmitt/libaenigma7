@@ -8,7 +8,7 @@ class CryptoMachine
     EvpContext *cipher;
 
     const EncrypterData *in;
-    const EncrypterData *out;
+    const EncrypterResult *out;
 
     CryptoMachine(const CryptoMachine &);
     const CryptoMachine &operator=(const CryptoMachine &);
@@ -35,25 +35,18 @@ class CryptoMachine
         this->cipher = cipher;
     }
 
-    void init(EvpContext *cipher)
-    {
-        this->setIn(nullptr);
-        this->setOut(nullptr);
-        this->setCipher(cipher);
-    }
-
 protected:
     const EncrypterData *getIn() const
     {
         return this->in;
     }
 
-    void setOut(const EncrypterData *out)
+    void setOut(const EncrypterResult *out)
     {
         this->out = out;
     }
 
-    const EncrypterData *getOut() const
+    const EncrypterResult *getOut() const
     {
         return this->out;
     }
@@ -65,7 +58,9 @@ protected:
 public:
     CryptoMachine(EvpContext *cipher)
     {
-        this->init(cipher);
+        this->setIn(nullptr);
+        this->setOut(nullptr);
+        this->setCipher(cipher);
     }
 
     virtual ~CryptoMachine()
@@ -83,7 +78,7 @@ public:
         return this->notNullIn();
     }
 
-    const EncrypterData *getOutput() const
+    const EncrypterResult *getOutput() const
     {
         return this->out;
     }

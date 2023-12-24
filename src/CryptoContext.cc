@@ -8,18 +8,18 @@ bool CryptoContext::allocateKey()
     switch (this->getCryptoType())
     {
     case SymmetricCryptography:
-        this->setKey(SymmetricKey::Factory::create());
+        this->key = SymmetricKey::Factory::create();
         break;
     case AsymmetricCryptography:
         switch (this->getCryptoOp())
         {
         case Encrypt:
         case SignVerify:
-            this->setKey(AsymmetricKey::Factory::createPublicKey());
+            this->key = AsymmetricKey::Factory::createPublicKey();
             break;
         case Decrypt:
         case Sign:
-            this->setKey(AsymmetricKey::Factory::createPrivateKey());
+            this->key = AsymmetricKey::Factory::createPrivateKey();
             break;
         default:
             return false;
@@ -42,18 +42,18 @@ bool CryptoContext::allocateCipher()
     switch (this->getCryptoType())
     {
     case SymmetricCryptography:
-        this->setCipher(SymmetricEvpCipherContext::Factory::create(this->getKey()));
+        this->cipher = SymmetricEvpCipherContext::Factory::create(this->key);
         break;
     case AsymmetricCryptography:
         switch (this->getCryptoOp())
         {
         case Encrypt:
         case Decrypt:
-            this->setCipher(AsymmetricEvpCipherContext::Factory::create(this->getKey()));
+            this->cipher = AsymmetricEvpCipherContext::Factory::create(this->key);
             break;
         case Sign:
         case SignVerify:
-            this->setCipher(EvpMdContext::Factory::create(this->getKey()));
+            this->cipher = EvpMdContext::Factory::create(this->key);
             break;
         default:
             return false;
@@ -78,11 +78,11 @@ bool CryptoContext::allocateCryptoMachine()
     {
     case Decrypt:
     case SignVerify:
-        this->setCryptoMachine(DecryptionMachine::create(this->getCipher()));
+        this->cryptoMachine = DecryptionMachine::create(this->cipher);
         break;
     case Encrypt:
     case Sign:
-        this->setCryptoMachine(EncryptionMachine::create(this->getCipher()));
+        this->cryptoMachine = EncryptionMachine::create(this->cipher);
         break;
     default:
         return false;

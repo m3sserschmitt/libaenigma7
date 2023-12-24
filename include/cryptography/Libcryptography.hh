@@ -1,40 +1,44 @@
-#include "contracts/ICryptoContext.hh"
+#ifndef LIBCRYPTOGRAPHY_HH
+#define LIBCRYPTOGRAPHY_HH
 
-extern "C" ICryptoContext *CreateSymmetricEncryptionContext(const unsigned char *key);
+#include "CryptoContext.hh"
+#include "CryptoContextBuilder.hh"
 
-extern "C" ICryptoContext *CreateSymmetricDecryptionContext(const unsigned char *key);
+extern "C" CryptoContext *CreateSymmetricEncryptionContext(const unsigned char *key);
 
-extern "C" ICryptoContext *CreateAsymmetricEncryptionContext(const char *key);
+extern "C" CryptoContext *CreateSymmetricDecryptionContext(const unsigned char *key);
 
-extern "C" ICryptoContext *CreateAsymmetricDecryptionContext(const char *key, char *passphrase = nullptr);
+extern "C" CryptoContext *CreateAsymmetricEncryptionContext(const char *key);
 
-extern "C" ICryptoContext *CreateAsymmetricEncryptionContextFromFile(const char *path);
+extern "C" CryptoContext *CreateAsymmetricDecryptionContext(const char *key, char *passphrase = nullptr);
 
-extern "C" ICryptoContext *CreateAsymmetricDecryptionContextFromFile(const char *key, char *passphrase = nullptr);
+extern "C" CryptoContext *CreateAsymmetricEncryptionContextFromFile(const char *path);
 
-extern "C" ICryptoContext *CreateSignatureContext(const char *key, char *passphrase = nullptr);
+extern "C" CryptoContext *CreateAsymmetricDecryptionContextFromFile(const char *key, char *passphrase = nullptr);
 
-extern "C" ICryptoContext *CreateVerificationContext(const char *key);
+extern "C" CryptoContext *CreateSignatureContext(const char *key, char *passphrase = nullptr);
 
-extern "C" ICryptoContext *CreateSignatureContextFromFile(const char *path, char *passphrase = nullptr);
+extern "C" CryptoContext *CreateVerificationContext(const char *key);
 
-extern "C" ICryptoContext *CreateVerificationContextFromFile(const char *path);
+extern "C" CryptoContext *CreateSignatureContextFromFile(const char *path, char *passphrase = nullptr);
 
-extern "C" void FreeContext(ICryptoContext *context);
+extern "C" CryptoContext *CreateVerificationContextFromFile(const char *path);
 
-extern "C" const unsigned char *EncryptData(ICryptoContext *ctx, const unsigned char *plaintext, unsigned int plaintextLen);
+extern "C" void FreeContext(CryptoContext *context);
 
-extern "C" const EncrypterData *EncryptDataEx(ICryptoContext *ctx, const unsigned char *plaintext, unsigned int plaintextLen);
+extern "C" const unsigned char *EncryptData(CryptoContext *ctx, const unsigned char *plaintext, unsigned int plaintextLen);
 
-extern "C" const unsigned char *DecryptData(ICryptoContext *ctx, const unsigned char *ciphertext, unsigned int cipherLen);
+extern "C" const EncrypterResult *EncryptDataEx(CryptoContext *ctx, const unsigned char *plaintext, unsigned int plaintextLen);
 
-extern "C" const EncrypterData *DecryptDataEx(ICryptoContext *ctx, const unsigned char *ciphertext, unsigned int cipherLen);
+extern "C" const unsigned char *DecryptData(CryptoContext *ctx, const unsigned char *ciphertext, unsigned int cipherLen);
 
-extern "C" const unsigned char *SignData(ICryptoContext *ctx, const unsigned char *plaintext, unsigned int plaintextLen);
+extern "C" const EncrypterResult *DecryptDataEx(CryptoContext *ctx, const unsigned char *ciphertext, unsigned int cipherLen);
 
-extern "C" const EncrypterData *SignDataEx(ICryptoContext *ctx, const unsigned char *plaintext, unsigned int plaintextLen);
+extern "C" const unsigned char *SignData(CryptoContext *ctx, const unsigned char *plaintext, unsigned int plaintextLen);
 
-extern "C" bool VerifySignature(ICryptoContext *ctx, const unsigned char *ciphertext, unsigned int cipherLen);
+extern "C" const EncrypterResult *SignDataEx(CryptoContext *ctx, const unsigned char *plaintext, unsigned int plaintextLen);
+
+extern "C" bool VerifySignature(CryptoContext *ctx, const unsigned char *ciphertext, unsigned int cipherLen);
 
 extern "C" unsigned int GetAesGcmCiphertextSize(unsigned int plaintext);
 
@@ -43,3 +47,5 @@ extern "C" unsigned int GetAesGcmPlaintextSize(unsigned int ciphertext);
 extern "C" unsigned int GetEnvelopeSize(unsigned int pkeySizeBits, unsigned int plaintextLen);
 
 extern "C" unsigned int GetOpenEnvelopeSize(unsigned int pkeySizeBits, unsigned int envelopeSize);
+
+#endif

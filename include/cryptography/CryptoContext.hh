@@ -7,9 +7,9 @@
 #include "AsymmetricKey.hh"
 #include "enums/CryptoOp.hh"
 #include "enums/CryptoType.hh"
-#include "contracts/ICryptoContext.hh"
+#include "exceptions/InvalidOperation.hh"
 
-class CryptoContext : public ICryptoContext
+class CryptoContext
 {
     CryptoType cryptoType;
     CryptoOp cryptoOp;
@@ -21,20 +21,6 @@ class CryptoContext : public ICryptoContext
     CryptoContext(const CryptoContext &);
     const CryptoContext &operator=(const CryptoContext &);
 
-    void setKey(Key *key) { this->key = key; }
-
-    Key *getKey() { return this->key; }
-
-    void setCryptoMachine(CryptoMachine *cryptoMachine) { this->cryptoMachine = cryptoMachine; }
-
-    CryptoMachine *getCryptoMachine() { return this->cryptoMachine; }
-
-    const CryptoMachine *getCryptoMachine() const { return this->cryptoMachine; }
-
-    EvpContext *getCipher() { return this->cipher; }
-
-    void setCipher(EvpContext *cipher) { this->cipher = cipher; }
-
     bool notNullCryptoMachine() const { return this->cryptoMachine != nullptr; }
 
     bool notNullKey() const { return this->key != nullptr; }
@@ -43,8 +29,8 @@ class CryptoContext : public ICryptoContext
 
     void freeKey()
     {
-        delete this->getKey();
-        this->setKey(nullptr);
+        delete this->key;
+        this->key = nullptr;
     }
 
     bool allocateKey();
@@ -57,8 +43,8 @@ class CryptoContext : public ICryptoContext
 
     void freeCipher()
     {
-        delete this->getCipher();
-        this->setCipher(nullptr);
+        delete this->cipher;
+        this->cipher = nullptr;
     }
 
     bool allocateCipher();
@@ -71,8 +57,8 @@ class CryptoContext : public ICryptoContext
 
     void freeCryptoMachine()
     {
-        delete this->getCryptoMachine();
-        this->setCryptoMachine(nullptr);
+        delete this->cryptoMachine;
+        this->cryptoMachine = nullptr;
     }
 
     bool allocateCryptoMachine();
@@ -83,22 +69,22 @@ class CryptoContext : public ICryptoContext
         return this->allocateCryptoMachine();
     }
 
-    void init()
-    {
-        this->setCryptoMachine(nullptr);
-        this->setKey(nullptr);
-        this->setCipher(nullptr);
-    }
-
     CryptoContext(CryptoType cryptoType, CryptoOp cryptoOp)
     {
-        this->init();
+        this->cryptoMachine = nullptr;
+        this->key = nullptr;
+        this->cipher = nullptr;
         this->setCryptoType(cryptoType);
         this->setCryptoOp(cryptoOp);
-        this->setup();
+        this->allocateMemory();
     }
 
-    CryptoContext() { this->init(); }
+    CryptoContext()
+    {
+        this->cryptoMachine = nullptr;
+        this->key = nullptr;
+        this->cipher = nullptr;
+    }
 
 public:
     ~CryptoContext() { this->cleanup(); }
@@ -111,7 +97,7 @@ public:
 
     void setCryptoOp(CryptoOp cryptoOp) { this->cryptoOp = cryptoOp; }
 
-    bool setup()
+    bool allocateMemory()
     {
         return this->initKey() and
                this->initCipher() and
@@ -120,17 +106,27 @@ public:
 
     bool setKey256(ConstBytes key)
     {
-        return this->notNullKey() and this->getKey()->setKeyData(key, SYMMETRIC_KEY_SIZE);
+        if (this->notNullKey() and !this->key->isSymmetricKey())
+        {
+            throw InvalidKey(INVALID_KEY_MATERIAL);
+        }
+
+        return this->notNullKey() and this->key->setKeyData(key, SYMMETRIC_KEY_SIZE);
     }
 
     bool setKeyData(ConstPlaintext key, char *passphrase = nullptr)
     {
-        return this->notNullKey() and this->getKey()->setKeyData((ConstBytes)key, strlen(key), passphrase);
+        return this->notNullKey() and this->key->setKeyData((ConstBytes)key, strlen(key), passphrase);
     }
 
     bool readKeyFile(ConstPlaintext path, Plaintext passphrase = nullptr)
     {
-        return this->notNullKey() and this->getKey()->readKeyFile(path, passphrase);
+        if (this->notNullKey() and this->key->isSymmetricKey())
+        {
+            throw InvalidKey(INVALID_KEY_MATERIAL);
+        }
+
+        return this->notNullKey() and this->key->readKeyFile(path, passphrase);
     }
 
     bool isSetForEncryption() const
@@ -145,7 +141,12 @@ public:
 
     bool setPlaintext(ConstBytes data, Size datalen)
     {
-        return (this->isSetForEncryption() or this->isSetForSigning()) and this->getCryptoMachine()->setInput(data, datalen);
+        if (!(this->isSetForEncryption() or this->isSetForSigning()))
+        {
+            throw InvalidOperation(COULD_NOT_SET_PLAINTEXT_IN_CONTEXT);
+        }
+
+        return this->cryptoMachine->setInput(data, datalen);
     }
 
     bool isSetForDecryption() const
@@ -158,63 +159,73 @@ public:
         return this->notNullCryptoMachine() and this->getCryptoOp() == SignVerify;
     }
 
-    const EncrypterData *getPlaintext() const
+    const EncrypterResult *getPlaintext() const
     {
-        return this->isSetForDecryption() or this->isSetForVerifying() ? this->getCryptoMachine()->getOutput() : nullptr;
+        return this->isSetForDecryption() or this->isSetForVerifying() ? this->cryptoMachine->getOutput() : nullptr;
     }
 
     bool setCiphertext(ConstBytes data, Size datalen)
     {
-        return (this->isSetForDecryption() or this->isSetForVerifying()) and this->getCryptoMachine()->setInput(data, datalen);
+        if (!(this->isSetForDecryption() or this->isSetForVerifying()))
+        {
+            throw InvalidOperation(COULD_NOT_SET_CIPHERTEXT_IN_CONTEXT);
+        }
+
+        return this->cryptoMachine->setInput(data, datalen);
     }
 
-    const EncrypterData *getCiphertext() const
+    const EncrypterResult *getCiphertext() const
     {
-        return this->isSetForEncryption() or this->isSetForSigning() ? this->getCryptoMachine()->getOutput() : nullptr;
+        return this->isSetForEncryption() or this->isSetForSigning() ? this->cryptoMachine->getOutput() : nullptr;
     }
 
-    bool run() { return this->notNullCryptoMachine() and this->getCryptoMachine()->run(); }
+    bool run() { return this->notNullCryptoMachine() and this->cryptoMachine->run(); }
 
     void cleanup()
     {
         this->freeCryptoMachine();
         this->freeKey();
+        this->freeCipher();
     }
 
-    static CryptoContext *createAesEncryptionContext()
+    class Factory
     {
-        return new CryptoContext(SymmetricCryptography, Encrypt);
-    }
+    public:
+        static CryptoContext *createAesEncryptionContext()
+        {
+            return new CryptoContext(SymmetricCryptography, Encrypt);
+        }
 
-    static CryptoContext *CreateAesDecryptionContext()
-    {
-        return new CryptoContext(SymmetricCryptography, Decrypt);
-    }
+        static CryptoContext *CreateAesDecryptionContext()
+        {
+            return new CryptoContext(SymmetricCryptography, Decrypt);
+        }
 
-    static CryptoContext *createRsaEncryptionContext()
-    {
-        return new CryptoContext(AsymmetricCryptography, Encrypt);
-    }
+        static CryptoContext *createRsaEncryptionContext()
+        {
+            return new CryptoContext(AsymmetricCryptography, Encrypt);
+        }
 
-    static CryptoContext *createRsaDecryptionContext()
-    {
-        return new CryptoContext(AsymmetricCryptography, Decrypt);
-    }
+        static CryptoContext *createRsaDecryptionContext()
+        {
+            return new CryptoContext(AsymmetricCryptography, Decrypt);
+        }
 
-    static CryptoContext *createRsaSignatureContext()
-    {
-        return new CryptoContext(AsymmetricCryptography, Sign);
-    }
+        static CryptoContext *createRsaSignatureContext()
+        {
+            return new CryptoContext(AsymmetricCryptography, Sign);
+        }
 
-    static CryptoContext *createRsaSignatureVerificationContext()
-    {
-        return new CryptoContext(AsymmetricCryptography, SignVerify);
-    }
+        static CryptoContext *createRsaSignatureVerificationContext()
+        {
+            return new CryptoContext(AsymmetricCryptography, SignVerify);
+        }
 
-    static CryptoContext *CreateCryptoContext()
-    {
-        return new CryptoContext();
-    }
+        static CryptoContext *CreateCryptoContext()
+        {
+            return new CryptoContext();
+        }
+    };
 };
 
 #endif

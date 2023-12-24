@@ -1,6 +1,8 @@
 #ifndef CRYPTO_CONTEXT_BUILDER_HH
 #define CRYPTO_CONTEXT_BUILDER_HH
 
+#include <exception>
+
 #include "contracts/ICryptoContextBuilderType.hh"
 #include "CryptoContext.hh"
 
@@ -19,7 +21,7 @@ private:
         CryptoContext *ctx;
 
     public:
-        Impl() { this->ctx = CryptoContext::CreateCryptoContext(); }
+        Impl() { this->ctx = CryptoContext::Factory::CreateCryptoContext(); }
 
         ICryptoContextBuilderKeyData *noPlaintext()
         {
@@ -33,43 +35,71 @@ private:
 
         ICryptoContextBuilder *setKey256(ConstBytes key) override
         {
-            this->ctx->setKey256(key);
+            if(!this->ctx->setKey256(key))
+            {
+                throw InvalidOperation(COULD_NOT_SET_KEY);
+            }
+
             return this;
         }
 
         ICryptoContextBuilder *setKey(ConstPlaintext key) override
         {
-            this->ctx->setKeyData(key);
+            if(!this->ctx->setKeyData(key))
+            {
+                throw InvalidOperation(COULD_NOT_SET_KEY);
+            }
+
             return this;
         }
 
         ICryptoContextBuilder *setKey(ConstPlaintext key, Plaintext passphrase) override
         {
-            this->ctx->setKeyData(key, passphrase);
+            if(!this->ctx->setKeyData(key, passphrase))
+            {
+                throw InvalidOperation(COULD_NOT_SET_KEY);
+            }
+
             return this;
         }
 
         ICryptoContextBuilder *readKeyData(ConstPlaintext path, Plaintext passphrase) override
         {
-            this->ctx->readKeyFile(path, passphrase);
+            if(!this->ctx->readKeyFile(path, passphrase))
+            {
+                throw InvalidOperation(COULD_NOT_SET_KEY);
+            }
+
             return this;
         }
 
         ICryptoContextBuilder *readKeyData(ConstPlaintext path) override
         {
-            this->ctx->readKeyFile(path);
+            if(!this->ctx->readKeyFile(path))
+            {
+                throw InvalidOperation(COULD_NOT_SET_KEY);
+            }
+
             return this;
         }
 
         ICryptoContextBuilderKeyData *setPlaintext(ConstBytes data, Size datalen) override
         {
-            this->ctx->setPlaintext(data, datalen);
+            if(!this->ctx->setPlaintext(data, datalen))
+            {
+                throw InvalidOperation(COULD_NOT_SET_PLAINTEXT);
+            }
+
             return this;
         }
 
         ICryptoContextBuilderKeyData *setCiphertext(ConstBytes data, Size datalen)
         {
-            this->ctx->setCiphertext(data, datalen);
+            if(!this->ctx->setCiphertext(data, datalen))
+            {
+                throw InvalidOperation(COULD_NOT_SET_CIPHERTEXT);
+            }
+
             return this;
         }
 
@@ -88,32 +118,52 @@ private:
         ICryptoContextBuilderPlaintext *useEncryption() override
         {
             this->ctx->setCryptoOp(Encrypt);
-            this->ctx->setup();
+
+            if(!this->ctx->allocateMemory())
+            {
+                throw InvalidOperation(COULD_NOT_INITIALIZE_CONTEXT);
+            }
+
             return this;
         }
 
         ICryptoContextBuilderCiphertext *useDecryption() override
         {
             this->ctx->setCryptoOp(Decrypt);
-            this->ctx->setup();
+
+            if(!this->ctx->allocateMemory())
+            {
+                throw InvalidOperation(COULD_NOT_INITIALIZE_CONTEXT);
+            }
+
             return this;
         }
 
         ICryptoContextBuilderPlaintext *useSignature() override
         {
             this->ctx->setCryptoOp(Sign);
-            this->ctx->setup();
+
+            if(!this->ctx->allocateMemory())
+            {
+                throw InvalidOperation(COULD_NOT_INITIALIZE_CONTEXT);
+            }
+
             return this;
         }
 
         ICryptoContextBuilderCiphertext *useSignatureVerification() override
         {
             this->ctx->setCryptoOp(SignVerify);
-            this->ctx->setup();
+
+            if(!this->ctx->allocateMemory())
+            {
+                throw InvalidOperation(COULD_NOT_INITIALIZE_CONTEXT);
+            }
+            
             return this;
         }
 
-        ICryptoContext *build() override
+        CryptoContext *build() override
         {
             return this->ctx;
         }

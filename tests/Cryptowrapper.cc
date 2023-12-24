@@ -6,7 +6,7 @@
 
 using namespace std;
 
-bool testSymmetricCryptoWrapper(ICryptoContext *encrctx, ICryptoContext *decrctx)
+bool testSymmetricCryptoWrapper(CryptoContext *encrctx, CryptoContext *decrctx)
 {
     unsigned int dataSize = 128;
     unsigned char *data = RandomDataGenerator::generate(dataSize);
@@ -28,7 +28,7 @@ bool testSymmetricCryptoWrapper(ICryptoContext *encrctx, ICryptoContext *decrctx
     return memcmp(data, plaintext, dataSize) == 0;
 }
 
-bool testAsymmetricCryptoWrapper(ICryptoContext *encrctx, ICryptoContext *decrctx)
+bool testAsymmetricCryptoWrapper(CryptoContext *encrctx, CryptoContext *decrctx)
 {
     unsigned int dataSize = 128;
     unsigned char *data = RandomDataGenerator::generate(dataSize);
@@ -51,7 +51,7 @@ bool testAsymmetricCryptoWrapper(ICryptoContext *encrctx, ICryptoContext *decrct
     return memcmp(data, plaintext, dataSize) == 0;
 }
 
-bool testSignatureWrapper(ICryptoContext *signctx, ICryptoContext *verifctx)
+bool testSignatureWrapper(CryptoContext *signctx, CryptoContext *verifctx)
 {
     unsigned int dataSize = 128;
     unsigned char *data = RandomDataGenerator::generate(dataSize);
@@ -112,8 +112,8 @@ const char *privateKey = "-----BEGIN ENCRYPTED PRIVATE KEY-----\n" \
 int main()
 {
     unsigned char *key = RandomDataGenerator::generateKey();
-    ICryptoContext *encrctx = CreateSymmetricEncryptionContext(key);
-    ICryptoContext *decrctx = CreateSymmetricDecryptionContext(key);
+    CryptoContext *encrctx = CreateSymmetricEncryptionContext(key);
+    CryptoContext *decrctx = CreateSymmetricDecryptionContext(key);
 
     bool success = testSymmetricCryptoWrapper(encrctx, decrctx);
     
