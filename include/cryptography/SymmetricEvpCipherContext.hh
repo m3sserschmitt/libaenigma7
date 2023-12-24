@@ -8,8 +8,6 @@ class SymmetricEvpCipherContext : public EvpCipherContext
     SymmetricEvpCipherContext(const SymmetricEvpCipherContext &);
     const SymmetricEvpCipherContext &operator=(const SymmetricEvpCipherContext &);
 
-    Bytes getKeyBytes() { return (Bytes)this->getKey()->getKeyData(); }
-
     bool encryptionAllocateMemory(const EncrypterData *in)
     {
         return this->allocateCipherContext() and this->allocateIV() and this->allocateOutBuffer(in->getDataSize()) and this->allocateTag();
@@ -21,8 +19,28 @@ class SymmetricEvpCipherContext : public EvpCipherContext
         return this->allocateCipherContext() and this->allocateIV() and this->allocateOutBuffer(outBufferSize) and this->allocateTag();
     }
 
+    /**
+     * @brief Create output buffer resulted from a symmetric encryption
+     * 
+     * Structure of output buffer: 
+     * 1. Initialization Vector (IV);
+     * 2. Ciphertext (C)
+     * 3. Tag (T)
+     * 
+     * Total size of the output buffer: len(IV) + len(C) + len(T)
+     * 
+     * @return EncrypterResult* structure containing the output buffer resulted from symmetric encryption
+     */
     EncrypterResult *createEncryptedData() const;
 
+    /**
+     * @brief Read the byte array created by createEncryptedData method an initializes internal structures
+     * i.e. initialization vector and tag
+     * 
+     * @param in data to be decrypted, as it was created by createEncryptedData
+     * @param cipherlen if successful it contains the size of ciphertext (C)
+     * @return ConstBytes pointer to the ciphertext
+     */
     ConstBytes readEncryptedData(const EncrypterData *in, Size &cipherlen);
 
 public:
@@ -34,7 +52,17 @@ public:
 
     EncrypterResult *decrypt(const EncrypterData *in) override;
 
-    static EvpContext *create(Key *key) { return new SymmetricEvpCipherContext(key); }
+    class Factory
+    {
+    public:
+        /**
+         * @brief Create a new SymmetricEvpCipherContext.
+         *
+         * @param key Initialized SymmetricKey object
+         * @return EvpContext* Newly created SymmetricEvpCipherContext
+         */
+        static SymmetricEvpCipherContext *create(Key *key) { return new SymmetricEvpCipherContext(key); }
+    };
 };
 
 #endif

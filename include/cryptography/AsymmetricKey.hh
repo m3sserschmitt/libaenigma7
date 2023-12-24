@@ -27,7 +27,7 @@ public:
 
     bool readKeyFile(const char *path, char *passphrase = nullptr) override;
 
-    unsigned int getSize() const override { return EVP_PKEY_size(this->key); }
+    int getSize() const override { return this->notNullKeyData() ? EVP_PKEY_size(this->key) : -1; }
 
     const void *getKeyData() const override { return this->key; }
 

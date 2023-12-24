@@ -10,59 +10,32 @@ class EvpMdContext : public EvpContext
     Bytes inSig;
     Size inSiglen;
 
-    void init() 
-    { 
-        this->setMdContext(nullptr); 
-        this->setInSig(nullptr);
-        this->setInSiglen(0);
-    }
-
-    void setMdContext(EVP_MD_CTX *mdContext) { this->mdContext = mdContext; }
-
-    const EVP_MD_CTX *getMdContext() const { return this->mdContext; }
-
-    EVP_MD_CTX *getMdContext() { return this->mdContext; }
-
-    void setInSig(Bytes inSig) { this->inSig = inSig; }
-
-    Bytes getInSig() { return this->inSig; }
-
-    const Bytes getInSig() const { return this->inSig; }
-
-    Size getInSiglen() const { return this->inSiglen; }
-
-    void setInSiglen(Size inSiglen) { this->inSiglen = inSiglen; }
-
-    bool notNullInSig() const { return this->getInSig() != nullptr; }
+    bool notNullInSig() const { return this->inSig != nullptr; }
 
     void freeInSig()
     {
-        Bytes inSig = this->getInSig();
-
-        if (inSig)
+        if (this->inSig)
         {
-            memset(inSig, 0, this->getInSiglen());
-            delete[] this->getInSig();
-            this->setInSig(nullptr);
+            memset(this->inSig, 0, this->inSiglen);
+            delete[] this->inSig;
+            this->inSig = nullptr;
         }
     }
 
     bool allocateInSig(Size len)
     {
         this->freeInSig();
-        this->setInSig(new Byte[len + 1]);
+        this->inSig = new Byte[len + 1];
 
         return this->notNullInSig();
     }
 
     bool writeInSig(ConstBytes inSig, Size len)
     {
-        Bytes localInSig = this->getInSig();
-
-        if (inSig and localInSig)
+        if (inSig and this->inSig)
         {
-            memcpy(localInSig, inSig, len);
-            this->setInSiglen(len);
+            memcpy(this->inSig, inSig, len);
+            this->inSiglen = len;
             return true;
         }
 
@@ -71,34 +44,48 @@ class EvpMdContext : public EvpContext
 
     void freeMdContext()
     {
-        EVP_MD_CTX_free(this->getMdContext());
-        this->setMdContext(nullptr);
+        EVP_MD_CTX_free(this->mdContext);
+        this->mdContext = nullptr;
     }
 
     bool allocateMdContext()
     {
         this->freeMdContext();
-        this->setMdContext(EVP_MD_CTX_new());
+        this->mdContext = EVP_MD_CTX_new();
 
-        return this->getMdContext() != nullptr;
+        return this->mdContext != nullptr;
     }
 
+    /**
+     * @brief Create a signature
+     *
+     * Signature structure
+     * 1. Data
+     * 2. Digest (signature)
+     *
+     * @param in Structure containing data to be signed and its size
+     * @return EncrypterResult* structure containing byte array with the output and its size
+     */
     EncrypterResult *createSignedData(const EncrypterData *in) const;
 
-    ConstBytes readSignedData(const EncrypterData *in, Size &signlen);
+    /**
+     * @brief Read a byte array resulted from createSignedData and initializes internal structures
+     *
+     * @param in structure containing data do be verified and its size
+     * @param datasize if successful it contains the data size
+     * @return ConstBytes pointer to data
+     */
+    ConstBytes readSignedData(const EncrypterData *in, Size &datasize);
 
-    bool notNullMdContext() const { return this->getMdContext() != nullptr; }
-
-    void cleanup() override
-    {
-        EvpContext::cleanup();
-
-        this->freeMdContext();
-        this->freeInSig();
-    }
+    bool notNullMdContext() const { return this->mdContext != nullptr; }
 
 public:
-    EvpMdContext(Key *key) : EvpContext(key) { this->init(); }
+    EvpMdContext(Key *key) : EvpContext(key)
+    {
+        this->mdContext = nullptr;
+        this->inSig = nullptr;
+        this->inSiglen = 0;
+    }
 
     ~EvpMdContext()
     {
@@ -110,7 +97,25 @@ public:
 
     EncrypterResult *decrypt(const EncrypterData *in) override;
 
-    static EvpContext *create(Key *key) { return new EvpMdContext(key); }
+    void cleanup() override
+    {
+        EvpContext::cleanup();
+
+        this->freeMdContext();
+        this->freeInSig();
+    }
+
+    class Factory
+    {
+    public:
+        /**
+         * @brief Create new EvpMdContext to be used for signing or verification
+         *
+         * @param key AsymmetricKey object initialized accordingly
+         * @return EvpContext* Newly created EvpMdContext
+         */
+        static EvpMdContext *create(Key *key) { return new EvpMdContext(key); }
+    };
 };
 
 #endif

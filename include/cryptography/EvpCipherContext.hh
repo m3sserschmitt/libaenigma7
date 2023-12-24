@@ -10,28 +10,19 @@ class EvpCipherContext : public EvpContext
     Bytes iv;
     Bytes tag;
 
-    void setCipherContext(EVP_CIPHER_CTX *cipherContext) { this->cipherContext = cipherContext; }
-
-    void init()
-    {
-        this->setCipherContext(nullptr);
-        this->setIV(nullptr);
-        this->setTag(nullptr);
-    }
-
 protected:
     EVP_CIPHER_CTX *getCipherContext() { return this->cipherContext; }
 
     void freeCipherContext()
     {
         EVP_CIPHER_CTX_free(this->getCipherContext());
-        this->setCipherContext(nullptr);
+        this->cipherContext = nullptr;
     }
 
     bool allocateCipherContext()
     {
         this->freeCipherContext();
-        this->setCipherContext(EVP_CIPHER_CTX_new());
+        this->cipherContext = EVP_CIPHER_CTX_new();
 
         return this->getCipherContext() != nullptr;
     }
@@ -39,8 +30,6 @@ protected:
     Bytes getTag() { return this->tag; }
 
     const Bytes getTag() const { return this->tag; }
-
-    void setTag(Bytes tag) { this->tag = tag; }
 
     bool writeTag(ConstBytes tag)
     {
@@ -53,8 +42,6 @@ protected:
 
         return false;
     }
-
-    void setIV(Bytes iv) { this->iv = iv; }
 
     Bytes getIV() { return this->iv; }
 
@@ -81,7 +68,7 @@ protected:
         {
             memset(iv, 0, IV_SIZE);
             delete[] iv;
-            this->setIV(nullptr);
+            this->iv = nullptr;
         }
     }
 
@@ -89,7 +76,7 @@ protected:
     {
         if (not this->getIV())
         {
-            this->setIV(new Byte[IV_SIZE + 1]);
+            this->iv = new Byte[IV_SIZE + 1];
             return this->getIV() != nullptr;
         }
 
@@ -113,7 +100,7 @@ protected:
         {
             memset(tag, 0, TAG_SIZE);
             delete[] tag;
-            this->setTag(nullptr);
+            this->tag = nullptr;
         }
     }
 
@@ -121,7 +108,7 @@ protected:
     {
         if (not this->getTag())
         {
-            this->setTag(new Byte[TAG_SIZE + 1]);
+            this->tag = new Byte[TAG_SIZE + 1];
 
             return this->getTag() != nullptr;
         }
@@ -129,20 +116,26 @@ protected:
         return true;
     }
 
-    void cleanup() override
-    {
-        EvpContext::cleanup();
+public:
 
+    EvpCipherContext(Key *key) : EvpContext(key)
+    {
+        this->cipherContext = nullptr;
+        this->iv = nullptr;
+        this->tag = nullptr;
+    }
+
+    ~EvpCipherContext()
+    {
         this->freeCipherContext();
         this->freeIV();
         this->freeTag();
     }
 
-public:
-    EvpCipherContext(Key *key) : EvpContext(key) { this->init(); }
-
-    ~EvpCipherContext()
+    void cleanup() override
     {
+        EvpContext::cleanup();
+
         this->freeCipherContext();
         this->freeIV();
         this->freeTag();

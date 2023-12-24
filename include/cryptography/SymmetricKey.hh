@@ -54,7 +54,7 @@ public:
 
     const void *getKeyData() const override { return this->keyData; }
 
-    unsigned int getSize() const override { return SYMMETRIC_KEY_SIZE; }
+    int getSize() const override { return this->notNullKeyData() ? SYMMETRIC_KEY_SIZE : -1; }
 
     void freeKey() override
     {

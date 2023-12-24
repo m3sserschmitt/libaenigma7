@@ -42,18 +42,18 @@ bool CryptoContext::allocateCipher()
     switch (this->getCryptoType())
     {
     case SymmetricCryptography:
-        this->setCipher(SymmetricEvpCipherContext::create(this->getKey()));
+        this->setCipher(SymmetricEvpCipherContext::Factory::create(this->getKey()));
         break;
     case AsymmetricCryptography:
         switch (this->getCryptoOp())
         {
         case Encrypt:
         case Decrypt:
-            this->setCipher(AsymmetricEvpCipherContext::create(this->getKey()));
+            this->setCipher(AsymmetricEvpCipherContext::Factory::create(this->getKey()));
             break;
         case Sign:
         case SignVerify:
-            this->setCipher(EvpMdContext::create(this->getKey()));
+            this->setCipher(EvpMdContext::Factory::create(this->getKey()));
             break;
         default:
             return false;

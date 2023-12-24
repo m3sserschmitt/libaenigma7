@@ -5,10 +5,10 @@ EncrypterResult *AsymmetricEvpCipherContext::createEnvelope() const
     Size envelopeSize = this->calculateEnvelopeSize();
     Bytes envelope = new Byte[envelopeSize + 1];
 
-    Size N = this->getEncryptedKeyLength();
+    Size N = this->encryptedKeyLength;
     Size P = this->getOutBufferSize();
 
-    memcpy(envelope, this->getEncryptedKey(), N);
+    memcpy(envelope, this->encryptedKey, N);
     memcpy(envelope + N, this->getIV(), IV_SIZE);
     memcpy(envelope + N + IV_SIZE, this->getOutBuffer(), P);
     memcpy(envelope + N + IV_SIZE + P, this->getTag(), TAG_SIZE);
@@ -30,7 +30,7 @@ ConstBytes AsymmetricEvpCipherContext::readEnvelope(const EncrypterData *in, Siz
         return nullptr;
     }
 
-    Size N = this->getPkeySize();
+    Size N = this->getKeySize();
     Size envelopeSize = in->getDataSize();
     ConstBytes envelope = in->getData();
 
@@ -67,10 +67,10 @@ EncrypterResult *AsymmetricEvpCipherContext::decrypt(const EncrypterData *in)
 
     if (EVP_OpenInit(this->getCipherContext(),
                      EVP_aes_256_gcm(),
-                     this->getEncryptedKey(),
-                     this->getEncryptedKeyLength(),
+                     this->encryptedKey,
+                     this->encryptedKeyLength,
                      this->getIV(),
-                     this->getPkey()) != 1)
+                     (EVP_PKEY *)this->getKey()->getKeyData()) != 1)
     {
         return this->abort();
     }
@@ -119,12 +119,12 @@ EncrypterResult *AsymmetricEvpCipherContext::encrypt(const EncrypterData *in)
         return this->abort();
     }
 
-    EVP_PKEY *pkey = this->getPkey();
+    EVP_PKEY *pkey = (EVP_PKEY *)this->getKey()->getKeyData();
 
     if (EVP_SealInit(this->getCipherContext(),
                      EVP_aes_256_gcm(),
-                     this->getEncryptedKeyPtr(),
-                     this->getEncryptedKeyLengthPtr(),
+                     &this->encryptedKey,
+                     &this->encryptedKeyLength,
                      this->getIV(),
                      &pkey, 1) != 1)
     {

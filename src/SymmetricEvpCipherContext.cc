@@ -54,7 +54,7 @@ EncrypterResult *SymmetricEvpCipherContext::encrypt(const EncrypterData *in)
         return this->abort();
     }
 
-    if (EVP_EncryptInit_ex(this->getCipherContext(), EVP_aes_256_gcm(), NULL, this->getKeyBytes(), this->getIV()) != 1)
+    if (EVP_EncryptInit_ex(this->getCipherContext(), EVP_aes_256_gcm(), NULL, (const unsigned char *)this->getKey()->getKeyData(), this->getIV()) != 1)
     {
         return this->abort();
     }
@@ -104,7 +104,7 @@ EncrypterResult *SymmetricEvpCipherContext::decrypt(const EncrypterData *in)
     Size cipherlen;
     ConstBytes ciphertext = this->readEncryptedData(in, cipherlen);
 
-    if (EVP_DecryptInit_ex(this->getCipherContext(), EVP_aes_256_gcm(), NULL, this->getKeyBytes(), this->getIV()) != 1)
+    if (EVP_DecryptInit_ex(this->getCipherContext(), EVP_aes_256_gcm(), NULL, (const unsigned char *)this->getKey()->getKeyData(), this->getIV()) != 1)
     {
         return this->abort();
     }

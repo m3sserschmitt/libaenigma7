@@ -16,28 +16,11 @@ class EvpContext
     Bytes outBuffer;
     int outBufferSize;
 
-    void init(Key *key)
-    {
-        this->setKey(key);
-
-        this->setOutBuffer(nullptr);
-        this->setOutBufferSize(0);
-    }
-
-    void setKey(Key *key) { this->key = key; }
-
 protected:
-    const Key *getKey() const { return this->key; }
 
-    const EVP_PKEY *getPkey() const { return (EVP_PKEY *)this->getKey()->getKeyData(); }
+    Key *getKey() { return this->key; }
 
-    EVP_PKEY *getPkey() { return (EVP_PKEY *)this->getKey()->getKeyData(); }
-
-    int getPkeySize() const
-    {
-        const EVP_PKEY *pkey = this->getPkey();
-        return pkey ? EVP_PKEY_size(pkey) : -1;
-    }
+    int getKeySize() const { return this->key->getSize(); }
 
     Bytes getOutBuffer() { return this->outBuffer; }
 
@@ -48,8 +31,6 @@ protected:
     void setOutBufferSize(Size outBufferSize) { this->outBufferSize = outBufferSize; }
 
     Size getOutBufferSize() const { return this->outBufferSize; }
-
-    int *getOutBufferSizePtr() { return &this->outBufferSize; }
 
     void freeOutBuffer()
     {
@@ -77,11 +58,6 @@ protected:
         return true;
     }
 
-    virtual void cleanup()
-    {
-        this->freeOutBuffer();
-    }
-
     EncrypterResult *abort()
     {
         this->cleanup();
@@ -89,13 +65,36 @@ protected:
     }
 
 public:
-    EvpContext(Key *key) { this->init(key); }
+
+    EvpContext(Key *key)
+    {
+        this->key = key;
+        this->setOutBuffer(nullptr);
+        this->setOutBufferSize(0);
+    }
 
     virtual ~EvpContext() { this->freeOutBuffer(); }
 
+    /**
+     * @brief Transform plaintext provided as input into ciphertext.
+     * 
+     * @param in Input data - plaintext
+     * @return EncrypterResult* Output data - ciphertext
+     */
     virtual EncrypterResult *encrypt(const EncrypterData *in) = 0;
 
+    /**
+     * @brief Transform ciphertext provided as input into plaintext
+     * 
+     * @param in Input data - ciphertext
+     * @return EncrypterResult* Output data - plaintext
+     */
     virtual EncrypterResult *decrypt(const EncrypterData *in) = 0;
+
+    virtual void cleanup()
+    {
+        this->freeOutBuffer();
+    }
 };
 
 #endif

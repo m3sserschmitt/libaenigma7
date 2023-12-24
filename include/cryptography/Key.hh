@@ -77,7 +77,7 @@ public:
      * 
      * @return Size Size of the key in bytes
      */
-    virtual unsigned int getSize() const = 0;
+    virtual int getSize() const = 0;
 
     /**
      * @brief Returns a pointer to the underlying key structure: for symmetric keys it will be an array of

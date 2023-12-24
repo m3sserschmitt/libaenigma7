@@ -20,7 +20,7 @@ ConstBytes EvpMdContext::readSignedData(const EncrypterData *in, Size &datasize)
         return nullptr;
     }
 
-    Size pkeySize = this->getPkeySize();
+    Size pkeySize = this->getKeySize();
     
     if(not this->writeInSig(in->getData() + in->getDataSize() - pkeySize, pkeySize))
     {
@@ -46,19 +46,19 @@ EncrypterResult *EvpMdContext::encrypt(const EncrypterData *in)
         return this->abort();
     }
 
-    if (EVP_DigestSignInit(this->getMdContext(), nullptr, EVP_sha256(), nullptr, this->getPkey()) != 1)
+    if (EVP_DigestSignInit(this->mdContext, nullptr, EVP_sha256(), nullptr, (EVP_PKEY *)this->getKey()->getKeyData()) != 1)
     {
         return this->abort();
     }
 
-    if (EVP_DigestSignUpdate(this->getMdContext(), in->getData(), in->getDataSize()) != 1)
+    if (EVP_DigestSignUpdate(this->mdContext, in->getData(), in->getDataSize()) != 1)
     {
         return this->abort();
     }
 
     size_t siglen;
 
-    if (EVP_DigestSignFinal(this->getMdContext(), nullptr, &siglen) != 1)
+    if (EVP_DigestSignFinal(this->mdContext, nullptr, &siglen) != 1)
     {
         return this->abort();
     }
@@ -68,7 +68,7 @@ EncrypterResult *EvpMdContext::encrypt(const EncrypterData *in)
         return this->abort();
     }
 
-    if (EVP_DigestSignFinal(this->getMdContext(), this->getOutBuffer(), &siglen) != 1)
+    if (EVP_DigestSignFinal(this->mdContext, this->getOutBuffer(), &siglen) != 1)
     {
         return this->abort();
     }
@@ -91,12 +91,12 @@ EncrypterResult *EvpMdContext::decrypt(const EncrypterData *in)
 
     this->cleanup();
 
-    if (not this->allocateMdContext() or not this->allocateInSig(this->getPkeySize()))
+    if (not this->allocateMdContext() or not this->allocateInSig(this->getKeySize()))
     {
         return this->abort();
     }
 
-    if (EVP_DigestVerifyInit(this->getMdContext(), nullptr, EVP_sha256(), nullptr, this->getPkey()) != 1)
+    if (EVP_DigestVerifyInit(this->mdContext, nullptr, EVP_sha256(), nullptr, (EVP_PKEY *)this->getKey()->getKeyData()) != 1)
     {
         return this->abort();
     }
@@ -109,12 +109,12 @@ EncrypterResult *EvpMdContext::decrypt(const EncrypterData *in)
         return this->abort();
     }
 
-    if (EVP_DigestVerifyUpdate(this->getMdContext(), data, datalen) != 1)
+    if (EVP_DigestVerifyUpdate(this->mdContext, data, datalen) != 1)
     {
         return this->abort();
     }
 
-    if (EVP_DigestVerifyFinal(this->getMdContext(), this->getInSig(), this->getInSiglen()) == 1)
+    if (EVP_DigestVerifyFinal(this->mdContext, this->inSig, this->inSiglen) == 1)
     {
         return new EncrypterResult(true);
     }
