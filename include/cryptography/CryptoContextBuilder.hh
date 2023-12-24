@@ -33,9 +33,9 @@ private:
             return this;
         }
 
-        ICryptoContextBuilder *setKey256(ConstBytes key) override
+        ICryptoContextBuilder *setKey256(const unsigned char *key) override
         {
-            if(!this->ctx->setKey256(key))
+            if (!this->ctx->setKey256(key))
             {
                 throw InvalidOperation(COULD_NOT_SET_KEY);
             }
@@ -43,9 +43,9 @@ private:
             return this;
         }
 
-        ICryptoContextBuilder *setKey(ConstPlaintext key) override
+        ICryptoContextBuilder *setKey(const char *key) override
         {
-            if(!this->ctx->setKeyData(key))
+            if (!this->ctx->setKeyData(key))
             {
                 throw InvalidOperation(COULD_NOT_SET_KEY);
             }
@@ -53,9 +53,9 @@ private:
             return this;
         }
 
-        ICryptoContextBuilder *setKey(ConstPlaintext key, Plaintext passphrase) override
+        ICryptoContextBuilder *setKey(const char *key, char *passphrase) override
         {
-            if(!this->ctx->setKeyData(key, passphrase))
+            if (!this->ctx->setKeyData(key, passphrase))
             {
                 throw InvalidOperation(COULD_NOT_SET_KEY);
             }
@@ -63,9 +63,9 @@ private:
             return this;
         }
 
-        ICryptoContextBuilder *readKeyData(ConstPlaintext path, Plaintext passphrase) override
+        ICryptoContextBuilder *readKeyData(const char *path, char *passphrase) override
         {
-            if(!this->ctx->readKeyFile(path, passphrase))
+            if (!this->ctx->readKeyFile(path, passphrase))
             {
                 throw InvalidOperation(COULD_NOT_SET_KEY);
             }
@@ -73,9 +73,9 @@ private:
             return this;
         }
 
-        ICryptoContextBuilder *readKeyData(ConstPlaintext path) override
+        ICryptoContextBuilder *readKeyData(const char *path) override
         {
-            if(!this->ctx->readKeyFile(path))
+            if (!this->ctx->readKeyFile(path))
             {
                 throw InvalidOperation(COULD_NOT_SET_KEY);
             }
@@ -83,9 +83,9 @@ private:
             return this;
         }
 
-        ICryptoContextBuilderKeyData *setPlaintext(ConstBytes data, Size datalen) override
+        ICryptoContextBuilderKeyData *setPlaintext(const unsigned char *data, unsigned int datalen) override
         {
-            if(!this->ctx->setPlaintext(data, datalen))
+            if (!this->ctx->setPlaintext(data, datalen))
             {
                 throw InvalidOperation(COULD_NOT_SET_PLAINTEXT);
             }
@@ -93,9 +93,9 @@ private:
             return this;
         }
 
-        ICryptoContextBuilderKeyData *setCiphertext(ConstBytes data, Size datalen)
+        ICryptoContextBuilderKeyData *setCiphertext(const unsigned char *data, unsigned int datalen)
         {
-            if(!this->ctx->setCiphertext(data, datalen))
+            if (!this->ctx->setCiphertext(data, datalen))
             {
                 throw InvalidOperation(COULD_NOT_SET_CIPHERTEXT);
             }
@@ -119,7 +119,7 @@ private:
         {
             this->ctx->setCryptoOp(Encrypt);
 
-            if(!this->ctx->allocateMemory())
+            if (!this->ctx->allocateMemory())
             {
                 throw InvalidOperation(COULD_NOT_INITIALIZE_CONTEXT);
             }
@@ -131,7 +131,7 @@ private:
         {
             this->ctx->setCryptoOp(Decrypt);
 
-            if(!this->ctx->allocateMemory())
+            if (!this->ctx->allocateMemory())
             {
                 throw InvalidOperation(COULD_NOT_INITIALIZE_CONTEXT);
             }
@@ -143,7 +143,7 @@ private:
         {
             this->ctx->setCryptoOp(Sign);
 
-            if(!this->ctx->allocateMemory())
+            if (!this->ctx->allocateMemory())
             {
                 throw InvalidOperation(COULD_NOT_INITIALIZE_CONTEXT);
             }
@@ -155,11 +155,11 @@ private:
         {
             this->ctx->setCryptoOp(SignVerify);
 
-            if(!this->ctx->allocateMemory())
+            if (!this->ctx->allocateMemory())
             {
                 throw InvalidOperation(COULD_NOT_INITIALIZE_CONTEXT);
             }
-            
+
             return this;
         }
 

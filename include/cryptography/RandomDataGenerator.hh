@@ -7,15 +7,15 @@
 class RandomDataGenerator
 {
 public:
-    static Bytes generate(Size len)
+    static unsigned char * generate(unsigned int len)
     {
         std::random_device dev;
         std::mt19937 rng(dev());
         std::uniform_int_distribution<int> dist(0, 0xff);
 
-        Bytes data = new Byte[len + 1];
+        unsigned char * data = new unsigned char[len + 1];
 
-        for (Size i = 0; i < len; i++)
+        for (unsigned int i = 0; i < len; i++)
         {
             data[i] = dist(rng);
         }
@@ -23,7 +23,7 @@ public:
         return data;
     }
 
-    static Bytes generateKey()
+    static unsigned char * generateKey()
     {
         return generate(SYMMETRIC_KEY_SIZE);
     }

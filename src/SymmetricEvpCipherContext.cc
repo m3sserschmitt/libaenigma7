@@ -2,10 +2,10 @@
 
 EncrypterResult *SymmetricEvpCipherContext::createEncryptedData() const
 {
-    Size bufferSize = this->getOutBufferSize();
-    Size finalDataSize = bufferSize + IV_SIZE + TAG_SIZE;
+    unsigned int bufferSize = this->getOutBufferSize();
+    unsigned int finalDataSize = bufferSize + IV_SIZE + TAG_SIZE;
 
-    Bytes finalData = new Byte[finalDataSize + 1];
+    unsigned char * finalData = new unsigned char[finalDataSize + 1];
 
     memcpy(finalData, this->getIV(), IV_SIZE);
     memcpy(finalData + IV_SIZE, this->getOutBuffer(), bufferSize);
@@ -19,7 +19,7 @@ EncrypterResult *SymmetricEvpCipherContext::createEncryptedData() const
     return result;
 }
 
-ConstBytes SymmetricEvpCipherContext::readEncryptedData(const EncrypterData *in, Size &cipherlen)
+const unsigned char * SymmetricEvpCipherContext::readEncryptedData(const EncrypterData *in, unsigned int &cipherlen)
 {
     cipherlen = 0;
 
@@ -28,8 +28,8 @@ ConstBytes SymmetricEvpCipherContext::readEncryptedData(const EncrypterData *in,
         return nullptr;
     }
 
-    Size dataSize = in->getDataSize();
-    ConstBytes data = in->getData();
+    unsigned int dataSize = in->getDataSize();
+    const unsigned char * data = in->getData();
 
     if (not this->writeIV(data) or not this->writeTag(data + dataSize - TAG_SIZE))
     {
@@ -101,8 +101,8 @@ EncrypterResult *SymmetricEvpCipherContext::decrypt(const EncrypterData *in)
         return this->abort();
     }
 
-    Size cipherlen;
-    ConstBytes ciphertext = this->readEncryptedData(in, cipherlen);
+    unsigned int cipherlen;
+    const unsigned char * ciphertext = this->readEncryptedData(in, cipherlen);
 
     if (EVP_DecryptInit_ex(this->getCipherContext(), EVP_aes_256_gcm(), NULL, (const unsigned char *)this->getKey()->getKeyData(), this->getIV()) != 1)
     {

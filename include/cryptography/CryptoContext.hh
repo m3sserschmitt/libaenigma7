@@ -104,7 +104,7 @@ public:
                this->initCryptoMachine();
     }
 
-    bool setKey256(ConstBytes key)
+    bool setKey256(const unsigned char *key)
     {
         if (this->notNullKey() and !this->key->isSymmetricKey())
         {
@@ -114,12 +114,12 @@ public:
         return this->notNullKey() and this->key->setKeyData(key, SYMMETRIC_KEY_SIZE);
     }
 
-    bool setKeyData(ConstPlaintext key, char *passphrase = nullptr)
+    bool setKeyData(const char *key, char *passphrase = nullptr)
     {
-        return this->notNullKey() and this->key->setKeyData((ConstBytes)key, strlen(key), passphrase);
+        return this->notNullKey() and this->key->setKeyData((const unsigned char *)key, strlen(key), passphrase);
     }
 
-    bool readKeyFile(ConstPlaintext path, Plaintext passphrase = nullptr)
+    bool readKeyFile(const char *path, char *passphrase = nullptr)
     {
         if (this->notNullKey() and this->key->isSymmetricKey())
         {
@@ -139,7 +139,7 @@ public:
         return this->notNullCryptoMachine() and this->getCryptoOp() == Sign;
     }
 
-    bool setPlaintext(ConstBytes data, Size datalen)
+    bool setPlaintext(const unsigned char *data, unsigned int datalen)
     {
         if (!(this->isSetForEncryption() or this->isSetForSigning()))
         {
@@ -164,7 +164,7 @@ public:
         return this->isSetForDecryption() or this->isSetForVerifying() ? this->cryptoMachine->getOutput() : nullptr;
     }
 
-    bool setCiphertext(ConstBytes data, Size datalen)
+    bool setCiphertext(const unsigned char *data, unsigned int datalen)
     {
         if (!(this->isSetForDecryption() or this->isSetForVerifying()))
         {

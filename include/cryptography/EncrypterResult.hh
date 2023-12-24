@@ -9,9 +9,9 @@ class EncrypterResult : public EncrypterData
 
     EncrypterResult(const EncrypterResult &);
     const EncrypterResult &operator=(const EncrypterResult &);
-    
+
 public:
-    EncrypterResult(ConstBytes data, Size datalen) : EncrypterData(data, datalen) 
+    EncrypterResult(const unsigned char *data, unsigned int datalen) : EncrypterData(data, datalen)
     {
         this->ok = true;
     }

@@ -7,8 +7,8 @@ class EvpMdContext : public EvpContext
 {
     EVP_MD_CTX *mdContext;
 
-    Bytes inSig;
-    Size inSiglen;
+    unsigned char *inSig;
+    unsigned int inSiglen;
 
     bool notNullInSig() const { return this->inSig != nullptr; }
 
@@ -22,15 +22,15 @@ class EvpMdContext : public EvpContext
         }
     }
 
-    bool allocateInSig(Size len)
+    bool allocateInSig(unsigned int len)
     {
         this->freeInSig();
-        this->inSig = new Byte[len + 1];
+        this->inSig = new unsigned char[len + 1];
 
         return this->notNullInSig();
     }
 
-    bool writeInSig(ConstBytes inSig, Size len)
+    bool writeInSig(const unsigned char *inSig, unsigned int len)
     {
         if (inSig and this->inSig)
         {
@@ -73,9 +73,9 @@ class EvpMdContext : public EvpContext
      *
      * @param in structure containing data do be verified and its size
      * @param datasize if successful it contains the data size
-     * @return ConstBytes pointer to data
+     * @return const unsigned char * pointer to data
      */
-    ConstBytes readSignedData(const EncrypterData *in, Size &datasize);
+    const unsigned char *readSignedData(const EncrypterData *in, unsigned int &datasize);
 
     bool notNullMdContext() const { return this->mdContext != nullptr; }
 

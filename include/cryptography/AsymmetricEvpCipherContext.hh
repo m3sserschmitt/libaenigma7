@@ -5,7 +5,7 @@
 
 class AsymmetricEvpCipherContext : public EvpCipherContext
 {
-    Bytes encryptedKey;
+    unsigned char *encryptedKey;
     int encryptedKeyLength;
 
     AsymmetricEvpCipherContext(const AsymmetricEvpCipherContext &);
@@ -32,17 +32,17 @@ class AsymmetricEvpCipherContext : public EvpCipherContext
         }
 
         this->freeEncryptedKey();
-        this->encryptedKey = new Byte[pkeySize + 1];
+        this->encryptedKey = new unsigned char[pkeySize + 1];
         this->encryptedKeyLength = 0;
 
         return this->encryptedKey != nullptr;
     }
 
-    bool writeEncryptedKey(ConstBytes encryptedKey)
+    bool writeEncryptedKey(const unsigned char *encryptedKey)
     {
         if (encryptedKey and this->encryptedKey)
         {
-            Size encryptedKeySize = this->getKeySize();
+            unsigned int encryptedKeySize = this->getKeySize();
             memcpy(this->encryptedKey, encryptedKey, encryptedKeySize);
             this->encryptedKeyLength = encryptedKeySize;
             return true;
@@ -58,11 +58,11 @@ class AsymmetricEvpCipherContext : public EvpCipherContext
 
     bool openEnvelopeAllocateMemory(const EncrypterData *in)
     {
-        Size outBufferSize = in->getDataSize() - this->getKeySize() - IV_SIZE - TAG_SIZE;
+        unsigned int outBufferSize = in->getDataSize() - this->getKeySize() - IV_SIZE - TAG_SIZE;
         return this->allocateCipherContext() and this->allocateEncryptedKey() and this->allocateIV() and this->allocateOutBuffer(outBufferSize) and this->allocateTag();
     }
 
-    Size calculateEnvelopeSize() const
+    unsigned int calculateEnvelopeSize() const
     {
         return this->encryptedKeyLength + IV_SIZE + this->getOutBufferSize() + TAG_SIZE;
     }
@@ -91,12 +91,11 @@ class AsymmetricEvpCipherContext : public EvpCipherContext
      *
      * @param in Structure containing envelope data and size
      * @param cipherlen if successful it contains the calculated size of ciphertext (C)
-     * @return ConstBytes pointer to the ciphertext (C)
+     * @return const unsigned char * pointer to the ciphertext (C)
      */
-    ConstBytes readEnvelope(const EncrypterData *in, Size &cipherlen);
+    const unsigned char *readEnvelope(const EncrypterData *in, unsigned int &cipherlen);
 
 public:
-
     AsymmetricEvpCipherContext(Key *key) : EvpCipherContext(key)
     {
         this->encryptedKey = nullptr;
