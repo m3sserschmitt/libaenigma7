@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0.0)
+cmake_minimum_required(VERSION 3.5.0)
 
 project(libcryptography VERSION 7.0.0)
 
@@ -14,16 +14,27 @@ add_library(cryptography SHARED
 ./src/Libcryptography.cc
 )
 
-#add_library(cryptography7 STATIC 
-#./src/cryptography/AsymmetricKey.cc
-#./src/cryptography/AsymmetricCipher.cc
-#./src/cryptography/SymmetricCipher.cc
-#./src/cryptography/CryptoContext.cc
-#)
+add_library(cryptography7 STATIC 
+./src/AsymmetricKey.cc
+./src/AsymmetricEvpCipherContext.cc
+./src/SymmetricEvpCipherContext.cc
+./src/EvpMdContext.cc
+./src/CryptoContext.cc
+./src/File.cc
+./src/Libcryptography.cc
+)
 
 set_target_properties(cryptography PROPERTIES VERSION ${PROJECT_VERSION} SOVERSION 7)
-
 target_link_libraries(cryptography crypto)
 
 add_executable(libcryptography_wrapper_test ./tests/Cryptowrapper.cc)
 target_link_libraries(libcryptography_wrapper_test cryptography)
+
+add_executable(envelopes_test ./tests/Envelopes.cc)
+target_link_libraries(envelopes_test cryptography)
+
+install(FILES
+${CMAKE_BINARY_DIR}/libcryptography.so
+${CMAKE_BINARY_DIR}/libcryptography.so.7
+${CMAKE_BINARY_DIR}/libcryptography.so.7.0.0
+DESTINATION "/usr/local/lib")
