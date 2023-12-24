@@ -7,17 +7,17 @@
 
 class EncrypterData
 {
-    Bytes data;
-    Size datalen;
+    unsigned char *data;
+    unsigned int datalen;
 
     EncrypterData(const EncrypterData &);
     const EncrypterData &operator=(const EncrypterData &);
 
 public:
-    EncrypterData(ConstBytes data, Size datalen)
+    EncrypterData(const unsigned char *data, unsigned int datalen)
     {
         this->datalen = datalen;
-        this->data = new Byte[datalen + 1];
+        this->data = new unsigned char[datalen + 1];
         memcpy(this->data, data, datalen);
     }
 
@@ -28,12 +28,12 @@ public:
         this->data = nullptr;
     }
 
-    Size getDataSize() const
+    unsigned int getDataSize() const
     {
         return this->datalen;
     }
 
-    const Byte *getData() const
+    const unsigned char *getData() const
     {
         return this->data;
     }

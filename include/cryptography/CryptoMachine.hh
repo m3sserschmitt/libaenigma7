@@ -71,7 +71,7 @@ public:
 
     virtual bool run() = 0;
 
-    bool setInput(ConstBytes data, Size datalen)
+    bool setInput(const unsigned char *data, unsigned int datalen)
     {
         this->freeIn();
         this->setIn(new EncrypterData(data, datalen));

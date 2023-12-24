@@ -10,7 +10,7 @@
 class File
 {
 public:
-    static const char *readFile(const char *path, Size &len);
+    static const char *readFile(const char *path, unsigned int &len);
 };
 
 #endif

@@ -7,11 +7,11 @@
 class ICryptoContextBuilderKeyData
 {
 public:
-    virtual ICryptoContextBuilder *setKey256(ConstBytes key) = 0;
-    virtual ICryptoContextBuilder *setKey(ConstPlaintext key) = 0;
-    virtual ICryptoContextBuilder *setKey(ConstPlaintext Key, Plaintext passphrase) = 0;
-    virtual ICryptoContextBuilder *readKeyData(ConstPlaintext path, Plaintext passphrase) = 0;
-    virtual ICryptoContextBuilder *readKeyData(ConstPlaintext path) = 0;
+    virtual ICryptoContextBuilder *setKey256(const unsigned char *key) = 0;
+    virtual ICryptoContextBuilder *setKey(const char *key) = 0;
+    virtual ICryptoContextBuilder *setKey(const char *Key, char *passphrase) = 0;
+    virtual ICryptoContextBuilder *readKeyData(const char *path, char *passphrase) = 0;
+    virtual ICryptoContextBuilder *readKeyData(const char *path) = 0;
 };
 
 #endif

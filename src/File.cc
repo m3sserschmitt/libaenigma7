@@ -1,6 +1,6 @@
 #include "cryptography/File.hh"
 
-const char *File::readFile(const char *path, Size &len)
+const char *File::readFile(const char *path, unsigned int &len)
 {
     std::string line;
     std::string content;

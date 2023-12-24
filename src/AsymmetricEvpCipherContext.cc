@@ -2,11 +2,11 @@
 
 EncrypterResult *AsymmetricEvpCipherContext::createEnvelope() const
 {
-    Size envelopeSize = this->calculateEnvelopeSize();
-    Bytes envelope = new Byte[envelopeSize + 1];
+    unsigned int envelopeSize = this->calculateEnvelopeSize();
+    unsigned char * envelope = new unsigned char[envelopeSize + 1];
 
-    Size N = this->encryptedKeyLength;
-    Size P = this->getOutBufferSize();
+    unsigned int N = this->encryptedKeyLength;
+    unsigned int P = this->getOutBufferSize();
 
     memcpy(envelope, this->encryptedKey, N);
     memcpy(envelope + N, this->getIV(), IV_SIZE);
@@ -21,7 +21,7 @@ EncrypterResult *AsymmetricEvpCipherContext::createEnvelope() const
     return result;
 }
 
-ConstBytes AsymmetricEvpCipherContext::readEnvelope(const EncrypterData *in, Size &cipherlen)
+const unsigned char * AsymmetricEvpCipherContext::readEnvelope(const EncrypterData *in, unsigned int &cipherlen)
 {
     cipherlen = 0;
 
@@ -30,9 +30,9 @@ ConstBytes AsymmetricEvpCipherContext::readEnvelope(const EncrypterData *in, Siz
         return nullptr;
     }
 
-    Size N = this->getKeySize();
-    Size envelopeSize = in->getDataSize();
-    ConstBytes envelope = in->getData();
+    unsigned int N = this->getKeySize();
+    unsigned int envelopeSize = in->getDataSize();
+    const unsigned char * envelope = in->getData();
 
     if (not this->writeEncryptedKey(envelope) or not this->writeIV(envelope + N) or not this->writeTag(envelope + envelopeSize - TAG_SIZE))
     {
@@ -57,8 +57,8 @@ EncrypterResult *AsymmetricEvpCipherContext::decrypt(const EncrypterData *in)
         return this->abort();
     }
 
-    Size cipherlen;
-    ConstBytes ciphertext = this->readEnvelope(in, cipherlen);
+    unsigned int cipherlen;
+    const unsigned char * ciphertext = this->readEnvelope(in, cipherlen);
 
     if (not ciphertext or not cipherlen)
     {

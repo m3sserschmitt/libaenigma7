@@ -13,28 +13,27 @@ class EvpContext
 {
     Key *key;
 
-    Bytes outBuffer;
+    unsigned char *outBuffer;
     int outBufferSize;
 
 protected:
-
     Key *getKey() { return this->key; }
 
     int getKeySize() const { return this->key->getSize(); }
 
-    Bytes getOutBuffer() { return this->outBuffer; }
+    unsigned char *getOutBuffer() { return this->outBuffer; }
 
-    const Bytes getOutBuffer() const { return this->outBuffer; }
+    const unsigned char *getOutBuffer() const { return this->outBuffer; }
 
-    void setOutBuffer(Bytes outBuffer) { this->outBuffer = outBuffer; }
+    void setOutBuffer(unsigned char *outBuffer) { this->outBuffer = outBuffer; }
 
-    void setOutBufferSize(Size outBufferSize) { this->outBufferSize = outBufferSize; }
+    void setOutBufferSize(unsigned int outBufferSize) { this->outBufferSize = outBufferSize; }
 
-    Size getOutBufferSize() const { return this->outBufferSize; }
+    unsigned int getOutBufferSize() const { return this->outBufferSize; }
 
     void freeOutBuffer()
     {
-        Bytes outBuffer = this->getOutBuffer();
+        unsigned char *outBuffer = this->getOutBuffer();
 
         if (outBuffer)
         {
@@ -45,11 +44,11 @@ protected:
         }
     }
 
-    bool allocateOutBuffer(Size len)
+    bool allocateOutBuffer(unsigned int len)
     {
         if (not this->getOutBuffer())
         {
-            this->setOutBuffer(new Byte[len + 1]);
+            this->setOutBuffer(new unsigned char[len + 1]);
             this->setOutBufferSize(0);
 
             return this->getOutBuffer() != nullptr;
@@ -65,7 +64,6 @@ protected:
     }
 
 public:
-
     EvpContext(Key *key)
     {
         this->key = key;
@@ -77,7 +75,7 @@ public:
 
     /**
      * @brief Transform plaintext provided as input into ciphertext.
-     * 
+     *
      * @param in Input data - plaintext
      * @return EncrypterResult* Output data - ciphertext
      */
@@ -85,7 +83,7 @@ public:
 
     /**
      * @brief Transform ciphertext provided as input into plaintext
-     * 
+     *
      * @param in Input data - ciphertext
      * @return EncrypterResult* Output data - plaintext
      */

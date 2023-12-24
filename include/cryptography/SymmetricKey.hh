@@ -5,17 +5,17 @@
 
 class SymmetricKey : public Key
 {
-    Bytes keyData;
+    unsigned char * keyData;
 
     SymmetricKey(const SymmetricKey &);
 
     const SymmetricKey &operator=(const SymmetricKey &);
 
     SymmetricKey() : Key(KeySymmetric),
-                     keyData(new Byte[SYMMETRIC_KEY_SIZE + 1]) {}
+                     keyData(new unsigned char[SYMMETRIC_KEY_SIZE + 1]) {}
 
     SymmetricKey(const unsigned char *keyData) : Key(KeySymmetric),
-                                                 keyData(new Byte[SYMMETRIC_KEY_SIZE + 1])
+                                                 keyData(new unsigned char[SYMMETRIC_KEY_SIZE + 1])
     {
         this->writeKeyData(keyData);
     }

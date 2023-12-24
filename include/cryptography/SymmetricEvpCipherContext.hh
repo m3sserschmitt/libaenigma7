@@ -15,7 +15,7 @@ class SymmetricEvpCipherContext : public EvpCipherContext
 
     bool decryptionAllocateMemory(const EncrypterData *in)
     {
-        Size outBufferSize = in->getDataSize() - IV_SIZE - TAG_SIZE;
+        unsigned int outBufferSize = in->getDataSize() - IV_SIZE - TAG_SIZE;
         return this->allocateCipherContext() and this->allocateIV() and this->allocateOutBuffer(outBufferSize) and this->allocateTag();
     }
 
@@ -39,9 +39,9 @@ class SymmetricEvpCipherContext : public EvpCipherContext
      * 
      * @param in data to be decrypted, as it was created by createEncryptedData
      * @param cipherlen if successful it contains the size of ciphertext (C)
-     * @return ConstBytes pointer to the ciphertext
+     * @return const unsigned char * pointer to the ciphertext
      */
-    ConstBytes readEncryptedData(const EncrypterData *in, Size &cipherlen);
+    const unsigned char * readEncryptedData(const EncrypterData *in, unsigned int &cipherlen);
 
 public:
     SymmetricEvpCipherContext(Key *key) : EvpCipherContext(key) {}

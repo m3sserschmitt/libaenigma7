@@ -6,7 +6,7 @@
 class ICryptoContextBuilderCiphertext
 {
 public:
-    virtual ICryptoContextBuilderKeyData *setCiphertext(ConstBytes data, Size datalen) = 0;
+    virtual ICryptoContextBuilderKeyData *setCiphertext(const unsigned char *data, unsigned int datalen) = 0;
 
     virtual ICryptoContextBuilderKeyData *noCiphertext() = 0;
 };

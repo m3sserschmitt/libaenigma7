@@ -2,8 +2,8 @@
 
 EncrypterResult *EvpMdContext::createSignedData(const EncrypterData *in) const
 {
-    Size signedDataSize = in->getDataSize() + this->getOutBufferSize();
-    Bytes signedData = new Byte[signedDataSize + 1];
+    unsigned int signedDataSize = in->getDataSize() + this->getOutBufferSize();
+    unsigned char * signedData = new unsigned char[signedDataSize + 1];
 
     memcpy(signedData, in->getData(), in->getDataSize());
     memcpy(signedData + in->getDataSize(), this->getOutBuffer(), this->getOutBufferSize());
@@ -11,7 +11,7 @@ EncrypterResult *EvpMdContext::createSignedData(const EncrypterData *in) const
     return new EncrypterResult(signedData, signedDataSize);
 }
 
-ConstBytes EvpMdContext::readSignedData(const EncrypterData *in, Size &datasize)
+const unsigned char * EvpMdContext::readSignedData(const EncrypterData *in, unsigned int &datasize)
 {
     datasize = 0;
 
@@ -20,7 +20,7 @@ ConstBytes EvpMdContext::readSignedData(const EncrypterData *in, Size &datasize)
         return nullptr;
     }
 
-    Size pkeySize = this->getKeySize();
+    unsigned int pkeySize = this->getKeySize();
     
     if(not this->writeInSig(in->getData() + in->getDataSize() - pkeySize, pkeySize))
     {
@@ -101,8 +101,8 @@ EncrypterResult *EvpMdContext::decrypt(const EncrypterData *in)
         return this->abort();
     }
 
-    Size datalen;
-    ConstBytes data = this->readSignedData(in, datalen);
+    unsigned int datalen;
+    const unsigned char * data = this->readSignedData(in, datalen);
 
     if(not data or not datalen)
     {

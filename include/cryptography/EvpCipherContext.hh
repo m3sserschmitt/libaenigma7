@@ -7,8 +7,8 @@ class EvpCipherContext : public EvpContext
 {
     EVP_CIPHER_CTX *cipherContext;
 
-    Bytes iv;
-    Bytes tag;
+    unsigned char * iv;
+    unsigned char * tag;
 
 protected:
     EVP_CIPHER_CTX *getCipherContext() { return this->cipherContext; }
@@ -27,13 +27,13 @@ protected:
         return this->getCipherContext() != nullptr;
     }
 
-    Bytes getTag() { return this->tag; }
+    unsigned char * getTag() { return this->tag; }
 
-    const Bytes getTag() const { return this->tag; }
+    const unsigned char * getTag() const { return this->tag; }
 
-    bool writeTag(ConstBytes tag)
+    bool writeTag(const unsigned char * tag)
     {
-        Bytes localTag = this->getTag();
+        unsigned char * localTag = this->getTag();
         if (tag and localTag)
         {
             memcpy(localTag, tag, TAG_SIZE);
@@ -43,13 +43,13 @@ protected:
         return false;
     }
 
-    Bytes getIV() { return this->iv; }
+    unsigned char * getIV() { return this->iv; }
 
-    const Bytes getIV() const { return this->iv; }
+    const unsigned char * getIV() const { return this->iv; }
 
-    bool writeIV(ConstBytes iv)
+    bool writeIV(const unsigned char * iv)
     {
-        Bytes localIV = this->getIV();
+        unsigned char * localIV = this->getIV();
 
         if (localIV and iv)
         {
@@ -62,7 +62,7 @@ protected:
 
     void freeIV()
     {
-        Bytes iv = this->getIV();
+        unsigned char * iv = this->getIV();
 
         if (iv)
         {
@@ -76,7 +76,7 @@ protected:
     {
         if (not this->getIV())
         {
-            this->iv = new Byte[IV_SIZE + 1];
+            this->iv = new unsigned char[IV_SIZE + 1];
             return this->getIV() != nullptr;
         }
 
@@ -85,7 +85,7 @@ protected:
 
     bool generateIV()
     {
-        ConstBytes randomData = RandomDataGenerator::generate(IV_SIZE);
+        const unsigned char * randomData = RandomDataGenerator::generate(IV_SIZE);
         bool ok = this->writeIV(randomData);
         delete[] randomData;
 
@@ -94,7 +94,7 @@ protected:
 
     void freeTag()
     {
-        Bytes tag = this->getTag();
+        unsigned char * tag = this->getTag();
 
         if (tag)
         {
@@ -108,7 +108,7 @@ protected:
     {
         if (not this->getTag())
         {
-            this->tag = new Byte[TAG_SIZE + 1];
+            this->tag = new unsigned char[TAG_SIZE + 1];
 
             return this->getTag() != nullptr;
         }
