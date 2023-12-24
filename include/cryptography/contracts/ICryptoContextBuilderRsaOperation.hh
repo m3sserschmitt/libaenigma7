@@ -7,6 +7,7 @@
 class ICryptoContextBuilderRsaOperation : public ICryptoContextBuilderOperation
 {
 public:
+    virtual ~ICryptoContextBuilderRsaOperation() {}
     virtual ICryptoContextBuilderPlaintext *useSignature() = 0;
     virtual ICryptoContextBuilderCiphertext *useSignatureVerification() = 0;
 };

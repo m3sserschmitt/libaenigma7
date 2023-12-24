@@ -21,7 +21,7 @@ const char *File::readFile(const char *path, unsigned int &len)
     len = content.size();
 
     char *data = new char[len + 1];
-    strcpy(data, content.c_str());
+    memcpy(data, content.c_str(), content.size());
     data[len] = 0;
 
     return data;

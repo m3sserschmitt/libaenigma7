@@ -4,6 +4,7 @@
 class ICryptoContextBuilder
 {
 public:
+    virtual ~ICryptoContextBuilder() {}
     virtual CryptoContext *build() = 0;
 };
 

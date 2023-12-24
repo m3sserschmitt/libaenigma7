@@ -5,102 +5,122 @@ extern "C"
 {
     CryptoContext *CreateSymmetricEncryptionContext(const unsigned char *key)
     {
-        return CryptoContextBuilder::Create()
-            ->useAes()
-            ->useEncryption()
-            ->noPlaintext()
-            ->setKey256(key)
-            ->build();
+        ICryptoContextBuilderType *builder = CryptoContextBuilder::Create();
+        CryptoContext *ctx = builder->useAes()
+                                 ->useEncryption()
+                                 ->noPlaintext()
+                                 ->setKey256(key)
+                                 ->build();
+        delete builder;
+        return ctx;
     }
 
     CryptoContext *CreateSymmetricDecryptionContext(const unsigned char *key)
     {
-        return CryptoContextBuilder::Create()
-            ->useAes()
-            ->useDecryption()
-            ->noCiphertext()
-            ->setKey256(key)
-            ->build();
+        ICryptoContextBuilderType *builder = CryptoContextBuilder::Create();
+        CryptoContext *ctx = builder->useAes()
+                                 ->useDecryption()
+                                 ->noCiphertext()
+                                 ->setKey256(key)
+                                 ->build();
+        delete builder;
+        return ctx;
     }
 
     CryptoContext *CreateAsymmetricDecryptionContext(const char *key, char *passphrase)
     {
-        return CryptoContextBuilder::Create()
-            ->useRsa()
-            ->useDecryption()
-            ->noCiphertext()
-            ->setKey(key, passphrase)
-            ->build();
+        ICryptoContextBuilderType *builder = CryptoContextBuilder::Create();
+        CryptoContext *ctx = builder->useRsa()
+                                 ->useDecryption()
+                                 ->noCiphertext()
+                                 ->setKey(key, passphrase)
+                                 ->build();
+        delete builder;
+        return ctx;
     }
 
     CryptoContext *CreateAsymmetricEncryptionContext(const char *key)
     {
-        return CryptoContextBuilder::Create()
-            ->useRsa()
-            ->useEncryption()
-            ->noPlaintext()
-            ->setKey(key)
-            ->build();
+        ICryptoContextBuilderType *builder = CryptoContextBuilder::Create();
+        CryptoContext *ctx = builder->useRsa()
+                                 ->useEncryption()
+                                 ->noPlaintext()
+                                 ->setKey(key)
+                                 ->build();
+        delete builder;
+        return ctx;
     }
 
     CryptoContext *CreateAsymmetricEncryptionContextFromFile(const char *path)
     {
-        return CryptoContextBuilder::Create()
-            ->useRsa()
-            ->useEncryption()
-            ->noPlaintext()
-            ->readKeyData(path)
-            ->build();
+        ICryptoContextBuilderType *builder = CryptoContextBuilder::Create();
+        CryptoContext *ctx = builder->useRsa()
+                                 ->useEncryption()
+                                 ->noPlaintext()
+                                 ->readKeyData(path)
+                                 ->build();
+        delete builder;
+        return ctx;
     }
 
     CryptoContext *CreateAsymmetricDecryptionContextFromFile(const char *file, char *passphrase)
     {
-        return CryptoContextBuilder::Create()
-            ->useRsa()
-            ->useDecryption()
-            ->noCiphertext()
-            ->readKeyData(file, passphrase)
-            ->build();
+        ICryptoContextBuilderType *builder = CryptoContextBuilder::Create();
+        CryptoContext *ctx = builder->useRsa()
+                                 ->useDecryption()
+                                 ->noCiphertext()
+                                 ->readKeyData(file, passphrase)
+                                 ->build();
+        delete builder;
+        return ctx;
     }
 
     CryptoContext *CreateSignatureContext(const char *key, char *passphrase)
     {
-        return CryptoContextBuilder::Create()
-            ->useRsa()
-            ->useSignature()
-            ->noPlaintext()
-            ->setKey(key, passphrase)
-            ->build();
+        ICryptoContextBuilderType *builder = CryptoContextBuilder::Create();
+        CryptoContext *ctx = builder->useRsa()
+                                 ->useSignature()
+                                 ->noPlaintext()
+                                 ->setKey(key, passphrase)
+                                 ->build();
+        delete builder;
+        return ctx;
     }
 
     CryptoContext *CreateVerificationContext(const char *key)
     {
-        return CryptoContextBuilder::Create()
-            ->useRsa()
-            ->useSignatureVerification()
-            ->noCiphertext()
-            ->setKey(key)
-            ->build();
+        ICryptoContextBuilderType *builder = CryptoContextBuilder::Create();
+        CryptoContext *ctx = builder->useRsa()
+                                 ->useSignatureVerification()
+                                 ->noCiphertext()
+                                 ->setKey(key)
+                                 ->build();
+        delete builder;
+        return ctx;
     }
 
     CryptoContext *CreateSignatureContextFromFile(const char *path, char *passphrase)
     {
-        return CryptoContextBuilder::Create()
-            ->useRsa()
-            ->useSignature()
-            ->noPlaintext()
-            ->readKeyData(path, passphrase)
-            ->build();
+        ICryptoContextBuilderType *builder = CryptoContextBuilder::Create();
+        CryptoContext *ctx = builder->useRsa()
+                                 ->useSignature()
+                                 ->noPlaintext()
+                                 ->readKeyData(path, passphrase)
+                                 ->build();
+        delete builder;
+        return ctx;
     }
 
     CryptoContext *CreateVerificationContextFromFile(const char *path)
     {
-        return CryptoContextBuilder::Create()
-            ->useRsa()
-            ->useSignatureVerification()
-            ->noCiphertext()
-            ->readKeyData(path)
-            ->build();
+        ICryptoContextBuilderType *builder = CryptoContextBuilder::Create();
+        CryptoContext *ctx = builder->useRsa()
+                                 ->useSignatureVerification()
+                                 ->noCiphertext()
+                                 ->readKeyData(path)
+                                 ->build();
+        delete builder;
+        return ctx;
     }
 
     void FreeContext(CryptoContext *context)

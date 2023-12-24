@@ -7,6 +7,7 @@
 class ICryptoContextBuilderOperation
 {
 public:
+    virtual ~ICryptoContextBuilderOperation() {}
     virtual ICryptoContextBuilderPlaintext *useEncryption() = 0;
     virtual ICryptoContextBuilderCiphertext *useDecryption() = 0;
 };

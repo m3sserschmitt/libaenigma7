@@ -6,6 +6,7 @@
 class ICryptoContextBuilderKeyData
 {
 public:
+    virtual ~ICryptoContextBuilderKeyData() {}
     virtual ICryptoContextBuilder *setKey256(const unsigned char *key) = 0;
     virtual ICryptoContextBuilder *setKey(const char *key) = 0;
     virtual ICryptoContextBuilder *setKey(const char *Key, char *passphrase) = 0;

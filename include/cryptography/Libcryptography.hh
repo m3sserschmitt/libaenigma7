@@ -1,5 +1,5 @@
-#ifndef LIBCRYPTOGRAPHY_HH
-#define LIBCRYPTOGRAPHY_HH
+#ifndef LIB_CRYPTOGRAPHY_HH
+#define LIB_CRYPTOGRAPHY_HH
 
 #include "CryptoContext.hh"
 #include "CryptoContextBuilder.hh"

@@ -16,12 +16,19 @@ public:
     {
         this->datalen = datalen;
         this->data = new unsigned char[datalen + 1];
-        memcpy(this->data, data, datalen);
+        if (data)
+        {
+            memcpy(this->data, data, datalen);
+        }
     }
 
     virtual ~EncrypterData()
     {
-        memset(this->data, 0, datalen);
+        if (this->data)
+        {
+            memset(this->data, 0, datalen);
+        }
+
         delete[] this->data;
         this->data = nullptr;
     }

@@ -7,6 +7,7 @@
 class ICryptoContextBuilderType
 {
 public:
+    virtual ~ICryptoContextBuilderType() {}
     virtual ICryptoContextBuilderRsaOperation *useRsa() = 0;
     virtual ICryptoContextBuilderOperation *useAes() = 0;
 };

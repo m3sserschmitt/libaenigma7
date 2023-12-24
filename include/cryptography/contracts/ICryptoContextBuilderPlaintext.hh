@@ -6,8 +6,8 @@
 class ICryptoContextBuilderPlaintext
 {
 public:
-    virtual ICryptoContextBuilderKeyData *setPlaintext(const unsigned char * data, unsigned int datalen) = 0;
-
+    virtual ~ICryptoContextBuilderPlaintext() {}
+    virtual ICryptoContextBuilderKeyData *setPlaintext(const unsigned char *data, unsigned int datalen) = 0;
     virtual ICryptoContextBuilderKeyData *noPlaintext() = 0;
 };
 

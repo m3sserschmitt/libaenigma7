@@ -18,17 +18,37 @@ private:
           public ICryptoContextBuilder
     {
     private:
+        bool completed;
         CryptoContext *ctx;
 
     public:
-        Impl() { this->ctx = CryptoContext::Factory::CreateCryptoContext(); }
+        Impl()
+        {
+            completed = false;
+            this->ctx = CryptoContext::Factory::CreateCryptoContext();
+        }
 
-        ICryptoContextBuilderKeyData *noPlaintext()
+        ~Impl()
+        {
+            // Important note:
+            // If the user abandons the construction before calling the build() method
+            // and, later on, the Impl object is destroyed, then the CryptoContext object
+            // will remain behind (although partially initialized) with no chance for
+            // further cleanup. Thus, that will cause a memory leak.
+            // We have to release the that memory only if the build() method has not been called,
+            // i.e., the object has not been returned.
+            if (!completed)
+            {
+                delete this->ctx;
+            }
+        }
+
+        ICryptoContextBuilderKeyData *noPlaintext() override
         {
             return this;
         }
 
-        ICryptoContextBuilderKeyData *noCiphertext()
+        ICryptoContextBuilderKeyData *noCiphertext() override
         {
             return this;
         }
@@ -93,7 +113,7 @@ private:
             return this;
         }
 
-        ICryptoContextBuilderKeyData *setCiphertext(const unsigned char *data, unsigned int datalen)
+        ICryptoContextBuilderKeyData *setCiphertext(const unsigned char *data, unsigned int datalen) override
         {
             if (!this->ctx->setCiphertext(data, datalen))
             {
@@ -165,9 +185,14 @@ private:
 
         CryptoContext *build() override
         {
+            completed = true;
             return this->ctx;
         }
     };
+
+    CryptoContextBuilder() {}
+    CryptoContextBuilder(const CryptoContextBuilder &);
+    const CryptoContextBuilder &operator=(const CryptoContextBuilder &);
 
 public:
     static ICryptoContextBuilderType *Create()
