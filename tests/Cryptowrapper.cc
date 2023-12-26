@@ -10,15 +10,17 @@ bool testSymmetricCryptoWrapper(CryptoContext *encrctx, CryptoContext *decrctx)
 {
     unsigned int dataSize = 128;
     unsigned char *data = RandomDataGenerator::generate(dataSize);
-    const unsigned char *ciphertext = EncryptData(encrctx, data, dataSize);
+    
+    int cipherlen;
+    const unsigned char *ciphertext = EncryptData(encrctx, data, dataSize, cipherlen);
 
     if (not ciphertext)
     {
         return false;
     }
 
-    unsigned int cipherlen = GetAesGcmCiphertextSize(dataSize);
-    const unsigned char *plaintext = DecryptData(decrctx, ciphertext, cipherlen);
+    int plaintextLen;
+    const unsigned char *plaintext = DecryptData(decrctx, ciphertext, cipherlen, plaintextLen);
 
     if (not plaintext)
     {
@@ -33,15 +35,16 @@ bool testAsymmetricCryptoWrapper(CryptoContext *encrctx, CryptoContext *decrctx)
     unsigned int dataSize = 128;
     unsigned char *data = RandomDataGenerator::generate(dataSize);
     
-    const unsigned char *ciphertext = EncryptData(encrctx, data, dataSize);
+    int cipherlen;
+    const unsigned char *ciphertext = EncryptData(encrctx, data, dataSize, cipherlen);
 
     if (not ciphertext)
     {
         return false;
     }
 
-    int cipherlen = GetEnvelopeSize(2048, dataSize);
-    const unsigned char *plaintext = DecryptData(decrctx, ciphertext, cipherlen);
+    int plaintextLen;
+    const unsigned char *plaintext = DecryptData(decrctx, ciphertext, cipherlen, plaintextLen);
 
     if (not plaintext)
     {
@@ -56,7 +59,8 @@ bool testSignatureWrapper(CryptoContext *signctx, CryptoContext *verifctx)
     unsigned int dataSize = 128;
     unsigned char *data = RandomDataGenerator::generate(dataSize);
 
-    const unsigned char *signature = SignData(signctx, data, dataSize);
+    int signatureLen;
+    const unsigned char *signature = SignData(signctx, data, dataSize, signatureLen);
 
     if(not signature)
     {
