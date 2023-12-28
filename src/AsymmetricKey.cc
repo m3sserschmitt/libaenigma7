@@ -12,7 +12,7 @@ static char *AllocatePassphraseBuffer(const char *passphrase)
 
     int size = strlen(passphrase);
     char *newBuffer = new char[size + 1];
-    strcpy(newBuffer, passphrase);
+    strncpy(newBuffer, passphrase, size);
     newBuffer[size] = 0;
 
     return newBuffer;

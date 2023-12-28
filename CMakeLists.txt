@@ -12,6 +12,7 @@ add_library(cryptography SHARED
 ./src/CryptoContext.cc
 ./src/File.cc
 ./src/Libcryptography.cc
+./src/OnionParsing.cc
 )
 
 add_library(cryptography7 STATIC 
@@ -22,6 +23,7 @@ add_library(cryptography7 STATIC
 ./src/CryptoContext.cc
 ./src/File.cc
 ./src/Libcryptography.cc
+./src/OnionParsing.cc
 )
 
 set_target_properties(cryptography PROPERTIES VERSION ${PROJECT_VERSION} SOVERSION 7)
