@@ -3,24 +3,43 @@
 #include <openssl/bio.h>
 #include <openssl/pem.h>
 
-bool AsymmetricKey::setKeyData(const unsigned char *keyData, unsigned int len, char *passphrase)
+static char *AllocatePassphraseBuffer(const char *passphrase)
+{
+    if(not passphrase)
+    {
+        return nullptr;
+    }
+
+    int size = strlen(passphrase);
+    char *newBuffer = new char[size + 1];
+    strcpy(newBuffer, passphrase);
+    newBuffer[size] = 0;
+
+    return newBuffer;
+}
+
+bool AsymmetricKey::setKeyData(const unsigned char *keyData, unsigned int len, const char *passphrase)
 {
     this->freeKey();
 
-    BIO *bio = BIO_new_mem_buf((const char*)keyData, len);
+    BIO *bio = BIO_new_mem_buf((const char *)keyData, len);
 
     if (not bio)
     {
         return false;
     }
 
+    char *p = nullptr;
+
     switch (this->getKeyType())
     {
     case PublicKey:
-        this->key = PEM_read_bio_PUBKEY(bio, nullptr, nullptr, passphrase);
+        p = AllocatePassphraseBuffer(passphrase);
+        this->key = PEM_read_bio_PUBKEY(bio, nullptr, nullptr, p);
         break;
     case PrivateKey:
-        this->key = PEM_read_bio_PrivateKey(bio, nullptr, nullptr, passphrase);
+        p = AllocatePassphraseBuffer(passphrase);
+        this->key = PEM_read_bio_PrivateKey(bio, nullptr, nullptr, p);
         break;
     default:
         BIO_free(bio);
@@ -28,11 +47,12 @@ bool AsymmetricKey::setKeyData(const unsigned char *keyData, unsigned int len, c
     }
 
     BIO_free(bio);
+    delete[] p;
 
     return this->notNullKeyData();
 }
 
-bool AsymmetricKey::readKeyFile(const char *path, char *passphrase)
+bool AsymmetricKey::readKeyFile(const char *path, const char *passphrase)
 {
     this->freeKey();
 
@@ -43,13 +63,17 @@ bool AsymmetricKey::readKeyFile(const char *path, char *passphrase)
         return false;
     }
 
+    char *p = nullptr;
+
     switch (this->getKeyType())
     {
     case PublicKey:
-        this->key = PEM_read_PUBKEY(keyFile, nullptr, nullptr, passphrase);
+        p = AllocatePassphraseBuffer(passphrase);
+        this->key = PEM_read_PUBKEY(keyFile, nullptr, nullptr, p);
         break;
     case PrivateKey:
-        this->key = PEM_read_PrivateKey(keyFile, nullptr, nullptr, passphrase);
+        p = AllocatePassphraseBuffer(passphrase);
+        this->key = PEM_read_PrivateKey(keyFile, nullptr, nullptr, p);
         break;
     default:
         fclose(keyFile);
@@ -57,6 +81,7 @@ bool AsymmetricKey::readKeyFile(const char *path, char *passphrase)
     }
 
     fclose(keyFile);
+    delete[] p;
 
     return this->notNullKeyData();
 }

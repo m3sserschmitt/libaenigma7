@@ -10,17 +10,17 @@ extern "C" CryptoContext *CreateSymmetricDecryptionContext(const unsigned char *
 
 extern "C" CryptoContext *CreateAsymmetricEncryptionContext(const char *key);
 
-extern "C" CryptoContext *CreateAsymmetricDecryptionContext(const char *key, char *passphrase = nullptr);
+extern "C" CryptoContext *CreateAsymmetricDecryptionContext(const char *key, const char *passphrase = nullptr);
 
 extern "C" CryptoContext *CreateAsymmetricEncryptionContextFromFile(const char *path);
 
-extern "C" CryptoContext *CreateAsymmetricDecryptionContextFromFile(const char *key, char *passphrase = nullptr);
+extern "C" CryptoContext *CreateAsymmetricDecryptionContextFromFile(const char *key, const char *passphrase = nullptr);
 
-extern "C" CryptoContext *CreateSignatureContext(const char *key, char *passphrase = nullptr);
+extern "C" CryptoContext *CreateSignatureContext(const char *key, const char *passphrase = nullptr);
 
 extern "C" CryptoContext *CreateVerificationContext(const char *key);
 
-extern "C" CryptoContext *CreateSignatureContextFromFile(const char *path, char *passphrase = nullptr);
+extern "C" CryptoContext *CreateSignatureContextFromFile(const char *path, const char *passphrase = nullptr);
 
 extern "C" CryptoContext *CreateVerificationContextFromFile(const char *path);
 

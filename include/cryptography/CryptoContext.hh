@@ -114,12 +114,12 @@ public:
         return this->notNullKey() and this->key->setKeyData(key, SYMMETRIC_KEY_SIZE);
     }
 
-    bool setKeyData(const char *key, char *passphrase = nullptr)
+    bool setKeyData(const char *key, const char *passphrase = nullptr)
     {
         return this->notNullKey() and this->key->setKeyData((const unsigned char *)key, strlen(key), passphrase);
     }
 
-    bool readKeyFile(const char *path, char *passphrase = nullptr)
+    bool readKeyFile(const char *path, const char *passphrase = nullptr)
     {
         if (this->notNullKey() and this->key->isSymmetricKey())
         {

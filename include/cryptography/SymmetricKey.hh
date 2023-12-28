@@ -42,12 +42,12 @@ class SymmetricKey : public Key
 public:
     ~SymmetricKey() { this->freeKey(); }
 
-    bool setKeyData(const unsigned char *keyData, unsigned int keylen, char *passphrase = nullptr) override
+    bool setKeyData(const unsigned char *keyData, unsigned int keylen, const char *passphrase = nullptr) override
     {
         return this->writeKeyData(keyData);
     }
 
-    bool readKeyFile(const char *path, char *passphrase = nullptr) override
+    bool readKeyFile(const char *path, const char *passphrase = nullptr) override
     {
         return false;
     }

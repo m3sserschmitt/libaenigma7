@@ -52,7 +52,7 @@ public:
      * @return true If initialization successful
      * @return false If initialization failed
      */
-    virtual bool setKeyData(const unsigned char *keyData, unsigned int len, char *passphrase = nullptr) = 0;
+    virtual bool setKeyData(const unsigned char *keyData, unsigned int len, const char *passphrase = nullptr) = 0;
 
     /**
      * @brief Read encryption / decryption key material from file (especially useful for public/private key pairs). Override
@@ -63,7 +63,7 @@ public:
      * @return true If initialization successful
      * @return false If initialization failed
      */
-    virtual bool readKeyFile(const char *path, char *passphrase = nullptr) = 0;
+    virtual bool readKeyFile(const char *path, const char *passphrase = nullptr) = 0;
 
     /**
      * @brief release all memory related to the key

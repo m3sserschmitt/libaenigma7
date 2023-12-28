@@ -43,7 +43,7 @@ extern "C"
         }
     }
 
-    CryptoContext *CreateAsymmetricDecryptionContext(const char *key, char *passphrase)
+    CryptoContext *CreateAsymmetricDecryptionContext(const char *key, const char *passphrase)
     {
         ICryptoContextBuilderType *builder = CryptoContextBuilder::Create();
         try
@@ -103,7 +103,7 @@ extern "C"
         }
     }
 
-    CryptoContext *CreateAsymmetricDecryptionContextFromFile(const char *file, char *passphrase)
+    CryptoContext *CreateAsymmetricDecryptionContextFromFile(const char *file, const char *passphrase)
     {
         ICryptoContextBuilderType *builder = CryptoContextBuilder::Create();
         try
@@ -123,7 +123,7 @@ extern "C"
         }
     }
 
-    CryptoContext *CreateSignatureContext(const char *key, char *passphrase)
+    CryptoContext *CreateSignatureContext(const char *key, const char *passphrase)
     {
         ICryptoContextBuilderType *builder = CryptoContextBuilder::Create();
         try
@@ -163,7 +163,7 @@ extern "C"
         }
     }
 
-    CryptoContext *CreateSignatureContextFromFile(const char *path, char *passphrase)
+    CryptoContext *CreateSignatureContextFromFile(const char *path, const char *passphrase)
     {
         ICryptoContextBuilderType *builder = CryptoContextBuilder::Create();
         try

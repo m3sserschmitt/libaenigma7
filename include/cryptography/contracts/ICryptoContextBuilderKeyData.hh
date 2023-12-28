@@ -9,8 +9,8 @@ public:
     virtual ~ICryptoContextBuilderKeyData() {}
     virtual ICryptoContextBuilder *setKey256(const unsigned char *key) = 0;
     virtual ICryptoContextBuilder *setKey(const char *key) = 0;
-    virtual ICryptoContextBuilder *setKey(const char *Key, char *passphrase) = 0;
-    virtual ICryptoContextBuilder *readKeyData(const char *path, char *passphrase) = 0;
+    virtual ICryptoContextBuilder *setKey(const char *Key, const char *passphrase) = 0;
+    virtual ICryptoContextBuilder *readKeyData(const char *path, const char *passphrase) = 0;
     virtual ICryptoContextBuilder *readKeyData(const char *path) = 0;
 };
 

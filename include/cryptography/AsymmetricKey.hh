@@ -23,9 +23,9 @@ class AsymmetricKey : public Key
 public:
     ~AsymmetricKey() { this->freeKey(); }
 
-    bool setKeyData(const unsigned char *keyData, unsigned int len, char *passphrase = nullptr) override;
+    bool setKeyData(const unsigned char *keyData, unsigned int len, const char *passphrase = nullptr) override;
 
-    bool readKeyFile(const char *path, char *passphrase = nullptr) override;
+    bool readKeyFile(const char *path, const char *passphrase = nullptr) override;
 
     int getSize() const override { return this->notNullKeyData() ? EVP_PKEY_size(this->key) : -1; }
 

@@ -73,7 +73,7 @@ private:
             return this;
         }
 
-        ICryptoContextBuilder *setKey(const char *key, char *passphrase) override
+        ICryptoContextBuilder *setKey(const char *key, const char *passphrase) override
         {
             if (!this->ctx->setKeyData(key, passphrase))
             {
@@ -83,7 +83,7 @@ private:
             return this;
         }
 
-        ICryptoContextBuilder *readKeyData(const char *path, char *passphrase) override
+        ICryptoContextBuilder *readKeyData(const char *path, const char *passphrase) override
         {
             if (!this->ctx->readKeyFile(path, passphrase))
             {
