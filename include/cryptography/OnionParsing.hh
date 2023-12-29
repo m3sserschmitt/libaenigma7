@@ -3,8 +3,11 @@
 
 #include "CryptoContext.hh"
 
-extern "C" unsigned int DecodeOnionSize(const unsigned char *onion);
+extern "C"
+{
+    unsigned int DecodeOnionSize(const unsigned char *onion);
 
-extern "C" const unsigned char *UnsealOnion(CryptoContext *ctx, const unsigned char *onion, int &plaintextLen);
+    const unsigned char *UnsealOnion(CryptoContext *ctx, const unsigned char *onion, int &plaintextLen);
+}
 
 #endif

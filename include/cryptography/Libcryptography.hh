@@ -4,5 +4,6 @@
 #include "Factories.hh"
 #include "Encryption.hh"
 #include "OnionParsing.hh"
+#include "Utils.hh"
 
 #endif

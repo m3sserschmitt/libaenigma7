@@ -3,26 +3,29 @@
 
 #include "CryptoContext.hh"
 
-extern "C" CryptoContext *CreateSymmetricEncryptionContext(const unsigned char *key);
+extern "C"
+{
+    CryptoContext *CreateSymmetricEncryptionContext(const unsigned char *key);
 
-extern "C" CryptoContext *CreateSymmetricDecryptionContext(const unsigned char *key);
+    CryptoContext *CreateSymmetricDecryptionContext(const unsigned char *key);
 
-extern "C" CryptoContext *CreateAsymmetricEncryptionContext(const char *key);
+    CryptoContext *CreateAsymmetricEncryptionContext(const char *key);
 
-extern "C" CryptoContext *CreateAsymmetricDecryptionContext(const char *key, const char *passphrase = nullptr);
+    CryptoContext *CreateAsymmetricDecryptionContext(const char *key, const char *passphrase = nullptr);
 
-extern "C" CryptoContext *CreateAsymmetricEncryptionContextFromFile(const char *path);
+    CryptoContext *CreateAsymmetricEncryptionContextFromFile(const char *path);
 
-extern "C" CryptoContext *CreateAsymmetricDecryptionContextFromFile(const char *key, const char *passphrase = nullptr);
+    CryptoContext *CreateAsymmetricDecryptionContextFromFile(const char *key, const char *passphrase = nullptr);
 
-extern "C" CryptoContext *CreateSignatureContext(const char *key, const char *passphrase = nullptr);
+    CryptoContext *CreateSignatureContext(const char *key, const char *passphrase = nullptr);
 
-extern "C" CryptoContext *CreateVerificationContext(const char *key);
+    CryptoContext *CreateVerificationContext(const char *key);
 
-extern "C" CryptoContext *CreateSignatureContextFromFile(const char *path, const char *passphrase = nullptr);
+    CryptoContext *CreateSignatureContextFromFile(const char *path, const char *passphrase = nullptr);
 
-extern "C" CryptoContext *CreateVerificationContextFromFile(const char *path);
+    CryptoContext *CreateVerificationContextFromFile(const char *path);
 
-extern "C" void FreeContext(CryptoContext *context);
+    void FreeContext(CryptoContext *context);
+}
 
 #endif

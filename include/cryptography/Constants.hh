@@ -5,5 +5,7 @@
 #define IV_SIZE 12
 #define TAG_SIZE 16
 #define ONION_LENGTH_BYTES 2
+#define ADDRESS_SIZE 32
+#define PKEY_SIZE 2048
 
 #endif

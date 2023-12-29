@@ -11,8 +11,10 @@ add_library(cryptography SHARED
 ./src/EvpMdContext.cc
 ./src/CryptoContext.cc
 ./src/File.cc
-./src/Libcryptography.cc
+./src/Encryption.cc
+./src/Factories.cc
 ./src/OnionParsing.cc
+./src/Utils.cc
 )
 
 add_library(cryptography7 STATIC 
@@ -22,8 +24,10 @@ add_library(cryptography7 STATIC
 ./src/EvpMdContext.cc
 ./src/CryptoContext.cc
 ./src/File.cc
-./src/Libcryptography.cc
+./src/Encryption.cc
+./src/Factories.cc
 ./src/OnionParsing.cc
+./src/Utils.cc
 )
 
 set_target_properties(cryptography PROPERTIES VERSION ${PROJECT_VERSION} SOVERSION 7)
