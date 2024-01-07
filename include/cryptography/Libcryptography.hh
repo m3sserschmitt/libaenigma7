@@ -5,5 +5,6 @@
 #include "Encryption.hh"
 #include "OnionParsing.hh"
 #include "Utils.hh"
+#include "OnionBuilding.hh"
 
 #endif

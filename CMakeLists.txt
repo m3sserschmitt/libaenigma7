@@ -15,6 +15,7 @@ add_library(cryptography SHARED
 ./src/Factories.cc
 ./src/OnionParsing.cc
 ./src/Utils.cc
+./src/OnionBuilding.cc
 )
 
 add_library(cryptography7 STATIC 
@@ -28,6 +29,7 @@ add_library(cryptography7 STATIC
 ./src/Factories.cc
 ./src/OnionParsing.cc
 ./src/Utils.cc
+./src/OnionBuilding.cc
 )
 
 set_target_properties(cryptography PROPERTIES VERSION ${PROJECT_VERSION} SOVERSION 7)
@@ -38,6 +40,9 @@ target_link_libraries(libcryptography_wrapper_test cryptography)
 
 add_executable(envelopes_test ./tests/Envelopes.cc)
 target_link_libraries(envelopes_test cryptography)
+
+add_executable(onion_builder_test ./tests/OnionBuilder.cc)
+target_link_libraries(onion_builder_test cryptography)
 
 install(FILES
 ${CMAKE_BINARY_DIR}/libcryptography.so

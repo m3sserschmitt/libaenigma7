@@ -23,7 +23,7 @@ extern "C"
 
     const unsigned char *UnsealOnion(CryptoContext *ctx, const unsigned char *onion, int &plaintextLen)
     {
-        plaintextLen = 0;
+        plaintextLen = -1;
         if (not onion or not ctx)
         {
             return nullptr;
