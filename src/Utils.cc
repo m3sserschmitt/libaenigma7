@@ -12,19 +12,19 @@ extern "C"
         return ciphertext - TAG_SIZE - IV_SIZE;
     }
 
-    unsigned int GetEnvelopeSize(unsigned int pkeySizeBits, unsigned int plaintextLen)
+    unsigned int GetEnvelopeSize(unsigned int plaintextLen)
     {
-        return pkeySizeBits / 8 + IV_SIZE + TAG_SIZE + plaintextLen;
+        return PKEY_SIZE / 8 + IV_SIZE + TAG_SIZE + plaintextLen;
     }
 
-    unsigned int GetOpenEnvelopeSize(unsigned int pkeySizeBits, unsigned int envelopeSize)
+    unsigned int GetOpenEnvelopeSize(unsigned int envelopeSize)
     {
-        return envelopeSize - pkeySizeBits / 8 - IV_SIZE - TAG_SIZE;
+        return envelopeSize - PKEY_SIZE / 8 - IV_SIZE - TAG_SIZE;
     }
 
-    unsigned int GetSignedDataSize(unsigned int pkeySizeBits, unsigned int dataSize)
+    unsigned int GetSignedDataSize(unsigned int dataSize)
     {
-        return pkeySizeBits / 8 + dataSize;
+        return PKEY_SIZE / 8 + dataSize;
     }
 
     unsigned int GetDefaultAddressSize()

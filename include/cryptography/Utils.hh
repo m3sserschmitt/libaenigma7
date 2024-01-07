@@ -7,11 +7,11 @@ extern "C"
 
     unsigned int GetAesGcmPlaintextSize(unsigned int ciphertext);
 
-    unsigned int GetEnvelopeSize(unsigned int pkeySizeBits, unsigned int plaintextLen);
+    unsigned int GetEnvelopeSize(unsigned int plaintextLen);
 
-    unsigned int GetOpenEnvelopeSize(unsigned int pkeySizeBits, unsigned int envelopeSize);
+    unsigned int GetOpenEnvelopeSize(unsigned int envelopeSize);
 
-    unsigned int GetSignedDataSize(unsigned int pkeySizeBits, unsigned int dataSize);
+    unsigned int GetSignedDataSize(unsigned int dataSize);
 
     unsigned int GetDefaultAddressSize();
 
