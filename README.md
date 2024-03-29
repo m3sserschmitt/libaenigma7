@@ -9,7 +9,7 @@ You need `OpenSSL` library to be installed on your machine. Type this command in
 
 `openssl version`
 
-If you see something similar to this: `OpenSSL 3.0.11 19 Sep 2023 (Library: OpenSSL 3.0.11 19 Sep 2023)`, it means that you have OpenSSL installed. Otherwise checkout [OpenSSL](https://www.openssl.org/) for details about installation process. You also need `openssl-dev` installed in order to compile the source code. This package can be installed using `sudo apt-get install libssl-dev` command.
+If you see something similar to this: `OpenSSL 3.0.11 19 Sep 2023 (Library: OpenSSL 3.0.11 19 Sep 2023)`, it means that you have OpenSSL installed. Otherwise checkout [OpenSSL](https://www.openssl.org/) for details about installation process. You will also need `openssl-dev` and `libkeyutils-dev` installed in order to compile the source code. This packages could be installed using `sudo apt-get install libssl-dev libkeyutils-dev` command.
 
 ### Installing
 
