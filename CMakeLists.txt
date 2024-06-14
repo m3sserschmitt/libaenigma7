@@ -1,5 +1,4 @@
-cmake_minimum_required(VERSION 3.5.0)
-
+cmake_minimum_required(VERSION 3.22.0)
 project(libcryptography VERSION 7.0.0)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
@@ -35,25 +34,21 @@ add_library(cryptography7 STATIC
 set_target_properties(cryptography PROPERTIES VERSION ${PROJECT_VERSION} SOVERSION 7)
 target_link_libraries(cryptography crypto)
 
-add_library(kernelkeys SHARED ./src/kernelkeys/KernelKeys.c)
-add_library(kernelkeys1 STATIC ./src/kernelkeys/KernelKeys.c)
-set_target_properties(kernelkeys PROPERTIES VERSION 1.0.0 SOVERSION 1)
-target_link_libraries(kernelkeys keyutils)
+if(ANDROID)
+    message(STATUS "Skipping kernelkeys library when building for platform Android.")
+    message(STATUS "Install rule will not be defined when building for platform Android.")
+else ()
+    add_library(kernelkeys SHARED ./src/kernelkeys/KernelKeys.c)
+    add_library(kernelkeys1 STATIC ./src/kernelkeys/KernelKeys.c)
+    set_target_properties(kernelkeys PROPERTIES VERSION 1.0.0 SOVERSION 1)
+    target_link_libraries(kernelkeys keyutils)
 
-add_executable(libcryptography_wrapper_test ./tests/Cryptowrapper.cc)
-target_link_libraries(libcryptography_wrapper_test cryptography)
-
-add_executable(envelopes_test ./tests/Envelopes.cc)
-target_link_libraries(envelopes_test cryptography)
-
-add_executable(onion_builder_test ./tests/OnionBuilder.cc)
-target_link_libraries(onion_builder_test cryptography)
-
-install(FILES
-${CMAKE_BINARY_DIR}/libcryptography.so
-${CMAKE_BINARY_DIR}/libcryptography.so.7
-${CMAKE_BINARY_DIR}/libcryptography.so.7.0.0
-${CMAKE_BINARY_DIR}/libkernelkeys.so
-${CMAKE_BINARY_DIR}/libkernelkeys.so.1
-${CMAKE_BINARY_DIR}/libkernelkeys.so.1.0.0
-DESTINATION "/usr/local/lib")
+    install(FILES
+            ${CMAKE_BINARY_DIR}/libcryptography.so
+            ${CMAKE_BINARY_DIR}/libcryptography.so.7
+            ${CMAKE_BINARY_DIR}/libcryptography.so.7.0.0
+            ${CMAKE_BINARY_DIR}/libkernelkeys.so
+            ${CMAKE_BINARY_DIR}/libkernelkeys.so.1
+            ${CMAKE_BINARY_DIR}/libkernelkeys.so.1.0.0
+            DESTINATION "/usr/local/lib")
+endif ()
