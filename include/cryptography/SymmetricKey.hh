@@ -59,7 +59,7 @@ public:
     void freeKey() override
     {
         this->cleanKeyData();
-        delete this->keyData;
+        delete[] this->keyData;
         this->keyData = nullptr;
     }
 

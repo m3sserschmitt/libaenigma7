@@ -24,18 +24,18 @@ class CryptoMachine
         this->setIn(nullptr);
     }
 
-    void freeOut()
-    {
-        delete this->getOut();
-        this->setOut(nullptr);
-    }
-
     void setCipher(EvpContext *cipher)
     {
         this->cipher = cipher;
     }
 
 protected:
+    void freeOut()
+    {
+        delete this->getOut();
+        this->setOut(nullptr);
+    }
+    
     const EncrypterData *getIn() const
     {
         return this->in;

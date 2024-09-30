@@ -41,7 +41,7 @@ class SymmetricEvpCipherContext : public EvpCipherContext
      * @param cipherlen if successful it contains the size of ciphertext (C)
      * @return const unsigned char * pointer to the ciphertext
      */
-    const unsigned char * readEncryptedData(const EncrypterData *in, unsigned int &cipherlen);
+    const unsigned char * readEncryptedData(const EncrypterData *in, int &cipherlen);
 
 public:
     SymmetricEvpCipherContext(Key *key) : EvpCipherContext(key) {}

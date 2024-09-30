@@ -19,9 +19,9 @@ EncrypterResult *SymmetricEvpCipherContext::createEncryptedData() const
     return result;
 }
 
-const unsigned char * SymmetricEvpCipherContext::readEncryptedData(const EncrypterData *in, unsigned int &cipherlen)
+const unsigned char * SymmetricEvpCipherContext::readEncryptedData(const EncrypterData *in, int &cipherlen)
 {
-    cipherlen = 0;
+    cipherlen = -1;
 
     if (not in or not in->getData())
     {
@@ -101,8 +101,13 @@ EncrypterResult *SymmetricEvpCipherContext::decrypt(const EncrypterData *in)
         return this->abort();
     }
 
-    unsigned int cipherlen;
+    int cipherlen;
     const unsigned char * ciphertext = this->readEncryptedData(in, cipherlen);
+
+    if(not ciphertext or cipherlen < 0)
+    {
+        return this->abort();
+    }
 
     if (EVP_DecryptInit_ex(this->getCipherContext(), EVP_aes_256_gcm(), NULL, (const unsigned char *)this->getKey()->getKeyData(), this->getIV()) != 1)
     {

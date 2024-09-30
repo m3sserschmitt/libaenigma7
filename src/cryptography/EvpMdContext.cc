@@ -15,9 +15,9 @@ EncrypterResult *EvpMdContext::createSignedData(const EncrypterData *in) const
     return result;
 }
 
-const unsigned char *EvpMdContext::readSignedData(const EncrypterData *in, unsigned int &datasize)
+const unsigned char *EvpMdContext::readSignedData(const EncrypterData *in, int &datasize)
 {
-    datasize = 0;
+    datasize = -1;
 
     if (not in or not in->getData())
     {
@@ -105,10 +105,10 @@ EncrypterResult *EvpMdContext::decrypt(const EncrypterData *in)
         return this->abort();
     }
 
-    unsigned int datalen;
+    int datalen;
     const unsigned char *data = this->readSignedData(in, datalen);
 
-    if (not data or not datalen)
+    if (not data or datalen < 0)
     {
         return this->abort();
     }

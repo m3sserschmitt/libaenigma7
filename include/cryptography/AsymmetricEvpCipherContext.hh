@@ -93,7 +93,7 @@ class AsymmetricEvpCipherContext : public EvpCipherContext
      * @param cipherlen if successful it contains the calculated size of ciphertext (C)
      * @return const unsigned char * pointer to the ciphertext (C)
      */
-    const unsigned char *readEnvelope(const EncrypterData *in, unsigned int &cipherlen);
+    const unsigned char *readEnvelope(const EncrypterData *in, int &cipherlen);
 
 public:
     AsymmetricEvpCipherContext(Key *key) : EvpCipherContext(key)

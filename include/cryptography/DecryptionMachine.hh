@@ -14,6 +14,7 @@ public:
     bool run() override
     {
         EncrypterResult *result = this->getCipher()->decrypt(this->getIn());
+        this->freeOut();
         this->setOut(result);
         return not result->isError();
     }

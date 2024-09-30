@@ -75,7 +75,7 @@ class EvpMdContext : public EvpContext
      * @param datasize if successful it contains the data size
      * @return const unsigned char * pointer to data
      */
-    const unsigned char *readSignedData(const EncrypterData *in, unsigned int &datasize);
+    const unsigned char *readSignedData(const EncrypterData *in, int &datasize);
 
     bool notNullMdContext() const { return this->mdContext != nullptr; }
 

@@ -21,9 +21,9 @@ EncrypterResult *AsymmetricEvpCipherContext::createEnvelope() const
     return result;
 }
 
-const unsigned char * AsymmetricEvpCipherContext::readEnvelope(const EncrypterData *in, unsigned int &cipherlen)
+const unsigned char * AsymmetricEvpCipherContext::readEnvelope(const EncrypterData *in, int &cipherlen)
 {
-    cipherlen = 0;
+    cipherlen = -1;
 
     if (not in or not in->getData())
     {
@@ -57,10 +57,10 @@ EncrypterResult *AsymmetricEvpCipherContext::decrypt(const EncrypterData *in)
         return this->abort();
     }
 
-    unsigned int cipherlen;
+    int cipherlen;
     const unsigned char * ciphertext = this->readEnvelope(in, cipherlen);
 
-    if (not ciphertext or not cipherlen)
+    if (not ciphertext or cipherlen < 0)
     {
         return this->abort();
     }

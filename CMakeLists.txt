@@ -42,6 +42,8 @@ else ()
     add_library(kernelkeys1 STATIC ./src/kernelkeys/KernelKeys.c)
     set_target_properties(kernelkeys PROPERTIES VERSION 1.0.0 SOVERSION 1)
     target_link_libraries(kernelkeys keyutils)
+    add_executable(cryptowrapper_test ./tests/Cryptowrapper.cc)
+    target_link_libraries(cryptowrapper_test cryptography)
 
     install(FILES
             ${CMAKE_BINARY_DIR}/libcryptography.so
