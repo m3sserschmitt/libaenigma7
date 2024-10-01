@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.22.0)
-project(libcryptography VERSION 7.0.0)
+project(libaenigma VERSION 7.0.0)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-add_library(cryptography SHARED 
+add_library(aenigma SHARED 
 ./src/cryptography/AsymmetricKey.cc
 ./src/cryptography/AsymmetricEvpCipherContext.cc
 ./src/cryptography/SymmetricEvpCipherContext.cc
@@ -17,7 +17,7 @@ add_library(cryptography SHARED
 ./src/cryptography/OnionBuilding.cc
 )
 
-add_library(cryptography7 STATIC 
+add_library(aenigma7 STATIC 
 ./src/cryptography/AsymmetricKey.cc
 ./src/cryptography/AsymmetricEvpCipherContext.cc
 ./src/cryptography/SymmetricEvpCipherContext.cc
@@ -31,8 +31,8 @@ add_library(cryptography7 STATIC
 ./src/cryptography/OnionBuilding.cc
 )
 
-set_target_properties(cryptography PROPERTIES VERSION ${PROJECT_VERSION} SOVERSION 7)
-target_link_libraries(cryptography crypto)
+set_target_properties(aenigma PROPERTIES VERSION ${PROJECT_VERSION} SOVERSION 7)
+target_link_libraries(aenigma crypto)
 
 if(ANDROID)
     message(STATUS "Skipping kernelkeys library when building for platform Android.")
@@ -42,13 +42,13 @@ else ()
     add_library(kernelkeys1 STATIC ./src/kernelkeys/KernelKeys.c)
     set_target_properties(kernelkeys PROPERTIES VERSION 1.0.0 SOVERSION 1)
     target_link_libraries(kernelkeys keyutils)
-    add_executable(cryptowrapper_test ./tests/Cryptowrapper.cc)
-    target_link_libraries(cryptowrapper_test cryptography)
+    add_executable(aenigma_test ./tests/AenigmaTest.cc)
+    target_link_libraries(aenigma_test aenigma)
 
     install(FILES
-            ${CMAKE_BINARY_DIR}/libcryptography.so
-            ${CMAKE_BINARY_DIR}/libcryptography.so.7
-            ${CMAKE_BINARY_DIR}/libcryptography.so.7.0.0
+            ${CMAKE_BINARY_DIR}/libaenigma.so
+            ${CMAKE_BINARY_DIR}/libaenigma.so.7
+            ${CMAKE_BINARY_DIR}/libaenigma.so.7.0.0
             ${CMAKE_BINARY_DIR}/libkernelkeys.so
             ${CMAKE_BINARY_DIR}/libkernelkeys.so.1
             ${CMAKE_BINARY_DIR}/libkernelkeys.so.1.0.0

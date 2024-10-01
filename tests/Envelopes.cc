@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "cryptography/Libcryptography.hh"
+#include "cryptography/Aenigma.hh"
 
 using namespace std;
 

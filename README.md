@@ -15,7 +15,7 @@ If you see something similar to this: `OpenSSL 3.0.11 19 Sep 2023 (Library: Open
 
 You need a copy of source code. Clone the repository using git:
 
-`git clone https://github.com/m3sserschmitt/libcryptography7.git` 
+`git clone https://github.com/m3sserschmitt/libaenigma7.git` 
 
 OR
 

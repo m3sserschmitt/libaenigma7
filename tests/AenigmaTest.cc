@@ -1,5 +1,4 @@
-#include "cryptography/Libcryptography.hh"
-#include "cryptography/RandomDataGenerator.hh"
+#include "cryptography/Aenigma.hh"
 
 #include <cstring>
 #include <iostream>
@@ -294,5 +293,5 @@ int main()
 
     PrintResult("===== TEST RESULT =====> ", result);
 
-    return EXIT_SUCCESS;
+    return result ? EXIT_SUCCESS : EXIT_FAILURE;
 }
