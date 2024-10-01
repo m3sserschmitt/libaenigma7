@@ -38,10 +38,10 @@ if(ANDROID)
     message(STATUS "Skipping kernelkeys library when building for platform Android.")
     message(STATUS "Install rule will not be defined when building for platform Android.")
 else ()
-    add_library(kernelkeys SHARED ./src/kernelkeys/KernelKeys.c)
-    add_library(kernelkeys1 STATIC ./src/kernelkeys/KernelKeys.c)
-    set_target_properties(kernelkeys PROPERTIES VERSION 1.0.0 SOVERSION 1)
-    target_link_libraries(kernelkeys keyutils)
+    add_library(aengima-kernelkeys SHARED ./src/kernelkeys/KernelKeys.c)
+    add_library(aengima-kernelkeys1 STATIC ./src/kernelkeys/KernelKeys.c)
+    set_target_properties(aengima-kernelkeys PROPERTIES VERSION 1.0.0 SOVERSION 1)
+    target_link_libraries(aengima-kernelkeys keyutils)
     add_executable(aenigma_test ./tests/AenigmaTest.cc)
     target_link_libraries(aenigma_test aenigma)
 
@@ -49,8 +49,8 @@ else ()
             ${CMAKE_BINARY_DIR}/libaenigma.so
             ${CMAKE_BINARY_DIR}/libaenigma.so.7
             ${CMAKE_BINARY_DIR}/libaenigma.so.7.0.0
-            ${CMAKE_BINARY_DIR}/libkernelkeys.so
-            ${CMAKE_BINARY_DIR}/libkernelkeys.so.1
-            ${CMAKE_BINARY_DIR}/libkernelkeys.so.1.0.0
+            ${CMAKE_BINARY_DIR}/libaengima-kernelkeys.so
+            ${CMAKE_BINARY_DIR}/libaengima-kernelkeys.so.1
+            ${CMAKE_BINARY_DIR}/libaengima-kernelkeys.so.1.0.0
             DESTINATION "/usr/local/lib")
 endif ()
