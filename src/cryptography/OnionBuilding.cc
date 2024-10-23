@@ -64,13 +64,13 @@ static CryptoContext **AllocateStructuresAndCalculateTotalSize(unsigned int plai
 
     for (allocatedIterations = 0; allocatedIterations < count; allocatedIterations++)
     {
-        requiredMemory = GetEnvelopeSize(requiredMemory + ADDRESS_SIZE) + ONION_LENGTH_BYTES;
-
         if (not keys[allocatedIterations] or not addresses[allocatedIterations] or
             not(ctx[allocatedIterations] = CreateAsymmetricEncryptionContext(keys[allocatedIterations])))
         {
             break;
         }
+
+        requiredMemory = GetEnvelopeSize(requiredMemory + ADDRESS_SIZE, keys[allocatedIterations]) + ONION_LENGTH_BYTES;
     }
 
     if (allocatedIterations == count)

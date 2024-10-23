@@ -1,4 +1,5 @@
 #include "cryptography/Constants.hh"
+#include "cryptography/AsymmetricKey.hh"
 
 extern "C"
 {
@@ -12,28 +13,33 @@ extern "C"
         return ciphertext - TAG_SIZE - IV_SIZE;
     }
 
-    unsigned int GetEnvelopeSize(unsigned int plaintextLen)
+    unsigned int GetPKeySize(const char *publicKey)
     {
-        return PKEY_SIZE / 8 + IV_SIZE + TAG_SIZE + plaintextLen;
+        AsymmetricKey *key = AsymmetricKey::Factory::createPublicKeyFromPem(publicKey, strlen(publicKey), nullptr);
+
+        if(not key)
+        {
+            return -1;
+        }
+
+        int keySize = key->getSize();
+        delete key;
+
+        return keySize;
     }
 
-    unsigned int GetOpenEnvelopeSize(unsigned int envelopeSize)
+    unsigned int GetEnvelopeSize(unsigned int plaintextLen, const char *publicKey)
     {
-        return envelopeSize - PKEY_SIZE / 8 - IV_SIZE - TAG_SIZE;
+        return GetPKeySize(publicKey) + IV_SIZE + TAG_SIZE + plaintextLen;
     }
 
-    unsigned int GetSignedDataSize(unsigned int dataSize)
+    unsigned int GetOpenEnvelopeSize(unsigned int envelopeSize, const char *publicKey)
     {
-        return PKEY_SIZE / 8 + dataSize;
+        return envelopeSize - GetPKeySize(publicKey) - IV_SIZE - TAG_SIZE;
     }
 
-    unsigned int GetDefaultAddressSize()
+    unsigned int GetSignedDataSize(unsigned int dataSize, const char *publicKey)
     {
-        return ADDRESS_SIZE;
-    }
-
-    unsigned int GetDefaultPKeySize()
-    {
-        return PKEY_SIZE;
+        return GetPKeySize(publicKey) + dataSize;
     }
 }

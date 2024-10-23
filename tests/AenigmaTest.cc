@@ -74,7 +74,7 @@ bool TestSubsequentOperations(VerificationFunction executor, CryptoContext *ctx,
 
 void PrintResult(const char *message, bool success)
 {
-    cout << message << (success ? "\033[32m" : "\033[31m") << "SUCCESS" << "\033[0m;\n";
+    cout << message << (success ? "\033[32mSUCCESS" : "\033[31mFAILURE") << "\033[0m;\n";
 }
 
 bool RunTest(const char *testCase, EncryptionFunction executor, CryptoContext *ctx, const unsigned char *input, unsigned int inlen, const unsigned char *expectedOutput, int expectedOutlen)
@@ -290,6 +290,8 @@ int main()
     ctx = CreateVerificationContext(invalidPublicKey);
     result = result && RunTest("Test signature verification with invalid signed data should fail", VerifySignature, ctx, invalidSignedData, invalidSignedDatalen, false);
     delete ctx;
+
+    PrintResult("Test get correct key size;result: ", GetPKeySize(publicKey) == 256);
 
     PrintResult("===== TEST RESULT =====> ", result);
 
