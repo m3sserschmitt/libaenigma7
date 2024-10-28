@@ -42,7 +42,7 @@ int ReadKey(int keyId, char *data)
     char *buffer = malloc((MAX_KERNEL_KEY_SIZE + 1) * sizeof(char));
     ssize_t bytesRead = keyctl_read(keyId, buffer, MAX_KERNEL_KEY_SIZE);
 
-    if (bytesRead < 0)
+    if (bytesRead < 0 || bytesRead > MAX_KERNEL_KEY_SIZE)
     {
         memset(buffer, 0, MAX_KERNEL_KEY_SIZE + 1);
         free(buffer);
