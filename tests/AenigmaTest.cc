@@ -79,7 +79,7 @@ void PrintResult(const char *message, bool success)
 
 bool RunTest(const char *testCase, EncryptionFunction executor, CryptoContext *ctx, const unsigned char *input, unsigned int inlen, const unsigned char *expectedOutput, int expectedOutlen)
 {
-    cout << testCase << ";";
+    cout << testCase << "; ";
     bool success = TestSubsequentOperations(executor, ctx, input, inlen, expectedOutput, expectedOutlen);
     PrintResult("result: ", success);
     return success;
@@ -87,7 +87,7 @@ bool RunTest(const char *testCase, EncryptionFunction executor, CryptoContext *c
 
 bool RunTest(const char *testCase, VerificationFunction executor, CryptoContext *ctx, const unsigned char *input, unsigned int inlen, bool expectedResult)
 {
-    cout << testCase << ";";
+    cout << testCase << "; ";
     bool success = TestSubsequentOperations(executor, ctx, input, inlen, expectedResult);
     PrintResult("result: ", success);
     return success;
@@ -102,6 +102,16 @@ const char *publicKey = "-----BEGIN PUBLIC KEY-----\n"
                         "uLWhUdX9FPjSpsTCu7vOq0fKitIe9yIXkcA+WZSU4AqxH3h+9eJtlG0/yiK/thkG\n"
                         "OwIDAQAB\n"
                         "-----END PUBLIC KEY-----\n";
+
+const char *otherPublicKey = "-----BEGIN PUBLIC KEY-----\n"
+                             "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAphPQBoaRmbn90mlMD7xV\n"
+                             "kYXkpoLCOfECW4MiqvIwlJ3CWx9f8fvrdTWkhQpJdFEtgXzIhe4a28CgOw4VzdrL\n"
+                             "jxSRxg+q/l7F7of7jGvbZEaS2RC/j1m7MLa8t7d5vpO5Rf3CjldiPLzQpuhfhRTt\n"
+                             "RjGTN8KGYqG37eXkPcmLgkUgRZRk4uxEy2kZLeNXLTbR8fiigSt1becTDhPPjyjT\n"
+                             "G/M8HRRAMQ1qv425pefzhXuqdNkR5qZl/2L9TwTvTCHMMha2MTWFlSRwsfV7GaJ2\n"
+                             "QZ+xHaQQ+Cv7cYwdYvg7tL+ETZuSQ/34XJeBbidWeLIfXZpRDJ512yK2XQw1iE5L\n"
+                             "yQIDAQAB\n"
+                             "-----END PUBLIC KEY-----";
 
 const char *privateKey = "-----BEGIN ENCRYPTED PRIVATE KEY-----\n"
                          "MIIFHDBOBgkqhkiG9w0BBQ0wQTApBgkqhkiG9w0BBQwwHAQIgeAn0zx2m+8CAggA\n"
@@ -229,6 +239,59 @@ const int signedDatalen = 272;
 const unsigned char invalidSignedData[] = {1, 56, 125, 100, 4, 156, 1, 80, 70, 45, 20, 76, 23, 67, 7, 12, 143, 112, 164, 107, 167, 15, 93, 9, 193, 162, 94, 112, 108, 250, 43, 118, 125, 206, 106, 204, 174, 84, 237, 239, 202, 187, 251, 155, 52, 183, 155, 60, 53, 156, 90, 247, 134, 138, 184, 21, 105, 85, 208, 68, 168, 153, 33, 117, 1, 209, 86, 123, 154, 208, 149, 234, 163, 3, 93, 9, 21, 246, 212, 158, 115, 190, 192, 22, 246, 204, 227, 111, 68, 162, 165, 241, 21, 74, 17, 96, 244, 82, 155, 204, 16, 76, 15, 28, 130, 217, 102, 118, 36, 83, 229, 214, 51, 77, 88, 4, 146, 150, 165, 233, 132, 215, 83, 83, 142, 98, 16, 200, 19, 66, 70, 222, 163, 76, 46, 21, 3, 240, 152, 222, 230, 77, 66, 222, 45, 127, 28, 130, 115, 148, 163, 22, 170, 71, 40, 119, 92, 134, 106, 240, 180, 189, 2, 68, 139, 137, 227, 223, 197, 140, 214, 86, 33, 149, 47, 117, 0, 47, 188, 19, 74, 11, 40, 184, 108, 124, 41, 85, 32, 52, 201, 27, 129, 221, 112, 182, 145, 101, 187, 92, 13, 65, 251, 218, 220, 182, 63, 190, 69, 74, 165, 34, 61, 142, 224, 160, 62, 81, 6, 197, 185, 179, 159, 25, 177, 87, 156, 164, 249, 54, 1, 146, 195, 7, 189, 228, 231, 236, 121, 166, 55, 51, 177, 152, 140, 163, 183, 115, 222};
 const int invalidSignedDatalen = 249;
 
+const char *publicKeys[] = {publicKey, otherPublicKey};
+const char *invalidPublicKeys[] = {publicKey, invalidPublicKey};
+const int publicKeysCount = 2;
+const char *address = "cbff2e12fb1f752cb17185f080f2b40301165a1051531cc0614e495ee2620ef9";
+const char *addresses[] = {address, address};
+
+const unsigned char onion[] = {1, 76, 12, 5, 29, 7, 248, 206, 17, 105, 127, 188, 225, 155, 222, 158, 221, 120, 138, 15, 198, 142, 185, 87, 222, 82, 144, 23, 235, 117, 23, 192, 94, 20, 79, 8, 216, 46, 52, 176, 180, 69, 131, 33, 196, 11, 1, 112, 177, 15, 3, 26, 184, 193, 27, 130, 7, 211, 77, 197, 214, 179, 243, 225, 123, 130, 192, 176, 111, 199, 131, 155, 237, 8, 223, 128, 94, 232, 172, 248, 181, 101, 102, 166, 43, 195, 205, 67, 253, 253, 160, 142, 105, 165, 154, 70, 9, 161, 183, 41, 103, 194, 34, 166, 249, 41, 53, 230, 51, 104, 147, 100, 58, 202, 40, 45, 225, 82, 23, 67, 161, 104, 196, 116, 153, 202, 113, 142, 91, 138, 1, 108, 197, 29, 39, 161, 251, 76, 196, 74, 245, 191, 224, 209, 119, 195, 43, 115, 187, 151, 18, 215, 2, 54, 107, 0, 88, 93, 157, 34, 28, 232, 216, 222, 102, 228, 203, 218, 214, 215, 149, 10, 155, 145, 92, 96, 178, 166, 60, 141, 7, 209, 83, 155, 142, 165, 8, 15, 88, 141, 132, 82, 91, 208, 150, 201, 104, 91, 12, 129, 14, 118, 34, 9, 112, 106, 192, 184, 76, 193, 146, 30, 94, 115, 84, 34, 72, 51, 161, 94, 103, 253, 48, 9, 168, 77, 32, 191, 98, 254, 12, 67, 14, 111, 39, 150, 145, 212, 43, 116, 80, 91, 121, 240, 45, 188, 31, 118, 38, 152, 18, 232, 255, 200, 159, 220, 184, 157, 75, 56, 132, 13, 150, 238, 253, 74, 72, 60, 71, 5, 119, 120, 225, 218, 70, 244, 74, 240, 167, 13, 144, 0, 62, 69, 55, 51, 153, 219, 7, 126, 211, 3, 101, 90, 21, 17, 0, 124, 214, 19, 67, 8, 220, 112, 99, 253, 25, 140, 210, 210, 177, 23, 241, 223, 55, 240, 4, 205, 25, 89, 211, 238, 241, 81, 76, 253, 33, 57, 137, 22, 42, 30, 208, 153};
+const int onionLen = 334;
+
+bool TestSealOnion()
+{
+    int outlen;
+    const unsigned char *out = SealOnion(plaintext, plaintextLen, publicKeys, addresses, publicKeysCount, outlen);
+    bool success = out and outlen == 652;
+    delete[] out;
+    return success;
+}
+
+bool TestSealOnionInvalidKeysFails()
+{
+    int outlen;
+    const unsigned char *out = SealOnion(plaintext, plaintextLen, invalidPublicKeys, addresses, publicKeysCount, outlen);
+    return not out and outlen < 0;
+}
+
+bool TestOnionUnseal()
+{
+    CryptoContext *ctx = CreateAsymmetricDecryptionContext(privateKey, privateKeyPassphrase);
+    int outlen;
+    const unsigned char *out = UnsealOnion(ctx, onion, outlen);
+    bool result = out && outlen == plaintextLen + 32 && !memcmp(plaintext, out + 32, plaintextLen);
+    delete ctx;
+    return result;
+}
+
+bool TestOnionUnsealInvalidKeyFails()
+{
+    CryptoContext *ctx = CreateAsymmetricDecryptionContext(invalidPrivateKey, privateKeyPassphrase);
+    int outlen;
+    const unsigned char *out = UnsealOnion(ctx, onion, outlen);
+    delete ctx;
+    return not out && outlen < 0;
+}
+
+bool TestOnionUnsealWrongKeyFails()
+{
+    CryptoContext *ctx = CreateAsymmetricDecryptionContext(otherPrivateKey);
+    int outlen;
+    const unsigned char *out = UnsealOnion(ctx, onion, outlen);
+    delete ctx;
+    return not out && outlen < 0;
+}
+
 int main()
 {
     CryptoContext *ctx = CreateAsymmetricEncryptionContext(publicKey);
@@ -236,62 +299,79 @@ int main()
     delete ctx;
 
     ctx = CreateAsymmetricEncryptionContext(invalidPublicKey);
-    result = result && RunTest("Test asymmetric encryption with invalid key should fail", EncryptData, ctx, plaintext, plaintextLen, nullptr, -1);
+    result = result & RunTest("Test asymmetric encryption with invalid key should fail", EncryptData, ctx, plaintext, plaintextLen, nullptr, -1);
     delete ctx;
 
     ctx = CreateAsymmetricDecryptionContext(privateKey, privateKeyPassphrase);
-    result = result && RunTest("Test asymmetric decryption", DecryptData, ctx, asymmetricCiphertext, asymmetricCipherLen, plaintext, plaintextLen);
+    result = result & RunTest("Test asymmetric decryption", DecryptData, ctx, asymmetricCiphertext, asymmetricCipherLen, plaintext, plaintextLen);
     delete ctx;
 
     ctx = CreateAsymmetricDecryptionContext(invalidPrivateKey, privateKeyPassphrase);
-    result = result && RunTest("Test asymmetric decryption with invalid key should fail", DecryptData, ctx, asymmetricCiphertext, asymmetricCipherLen, nullptr, -1);
+    result = result & RunTest("Test asymmetric decryption with invalid key should fail", DecryptData, ctx, asymmetricCiphertext, asymmetricCipherLen, nullptr, -1);
     delete ctx;
 
     ctx = CreateAsymmetricDecryptionContext(otherPrivateKey);
-    result = result && RunTest("Test asymmetric decryption with other key should fail", DecryptData, ctx, asymmetricCiphertext, asymmetricCipherLen, nullptr, -1);
+    result = result & RunTest("Test asymmetric decryption with other key should fail", DecryptData, ctx, asymmetricCiphertext, asymmetricCipherLen, nullptr, -1);
     delete ctx;
 
     ctx = CreateAsymmetricDecryptionContext(privateKey, privateKeyPassphrase);
-    result = result && RunTest("Test asymmetric decryption with invalid ciphertext should fail", DecryptData, ctx, invalidAsymmetricCiphertext, invalidAsymmetricCipherLen, nullptr, -1);
+    result = result & RunTest("Test asymmetric decryption with invalid ciphertext should fail", DecryptData, ctx, invalidAsymmetricCiphertext, invalidAsymmetricCipherLen, nullptr, -1);
     delete ctx;
 
     ctx = CreateSymmetricEncryptionContext(symmetricKey);
-    result = result && RunTest("Test symmetric encryption", EncryptData, ctx, plaintext, plaintextLen, nullptr, symmetricCipherLen);
+    result = result & RunTest("Test symmetric encryption", EncryptData, ctx, plaintext, plaintextLen, nullptr, symmetricCipherLen);
     delete ctx;
 
     ctx = CreateSymmetricDecryptionContext(symmetricKey);
-    result = result && RunTest("Test symmetric decryption", DecryptData, ctx, symmetricCiphertext, symmetricCipherLen, plaintext, plaintextLen);
+    result = result & RunTest("Test symmetric decryption", DecryptData, ctx, symmetricCiphertext, symmetricCipherLen, plaintext, plaintextLen);
     delete ctx;
 
     ctx = CreateSymmetricDecryptionContext(otherSymmetricKey);
-    result = result && RunTest("Test symmetric decryption with wrong key should fail", DecryptData, ctx, symmetricCiphertext, symmetricCipherLen, nullptr, -1);
+    result = result & RunTest("Test symmetric decryption with wrong key should fail", DecryptData, ctx, symmetricCiphertext, symmetricCipherLen, nullptr, -1);
     delete ctx;
 
     ctx = CreateSymmetricDecryptionContext(otherSymmetricKey);
-    result = result && RunTest("Test symmetric decryption with invalid ciphertext should fail", DecryptData, ctx, invalidSymmetricCiphertext, invalidSymmetricCipherLen, nullptr, -1);
+    result = result & RunTest("Test symmetric decryption with invalid ciphertext should fail", DecryptData, ctx, invalidSymmetricCiphertext, invalidSymmetricCipherLen, nullptr, -1);
     delete ctx;
 
     ctx = CreateSignatureContext(privateKey, privateKeyPassphrase);
-    result = result && RunTest("Test signature", SignData, ctx, plaintext, plaintextLen, nullptr, signedDatalen);
+    result = result & RunTest("Test signature", SignData, ctx, plaintext, plaintextLen, nullptr, signedDatalen);
     delete ctx;
 
     ctx = CreateSignatureContext(invalidPrivateKey, privateKeyPassphrase);
-    result = result && RunTest("Test signature with invalid key should fail", SignData, ctx, plaintext, plaintextLen, nullptr, -1);
+    result = result & RunTest("Test signature with invalid key should fail", SignData, ctx, plaintext, plaintextLen, nullptr, -1);
     delete ctx;
 
     ctx = CreateVerificationContext(publicKey);
-    result = result && RunTest("Test signature verification", VerifySignature, ctx, signedData, signedDatalen, true);
+    result = result & RunTest("Test signature verification", VerifySignature, ctx, signedData, signedDatalen, true);
     delete ctx;
 
     ctx = CreateVerificationContext(invalidPublicKey);
-    result = result && RunTest("Test signature verification with invalid key should fail", VerifySignature, ctx, signedData, signedDatalen, false);
+    result = result & RunTest("Test signature verification with invalid key should fail", VerifySignature, ctx, signedData, signedDatalen, false);
     delete ctx;
 
     ctx = CreateVerificationContext(invalidPublicKey);
-    result = result && RunTest("Test signature verification with invalid signed data should fail", VerifySignature, ctx, invalidSignedData, invalidSignedDatalen, false);
+    result = result & RunTest("Test signature verification with invalid signed data should fail", VerifySignature, ctx, invalidSignedData, invalidSignedDatalen, false);
     delete ctx;
 
-    PrintResult("Test get correct key size;result: ", GetPKeySize(publicKey) == 256);
+    bool t;
+    PrintResult("Test get correct key size; result: ", t = GetPKeySize(publicKey) == 256);
+    result = result & t;
+
+    PrintResult("Test seal onion; result: ", t = TestSealOnion());
+    result = result & t;
+
+    PrintResult("Test seal onion with invalid key should fail; result: ", t = TestSealOnionInvalidKeysFails());
+    result = result & t;
+
+    PrintResult("Test onion unseal; result: ", t = TestOnionUnseal());
+    result = result & t;
+
+    PrintResult("Test onion unsealing with invalid key fails; result: ", t = TestOnionUnsealInvalidKeyFails());
+    result = result & t;
+
+    PrintResult("Test onion unsealing with other key fails; result: ", t = TestOnionUnsealWrongKeyFails());
+    result = result & t;
 
     PrintResult("===== TEST RESULT =====> ", result);
 

@@ -6,20 +6,30 @@
 #include "cryptography/Constants.hh"
 #include "cryptography/Encryption.hh"
 
-static void sha256HexToBytes(const char *sha246Hex, unsigned char *out)
+static bool sha256HexToBytes(const char *sha246Hex, unsigned char *out)
 {
-    char *buffer = new char[3];
-    buffer[2] = 0;
-
-    unsigned int stringSize = 2 * ADDRESS_SIZE;
-
-    for (int i = 0; i < stringSize; i += 2)
+    try
     {
-        memcpy(buffer, sha246Hex + i, 2);
-        out[i / 2] = static_cast<unsigned char>(std::stoi(buffer, nullptr, 16));
-    }
+        unsigned int stringSize = 2 * ADDRESS_SIZE;
+        if (strlen(sha246Hex) != stringSize)
+        {
+            return false;
+        }
 
-    delete[] buffer;
+        char buffer[3]{0};
+
+        for (int i = 0; i < stringSize; i += 2)
+        {
+            memcpy(buffer, sha246Hex + i, 2);
+            out[i / 2] = static_cast<unsigned char>(std::stoi(buffer, nullptr, 16));
+        }
+
+        return true;
+    }
+    catch (const std::exception &e)
+    {
+        return false;
+    }
 }
 
 static void EncodeOnionSize(unsigned int size, unsigned char *out)
@@ -31,7 +41,11 @@ static void EncodeOnionSize(unsigned int size, unsigned char *out)
 static void SealOnionRecursive(unsigned char *data, int &len, CryptoContext **ctx, const char **addresses, int i, unsigned int count)
 {
     memcpy(data + ADDRESS_SIZE, data, len);
-    sha256HexToBytes(addresses[i], data);
+    if(!sha256HexToBytes(addresses[i], data))
+    {
+        len = -1;
+        return;
+    }
 
     const EncrypterResult *result = EncryptDataEx(ctx[i], data, len + ADDRESS_SIZE);
 
