@@ -3,17 +3,17 @@
 
 extern "C"
 {
-    unsigned int GetAesGcmCiphertextSize(unsigned int plaintext);
+    int GetAesGcmCiphertextSize(unsigned int plaintext);
 
-    unsigned int GetAesGcmPlaintextSize(unsigned int ciphertext);
+    int GetAesGcmPlaintextSize(unsigned int ciphertext);
 
-    unsigned int GetEnvelopeSize(unsigned int plaintextLen, const char *publicKey);
+    int GetEnvelopeSize(unsigned int plaintextLen, const char *publicKey);
 
-    unsigned int GetOpenEnvelopeSize(unsigned int envelopeSize, const char *publicKey);
+    int GetOpenEnvelopeSize(unsigned int envelopeSize, const char *publicKey);
 
-    unsigned int GetSignedDataSize(unsigned int dataSize, const char *publicKey);
+    int GetSignedDataSize(unsigned int dataSize, const char *publicKey);
 
-    unsigned int GetPKeySize(const char *publicKey);
+    int GetPKeySize(const char *publicKey);
 }
 
 #endif
