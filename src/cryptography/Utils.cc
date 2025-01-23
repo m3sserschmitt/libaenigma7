@@ -15,6 +15,11 @@ extern "C"
 
     int GetPKeySize(const char *publicKey)
     {
+        if(!publicKey)
+        {
+            return -1;
+        }
+        
         AsymmetricKey *key = AsymmetricKey::Factory::createPublicKeyFromPem(publicKey, strlen(publicKey), nullptr);
 
         if(not key)
@@ -30,16 +35,19 @@ extern "C"
 
     int GetEnvelopeSize(unsigned int plaintextLen, const char *publicKey)
     {
-        return GetPKeySize(publicKey) + IV_SIZE + TAG_SIZE + plaintextLen;
+        int pKeySize = GetPKeySize(publicKey);
+        return pKeySize < 0 ? -1 : pKeySize + IV_SIZE + TAG_SIZE + plaintextLen;
     }
 
     int GetOpenEnvelopeSize(unsigned int envelopeSize, const char *publicKey)
     {
-        return envelopeSize - GetPKeySize(publicKey) - IV_SIZE - TAG_SIZE;
+        int pKeySize = GetPKeySize(publicKey);
+        return pKeySize < 0 ? -1 : envelopeSize - pKeySize - IV_SIZE - TAG_SIZE;
     }
 
     int GetSignedDataSize(unsigned int dataSize, const char *publicKey)
     {
-        return GetPKeySize(publicKey) + dataSize;
+        int pKeySize = GetPKeySize(publicKey);
+        return pKeySize < 0 ? -1 : pKeySize + dataSize;
     }
 }
