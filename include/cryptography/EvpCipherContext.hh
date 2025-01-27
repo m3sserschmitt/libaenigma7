@@ -5,27 +5,17 @@
 
 class EvpCipherContext : public EvpContext
 {
-    EVP_CIPHER_CTX *cipherContext;
+    void *cipherContext;
 
     unsigned char * iv;
     unsigned char * tag;
 
 protected:
-    EVP_CIPHER_CTX *getCipherContext() { return this->cipherContext; }
+    void *getCipherContext() { return this->cipherContext; }
 
-    void freeCipherContext()
-    {
-        EVP_CIPHER_CTX_free(this->getCipherContext());
-        this->cipherContext = nullptr;
-    }
+    void freeCipherContext();
 
-    bool allocateCipherContext()
-    {
-        this->freeCipherContext();
-        this->cipherContext = EVP_CIPHER_CTX_new();
-
-        return this->getCipherContext() != nullptr;
-    }
+    bool allocateCipherContext();
 
     unsigned char * getTag() { return this->tag; }
 

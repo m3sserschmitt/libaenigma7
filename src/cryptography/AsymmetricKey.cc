@@ -6,7 +6,7 @@
 
 static char *AllocatePassphraseBuffer(const char *passphrase)
 {
-    if(not passphrase)
+    if (not passphrase)
     {
         return nullptr;
     }
@@ -85,4 +85,15 @@ bool AsymmetricKey::readKeyFile(const char *path, const char *passphrase)
     delete[] p;
 
     return this->notNullKeyData();
+}
+
+void AsymmetricKey::freeKey()
+{
+    EVP_PKEY_free((EVP_PKEY *)this->key);
+    this->key = nullptr;
+}
+
+int AsymmetricKey::getSize() const
+{
+    return this->notNullKeyData() ? EVP_PKEY_size((EVP_PKEY *)this->key) : -1;
 }

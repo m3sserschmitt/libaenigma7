@@ -1,6 +1,8 @@
 #include "cryptography/Constants.hh"
 #include "cryptography/AsymmetricKey.hh"
 
+#include <cstring>
+
 extern "C"
 {
     int GetAesGcmCiphertextSize(unsigned int plaintext)
