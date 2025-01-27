@@ -1,2 +1,6 @@
 .vscode
 build
+openssl-*
+android-build
+libaenigma
+libaenigma-android
