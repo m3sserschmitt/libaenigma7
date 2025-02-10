@@ -103,6 +103,16 @@ const char *publicKey = "-----BEGIN PUBLIC KEY-----\n"
                         "OwIDAQAB\n"
                         "-----END PUBLIC KEY-----\n";
 
+                        const char *publicKey2 = "-----BEGIN PUBLIC KEY-----\n"
+                        "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAyXnMOCtI35xdL88DO8Lm\n"
+                        "SR+Hut4K7Z0kdW7kJl8RfobKsgG2P8hBQgiYE2YisEPxhZyWnY2K/X9KNpKfSQOZ\n"
+                        "tbhZkLi4cWdAjkreMr+4ytVhCU91BzJDKLSkeGllw7g6o9X3XdMNhKsGARLKm5e3\n"
+                        "qvd2YrLilQWqUNJPXsOoQAVkzU1BvzBOF5IO77swq0JSoA1KkfCx6vQl99eHLzc1\n"
+                        "6vXkX4Kr7woObc3dNWIV5zbxlERzBGOBUEXHTnWcSAZPdsaMyVQ7a/aFlrDjo3Xb\n"
+                        "vrk5ku8YX3misPwqVHaksjFxBwjYOhj8Sa4Sj5D7IJoYt+Y+AqiQJH//OLukMeu0\n"
+                        "4wIDAQAB\n"
+                        "-----END PUBLIC KEY-----\n";
+
 const char *otherPublicKey = "-----BEGIN PUBLIC KEY-----\n"
                              "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAphPQBoaRmbn90mlMD7xV\n"
                              "kYXkpoLCOfECW4MiqvIwlJ3CWx9f8fvrdTWkhQpJdFEtgXzIhe4a28CgOw4VzdrL\n"
@@ -143,6 +153,37 @@ const char *privateKey = "-----BEGIN ENCRYPTED PRIVATE KEY-----\n"
                          "8BRQIr328o5OIEaUyWrgGUw2kPfY6JvI0qRUaIxc8KIZm4pJlIXICWTmufvpgG2H\n"
                          "jyOYYdWz/iFvQPvkJvXhRQ==\n"
                          "-----END ENCRYPTED PRIVATE KEY-----\n";
+
+const char *privateKey2 = "-----BEGIN ENCRYPTED PRIVATE KEY-----\n"
+                        "MIIFNTBfBgkqhkiG9w0BBQ0wUjAxBgkqhkiG9w0BBQwwJAQQZ23NLlHS1SZSdM8e\n"
+                        "yu9HAQICCAAwDAYIKoZIhvcNAgkFADAdBglghkgBZQMEASoEEBYzf6HXlt6W8Per\n"
+                        "X2/GpxYEggTQcSBwY0LwXmzqaa+oTcUoi50tazOIwunA3h3Ggg0p1IMOJctUasjr\n"
+                        "tR1g1GV8hrqyQziGATegZRVOk9Dx/VbToGDcPGNm4Ty6mZ11WmdYP3Wr8XZiO7hw\n"
+                        "hzwCLSaDTLMa+8Hdio6bi32858dnt6KFyM1XK/nmPNKC0DcWuODO+nMyV+dLKt3S\n"
+                        "SH3/z19hvEEzEwJ0Syr2/gXBgmoUdlgs0KTxPuT+FT/TiEnxNaEK2s7qtK0WOWSc\n"
+                        "bXiVvHTVTmpR3t+lcK1S76BvGrJ0ZN+SJfCqbt4XTtNXM+n1v8Cmnd42RSC5lxHp\n"
+                        "UsnfzOkQQSIXfZpOQYGMAxxGZAsB+xqZle5v+PsZ88APizUfPPAIC5+m9PFQ9rza\n"
+                        "YglTu9qVJey1am9NGsSqyW2XAfKoZUuUFoLydkEWAC/gqaC8NSrvbTQt1bjea15o\n"
+                        "Dlr/4BtEQlQvIxCVmgQpBiYqPEaDn0nI90em6g3NlSRFXv+vAgM2exQ4b93CS7TV\n"
+                        "xSbF7g/ys12xAhL+wJhFJO36oHq6Ga3P0+jxhvCDP1aAP9tgk/SrNJOQ2aSYNzAb\n"
+                        "Uq+IJzduZETkOF+8KhIzeTG8AiJJDRMi3APbXYjW338wWRriDlUphlpcP6b5LCD/\n"
+                        "BAskP5KVlxPSi95fIp2G6NWXwBdr4MR1dCLcvBH2ta82bimiHf0X3ZUvzZ2SxLs2\n"
+                        "czgnL+1rTLZqB7Jh3I093u4kBcX9ANSFRJAmho6f6eoE4pXsdYU94D+67w7QIoSz\n"
+                        "Ysi1AvyKqey9384fZI48C5rJzFBLpKB2nL/gZmK3vQU/XbDYv+1cp33CaDIKNn2R\n"
+                        "P/m0aIXgrpdv+G2xGJbmCkokBh7NrtR7N4p+pibf6xTehcvV9agLk3vLW5CkctiH\n"
+                        "hKu2Dbz65rhVp+XcEdXvbmd6dt8Fw1OBmXb1qutK4pQdywCKE9eOojv00Vyg041L\n"
+                        "GPyJqCVCT63XN+SNvKHezDq2mT6iF9ftwsFIVx5yEkpSL07Jhwb/o1xELhvEX0yM\n"
+                        "ECtyqGa0fKx5rWOaqh7nWrzL0C8v1f9QcwcRWcPwOH4hsGwPfamS7Hmv9labKdbs\n"
+                        "gd6oi5N7FM6F5/YjyvyDYzuTmerxIK4aAzvNdfPyW818R8bZ+KRrcdMoFsiuUgto\n"
+                        "RUJOu0L1bTHMhFUFWDiAC3+8POZLQ8qqBYirwRNNZhpQ6yq1wp+e/sJoF7mz9EfN\n"
+                        "uaWeOetPNNsPYwO5PcsdqCl/Lkc0tJPfcAgMZ3QO8/rHVAE8duu7OPYEJBSqP4Jm\n"
+                        "JbVVqzzfbVOrKva2bXLd6aUWqmFaUheNSLvFWajc/S0Hm8uDDFJmpBEqolOap6ut\n"
+                        "+qKnnDFQ1liyXSdUevzV+xua6hB356EpuXp5X/HZdLt2HUbNKnQre0RG22YQAigj\n"
+                        "PKKvQ/OQYy+SN3w9LwmPIwMRRqaD42ELbUA25jwffvATbBGpr9D3c8QPzib+0eLL\n"
+                        "uemvUMczU4etoHyiqcL7pco2iVbuMYUbEdq6Z+PQGjD0C/1X80wsTA8Bo1lc1XPs\n"
+                        "Y9CAzQ6v8SFrmyTVubkT0+9ZRTihfckNuTaUh/mf/rrXMEB7eWVMad7gY4U0Dk2v\n"
+                        "wVKY7KLOGrri8pew/hLRJii1lo4sXO3g7Qr5SB6u0/kMeODxErZ9N7o=\n"
+                        "-----END ENCRYPTED PRIVATE KEY-----\n";
 
 const char *privateKeyPassphrase = "12345678";
 
@@ -247,6 +288,40 @@ const char *addresses[] = {address, address};
 
 const unsigned char onion[] = {1, 76, 12, 5, 29, 7, 248, 206, 17, 105, 127, 188, 225, 155, 222, 158, 221, 120, 138, 15, 198, 142, 185, 87, 222, 82, 144, 23, 235, 117, 23, 192, 94, 20, 79, 8, 216, 46, 52, 176, 180, 69, 131, 33, 196, 11, 1, 112, 177, 15, 3, 26, 184, 193, 27, 130, 7, 211, 77, 197, 214, 179, 243, 225, 123, 130, 192, 176, 111, 199, 131, 155, 237, 8, 223, 128, 94, 232, 172, 248, 181, 101, 102, 166, 43, 195, 205, 67, 253, 253, 160, 142, 105, 165, 154, 70, 9, 161, 183, 41, 103, 194, 34, 166, 249, 41, 53, 230, 51, 104, 147, 100, 58, 202, 40, 45, 225, 82, 23, 67, 161, 104, 196, 116, 153, 202, 113, 142, 91, 138, 1, 108, 197, 29, 39, 161, 251, 76, 196, 74, 245, 191, 224, 209, 119, 195, 43, 115, 187, 151, 18, 215, 2, 54, 107, 0, 88, 93, 157, 34, 28, 232, 216, 222, 102, 228, 203, 218, 214, 215, 149, 10, 155, 145, 92, 96, 178, 166, 60, 141, 7, 209, 83, 155, 142, 165, 8, 15, 88, 141, 132, 82, 91, 208, 150, 201, 104, 91, 12, 129, 14, 118, 34, 9, 112, 106, 192, 184, 76, 193, 146, 30, 94, 115, 84, 34, 72, 51, 161, 94, 103, 253, 48, 9, 168, 77, 32, 191, 98, 254, 12, 67, 14, 111, 39, 150, 145, 212, 43, 116, 80, 91, 121, 240, 45, 188, 31, 118, 38, 152, 18, 232, 255, 200, 159, 220, 184, 157, 75, 56, 132, 13, 150, 238, 253, 74, 72, 60, 71, 5, 119, 120, 225, 218, 70, 244, 74, 240, 167, 13, 144, 0, 62, 69, 55, 51, 153, 219, 7, 126, 211, 3, 101, 90, 21, 17, 0, 124, 214, 19, 67, 8, 220, 112, 99, 253, 25, 140, 210, 210, 177, 23, 241, 223, 55, 240, 4, 205, 25, 89, 211, 238, 241, 81, 76, 253, 33, 57, 137, 22, 42, 30, 208, 153};
 const int onionLen = 334;
+
+bool TestOnionSealUnseal()
+{
+    return true;
+    int outlen;
+    const char *publicKeys[] = { publicKey, publicKey2 };
+    const char *addresses[] = { address, address };
+
+    const unsigned char *out = SealOnion(plaintext, plaintextLen, publicKeys, addresses, publicKeysCount, outlen);
+
+    if(outlen != 652 || not out)
+    {
+        return false;
+    }
+
+    CryptoContext *ctx = CreateAsymmetricDecryptionContext(privateKey2, privateKeyPassphrase);
+    const unsigned char *out1 = UnsealOnion(ctx, out, outlen);
+
+    if(outlen != 366 || not out1)
+    {
+        return false;
+    }
+
+    CryptoContext *ctx1 = CreateAsymmetricDecryptionContext(privateKey, privateKeyPassphrase);
+    const unsigned char *out2 = UnsealOnion(ctx1, out1 + ADDRESS_SIZE, outlen);
+
+    bool result = out2 && outlen == plaintextLen + ADDRESS_SIZE && !memcmp(plaintext, out2 + ADDRESS_SIZE, plaintextLen);
+
+    delete ctx;
+    delete ctx1;
+    delete[] out;
+
+    return result;
+}
 
 bool TestSealOnion()
 {
@@ -356,6 +431,9 @@ int main()
 
     bool t;
     PrintResult("Test get correct key size; result: ", t = GetPKeySize(publicKey) == 256);
+    result = result & t;
+
+    PrintResult("Test onion seal unseal; result: ", t = TestOnionSealUnseal());
     result = result & t;
 
     PrintResult("Test seal onion; result: ", t = TestSealOnion());

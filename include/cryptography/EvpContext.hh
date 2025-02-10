@@ -7,8 +7,6 @@
 #include "RandomDataGenerator.hh"
 #include "Key.hh"
 
-#include <openssl/evp.h>
-
 class EvpContext
 {
     Key *key;

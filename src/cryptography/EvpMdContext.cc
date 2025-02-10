@@ -1,5 +1,7 @@
 #include "cryptography/EvpMdContext.hh"
 
+#include <openssl/evp.h>
+
 EncrypterResult *EvpMdContext::createSignedData(const EncrypterData *in) const
 {
     unsigned int signedDataSize = in->getDataSize() + this->getOutBufferSize();
@@ -50,19 +52,19 @@ EncrypterResult *EvpMdContext::encrypt(const EncrypterData *in)
         return this->abort();
     }
 
-    if (EVP_DigestSignInit(this->mdContext, nullptr, EVP_sha256(), nullptr, (EVP_PKEY *)this->getKey()->getKeyData()) != 1)
+    if (EVP_DigestSignInit((EVP_MD_CTX *)this->mdContext, nullptr, EVP_sha256(), nullptr, (EVP_PKEY *)this->getKey()->getKeyData()) != 1)
     {
         return this->abort();
     }
 
-    if (EVP_DigestSignUpdate(this->mdContext, in->getData(), in->getDataSize()) != 1)
+    if (EVP_DigestSignUpdate((EVP_MD_CTX *)this->mdContext, in->getData(), in->getDataSize()) != 1)
     {
         return this->abort();
     }
 
     size_t siglen;
 
-    if (EVP_DigestSignFinal(this->mdContext, nullptr, &siglen) != 1)
+    if (EVP_DigestSignFinal((EVP_MD_CTX *)this->mdContext, nullptr, &siglen) != 1)
     {
         return this->abort();
     }
@@ -72,7 +74,7 @@ EncrypterResult *EvpMdContext::encrypt(const EncrypterData *in)
         return this->abort();
     }
 
-    if (EVP_DigestSignFinal(this->mdContext, this->getOutBuffer(), &siglen) != 1)
+    if (EVP_DigestSignFinal((EVP_MD_CTX *)this->mdContext, this->getOutBuffer(), &siglen) != 1)
     {
         return this->abort();
     }
@@ -100,7 +102,7 @@ EncrypterResult *EvpMdContext::decrypt(const EncrypterData *in)
         return this->abort();
     }
 
-    if (EVP_DigestVerifyInit(this->mdContext, nullptr, EVP_sha256(), nullptr, (EVP_PKEY *)this->getKey()->getKeyData()) != 1)
+    if (EVP_DigestVerifyInit((EVP_MD_CTX *)this->mdContext, nullptr, EVP_sha256(), nullptr, (EVP_PKEY *)this->getKey()->getKeyData()) != 1)
     {
         return this->abort();
     }
@@ -113,15 +115,29 @@ EncrypterResult *EvpMdContext::decrypt(const EncrypterData *in)
         return this->abort();
     }
 
-    if (EVP_DigestVerifyUpdate(this->mdContext, data, datalen) != 1)
+    if (EVP_DigestVerifyUpdate((EVP_MD_CTX *)this->mdContext, data, datalen) != 1)
     {
         return this->abort();
     }
 
-    if (EVP_DigestVerifyFinal(this->mdContext, this->inSig, this->inSiglen) == 1)
+    if (EVP_DigestVerifyFinal((EVP_MD_CTX *)this->mdContext, this->inSig, this->inSiglen) == 1)
     {
         return new EncrypterResult(true);
     }
 
     return new EncrypterResult(false);
+}
+
+void EvpMdContext::freeMdContext()
+{
+    EVP_MD_CTX_free((EVP_MD_CTX *)this->mdContext);
+    this->mdContext = nullptr;
+}
+
+bool EvpMdContext::allocateMdContext()
+{
+    this->freeMdContext();
+    this->mdContext = EVP_MD_CTX_new();
+
+    return this->mdContext != nullptr;
 }

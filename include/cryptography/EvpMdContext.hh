@@ -5,7 +5,7 @@
 
 class EvpMdContext : public EvpContext
 {
-    EVP_MD_CTX *mdContext;
+    void *mdContext;
 
     unsigned char *inSig;
     unsigned int inSiglen;
@@ -42,19 +42,9 @@ class EvpMdContext : public EvpContext
         return false;
     }
 
-    void freeMdContext()
-    {
-        EVP_MD_CTX_free(this->mdContext);
-        this->mdContext = nullptr;
-    }
+    void freeMdContext();
 
-    bool allocateMdContext()
-    {
-        this->freeMdContext();
-        this->mdContext = EVP_MD_CTX_new();
-
-        return this->mdContext != nullptr;
-    }
+    bool allocateMdContext();
 
     /**
      * @brief Create a signature

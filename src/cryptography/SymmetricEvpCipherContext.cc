@@ -1,5 +1,7 @@
 #include "cryptography/SymmetricEvpCipherContext.hh"
 
+#include <openssl/evp.h>
+
 EncrypterResult *SymmetricEvpCipherContext::createEncryptedData() const
 {
     unsigned int bufferSize = this->getOutBufferSize();
@@ -54,28 +56,28 @@ EncrypterResult *SymmetricEvpCipherContext::encrypt(const EncrypterData *in)
         return this->abort();
     }
 
-    if (EVP_EncryptInit_ex(this->getCipherContext(), EVP_aes_256_gcm(), NULL, (const unsigned char *)this->getKey()->getKeyData(), this->getIV()) != 1)
+    if (EVP_EncryptInit_ex((EVP_CIPHER_CTX *)this->getCipherContext(), EVP_aes_256_gcm(), NULL, (const unsigned char *)this->getKey()->getKeyData(), this->getIV()) != 1)
     {
         return this->abort();
     }
 
     int len;
 
-    if (EVP_EncryptUpdate(this->getCipherContext(), this->getOutBuffer(), &len, in->getData(), in->getDataSize()) != 1)
+    if (EVP_EncryptUpdate((EVP_CIPHER_CTX *)this->getCipherContext(), this->getOutBuffer(), &len, in->getData(), in->getDataSize()) != 1)
     {
         return this->abort();
     }
 
     int len2;
 
-    if (EVP_EncryptFinal_ex(this->getCipherContext(), this->getOutBuffer() + len, &len2) != 1)
+    if (EVP_EncryptFinal_ex((EVP_CIPHER_CTX *)this->getCipherContext(), this->getOutBuffer() + len, &len2) != 1)
     {
         return this->abort();
     }
 
     this->setOutBufferSize(len + len2);
 
-    if (EVP_CIPHER_CTX_ctrl(this->getCipherContext(), EVP_CTRL_GCM_GET_TAG, TAG_SIZE, this->getTag()) != 1)
+    if (EVP_CIPHER_CTX_ctrl((EVP_CIPHER_CTX *)this->getCipherContext(), EVP_CTRL_GCM_GET_TAG, TAG_SIZE, this->getTag()) != 1)
     {
         return this->abort();
     }
@@ -109,26 +111,26 @@ EncrypterResult *SymmetricEvpCipherContext::decrypt(const EncrypterData *in)
         return this->abort();
     }
 
-    if (EVP_DecryptInit_ex(this->getCipherContext(), EVP_aes_256_gcm(), NULL, (const unsigned char *)this->getKey()->getKeyData(), this->getIV()) != 1)
+    if (EVP_DecryptInit_ex((EVP_CIPHER_CTX *)this->getCipherContext(), EVP_aes_256_gcm(), NULL, (const unsigned char *)this->getKey()->getKeyData(), this->getIV()) != 1)
     {
         return this->abort();
     }
 
     int len;
 
-    if (EVP_DecryptUpdate(this->getCipherContext(), this->getOutBuffer(), &len, ciphertext, cipherlen) != 1)
+    if (EVP_DecryptUpdate((EVP_CIPHER_CTX *)this->getCipherContext(), this->getOutBuffer(), &len, ciphertext, cipherlen) != 1)
     {
         return this->abort();
     }
 
-    if (EVP_CIPHER_CTX_ctrl(this->getCipherContext(), EVP_CTRL_GCM_SET_TAG, TAG_SIZE, this->getTag()) != 1)
+    if (EVP_CIPHER_CTX_ctrl((EVP_CIPHER_CTX *)this->getCipherContext(), EVP_CTRL_GCM_SET_TAG, TAG_SIZE, this->getTag()) != 1)
     {
         return this->abort();
     }
 
     int len2;
 
-    if (EVP_DecryptFinal_ex(this->getCipherContext(), this->getOutBuffer() + len, &len2) != 1)
+    if (EVP_DecryptFinal_ex((EVP_CIPHER_CTX *)this->getCipherContext(), this->getOutBuffer() + len, &len2) != 1)
     {
         return this->abort();
     }

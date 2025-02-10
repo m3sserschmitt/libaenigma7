@@ -4,11 +4,9 @@
 #include "Key.hh"
 #include "exceptions/InvalidKey.hh"
 
-#include <openssl/pem.h>
-
 class AsymmetricKey : public Key
 {
-    EVP_PKEY *key;
+    void *key;
 
     AsymmetricKey(const AsymmetricKey &);
 
@@ -27,15 +25,11 @@ public:
 
     bool readKeyFile(const char *path, const char *passphrase = nullptr) override;
 
-    int getSize() const override { return this->notNullKeyData() ? EVP_PKEY_size(this->key) : -1; }
+    int getSize() const override;
 
     const void *getKeyData() const override { return this->key; }
 
-    void freeKey() override
-    {
-        EVP_PKEY_free(this->key);
-        this->key = nullptr;
-    }
+    void freeKey() override;
 
     class Factory
     {
