@@ -35,24 +35,14 @@ add_library(aenigma7 STATIC
 ./src/cryptography/OnionBuilding.cc
 ./src/cryptography/EvpCipherContext.cc
 )
-
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 set_target_properties(aenigma PROPERTIES VERSION ${PROJECT_VERSION} SOVERSION ${PROJECT_VERSION_MAJOR})
+target_link_libraries(aenigma crypto)
 
 if(ANDROID)
     message(STATUS "Skipping kernelkeys library when building for platform Android.")
     message(STATUS "Install rule will not be defined when building for platform Android.")
-
-    include_directories(${CMAKE_CURRENT_SOURCE_DIR}/openssl-src/include)
-
-    add_library(crypto STATIC IMPORTED)
-    set_target_properties(crypto PROPERTIES IMPORTED_LOCATION ${CMAKE_SOURCE_DIR}/openssl-bin/${CMAKE_ANDROID_ARCH_ABI}/lib/libcrypto.a)
-    target_link_libraries(aenigma crypto)
-
-    install(FILES ${CMAKE_BINARY_DIR}/libaenigma.so DESTINATION ${LIB_AENIGMA_ANDROID_INSTALL_DIR}/${CMAKE_ANDROID_ARCH_ABI})
-    install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/cryptography DESTINATION ${LIB_AENIGMA_ANDROID_INSTALL_DIR}/${CMAKE_ANDROID_ARCH_ABI}/include)
 else ()
-    target_link_libraries(aenigma crypto)
     add_library(aenigma-kernelkeys SHARED ./src/kernelkeys/KernelKeys.c)
     add_library(aenigma-kernelkeys${LIB_AENIGMA_KERNELKEYS_SOVERSION} STATIC ./src/kernelkeys/KernelKeys.c)
     set_target_properties(aenigma-kernelkeys PROPERTIES VERSION ${LIB_AENIGMA_KERNELKEYS_VERSION} SOVERSION ${LIB_AENIGMA_KERNELKEYS_SOVERSION})
