@@ -5,20 +5,11 @@
 
 class SymmetricKey : public Key
 {
-    unsigned char * keyData;
+    unsigned char *keyData;
 
     SymmetricKey(const SymmetricKey &);
 
     const SymmetricKey &operator=(const SymmetricKey &);
-
-    SymmetricKey() : Key(KeySymmetric),
-                     keyData(new unsigned char[SYMMETRIC_KEY_SIZE + 1]) {}
-
-    SymmetricKey(const unsigned char *keyData) : Key(KeySymmetric),
-                                                 keyData(new unsigned char[SYMMETRIC_KEY_SIZE + 1])
-    {
-        this->writeKeyData(keyData);
-    }
 
     bool writeKeyData(const unsigned char *keyData)
     {
@@ -42,6 +33,17 @@ class SymmetricKey : public Key
 public:
     ~SymmetricKey() { this->freeKey(); }
 
+    SymmetricKey() : Key()
+    {
+        this->keyData = new unsigned char[SYMMETRIC_KEY_SIZE];
+    }
+
+    SymmetricKey(const unsigned char *keyData) : Key()
+    {
+        this->keyData = new unsigned char[SYMMETRIC_KEY_SIZE];
+        this->writeKeyData(keyData);
+    }
+
     bool setKeyData(const unsigned char *keyData, unsigned int keylen, const char *passphrase = nullptr) override
     {
         return this->writeKeyData(keyData);
@@ -62,14 +64,6 @@ public:
         delete[] this->keyData;
         this->keyData = nullptr;
     }
-
-    class Factory
-    {
-    public:
-        static Key *create(const unsigned char *keyData) { return new SymmetricKey(keyData); }
-
-        static Key *create() { return new SymmetricKey(); }
-    };
 };
 
 #endif

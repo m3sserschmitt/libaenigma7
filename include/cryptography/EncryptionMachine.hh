@@ -13,6 +13,10 @@ public:
 
     bool run() override
     {
+        if(!this->getCipher()|| !this->getIn())
+        {
+            return false;
+        }
         EncrypterResult *result = this->getCipher()->encrypt(this->getIn());
         this->freeOut();
         this->setOut(result);

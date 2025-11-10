@@ -1,46 +1,14 @@
 #ifndef KEY_HH
 #define KEY_HH
 
-#include "enums/KeyType.hh"
-
 class Key
 {
-    KeyType keyType;
-
 protected:
-
-    void setKeyType(KeyType keyType)
-    {
-        this->keyType = keyType;
-    }
-
-    Key(KeyType keyType) { this->setKeyType(keyType); }
-
     bool notNullKeyData() const { return this->getKeyData() != nullptr; }
 
 public:
-
-    virtual ~Key() { }
-
-    KeyType getKeyType() const
-    {
-        return this->keyType;
-    }
-
-    bool isPublicKey() const
-    {
-        return this->getKeyType() == PublicKey;
-    }
-
-    bool isPrivateKey() const
-    {
-        return this->getKeyType() == PrivateKey;
-    }
-
-    bool isSymmetricKey() const
-    {
-        return this->getKeyType() == KeySymmetric;
-    }
+    virtual ~Key() {}
+    Key() {}
 
     /**
      * @brief Initialize encryption / decryption key from buffer. This method should be overriden into any derived class
@@ -67,14 +35,14 @@ public:
 
     /**
      * @brief release all memory related to the key
-     * 
+     *
      */
     virtual void freeKey() = 0;
 
     /**
      * @brief Get the Size of key. For symmetric key, it shall return SYMMETRIC_KEY_SIZE.
      * For Asymmetric keys the returned size depends on the key material used for initialization.
-     * 
+     *
      * @return Size Size of the key in bytes
      */
     virtual int getSize() const = 0;
@@ -82,7 +50,7 @@ public:
     /**
      * @brief Returns a pointer to the underlying key structure: for symmetric keys it will be an array of
      * unsigned chars; for asymmetric keys an EVP_PKEY structure.
-     * 
+     *
      * @return const void* pointer to underlying key structure.
      */
     virtual const void *getKeyData() const = 0;

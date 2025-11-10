@@ -11,14 +11,10 @@ add_library(aenigma SHARED
 ./src/cryptography/AsymmetricEvpCipherContext.cc
 ./src/cryptography/SymmetricEvpCipherContext.cc
 ./src/cryptography/EvpMdContext.cc
-./src/cryptography/CryptoContext.cc
-./src/cryptography/File.cc
-./src/cryptography/Encryption.cc
-./src/cryptography/Factories.cc
-./src/cryptography/OnionParsing.cc
-./src/cryptography/Utils.cc
-./src/cryptography/OnionBuilding.cc
 ./src/cryptography/EvpCipherContext.cc
+./src/cryptography/PublicKey.cc
+./src/cryptography/PrivateKey.cc
+./src/cryptography/Aenigma.cc
 )
 
 add_library(aenigma7 STATIC 
@@ -26,14 +22,10 @@ add_library(aenigma7 STATIC
 ./src/cryptography/AsymmetricEvpCipherContext.cc
 ./src/cryptography/SymmetricEvpCipherContext.cc
 ./src/cryptography/EvpMdContext.cc
-./src/cryptography/CryptoContext.cc
-./src/cryptography/File.cc
-./src/cryptography/Encryption.cc
-./src/cryptography/Factories.cc
-./src/cryptography/OnionParsing.cc
-./src/cryptography/Utils.cc
-./src/cryptography/OnionBuilding.cc
 ./src/cryptography/EvpCipherContext.cc
+./src/cryptography/PublicKey.cc
+./src/cryptography/PrivateKey.cc
+./src/cryptography/Aenigma.cc
 )
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 set_target_properties(aenigma PROPERTIES VERSION ${PROJECT_VERSION} SOVERSION ${PROJECT_VERSION_MAJOR})

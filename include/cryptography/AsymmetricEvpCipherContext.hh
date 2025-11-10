@@ -113,18 +113,6 @@ public:
         EvpCipherContext::cleanup();
         this->freeEncryptedKey();
     }
-
-    class Factory
-    {
-    public:
-        /**
-         * @brief Creates a new AsymmetricEvpCipherContext.
-         *
-         * @param key Initialized AsymmetricKey object
-         * @return EvpContext* Newly created AsymmetricEvpCipherContext
-         */
-        static AsymmetricEvpCipherContext *create(Key *key) { return new AsymmetricEvpCipherContext(key); }
-    };
 };
 
 #endif

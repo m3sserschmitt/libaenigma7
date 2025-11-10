@@ -2,14 +2,15 @@
 #define I_CRYPTO_CONTEXT_BUILDER_RSA_OPERATION
 
 #include "ICryptoContextBuilderKeyData.hh"
-#include "ICryptoContextBuilderOperation.hh"
 
-class ICryptoContextBuilderRsaOperation : public ICryptoContextBuilderOperation
+class ICryptoContextBuilderRsaOperation
 {
 public:
     virtual ~ICryptoContextBuilderRsaOperation() {}
-    virtual ICryptoContextBuilderPlaintext *useSignature() = 0;
-    virtual ICryptoContextBuilderCiphertext *useSignatureVerification() = 0;
+    virtual ICryptoContextBuilderKeyData *useSignature() = 0;
+    virtual ICryptoContextBuilderKeyData *useSignatureVerification() = 0;
+    virtual ICryptoContextBuilderKeyData *useSealing() = 0;
+    virtual ICryptoContextBuilderKeyData *useUnsealing() = 0;
 };
 
 #endif

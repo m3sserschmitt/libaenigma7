@@ -94,18 +94,6 @@ public:
         this->freeMdContext();
         this->freeInSig();
     }
-
-    class Factory
-    {
-    public:
-        /**
-         * @brief Create new EvpMdContext to be used for signing or verification
-         *
-         * @param key AsymmetricKey object initialized accordingly
-         * @return EvpContext* Newly created EvpMdContext
-         */
-        static EvpMdContext *create(Key *key) { return new EvpMdContext(key); }
-    };
 };
 
 #endif

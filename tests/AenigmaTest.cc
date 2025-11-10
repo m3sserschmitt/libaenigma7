@@ -370,63 +370,63 @@ bool TestOnionUnsealWrongKeyFails()
 int main()
 {
     CryptoContext *ctx = CreateAsymmetricEncryptionContext(publicKey);
-    bool result = RunTest("Test asymmetric encryption", EncryptData, ctx, plaintext, plaintextLen, nullptr, asymmetricCipherLen);
+    bool result = RunTest("Test asymmetric encryption", Run, ctx, plaintext, plaintextLen, nullptr, asymmetricCipherLen);
     delete ctx;
 
     ctx = CreateAsymmetricEncryptionContext(invalidPublicKey);
-    result = result & RunTest("Test asymmetric encryption with invalid key should fail", EncryptData, ctx, plaintext, plaintextLen, nullptr, -1);
+    result = result & RunTest("Test asymmetric encryption with invalid key should fail", Run, ctx, plaintext, plaintextLen, nullptr, -1);
     delete ctx;
 
     ctx = CreateAsymmetricDecryptionContext(privateKey, privateKeyPassphrase);
-    result = result & RunTest("Test asymmetric decryption", DecryptData, ctx, asymmetricCiphertext, asymmetricCipherLen, plaintext, plaintextLen);
+    result = result & RunTest("Test asymmetric decryption", Run, ctx, asymmetricCiphertext, asymmetricCipherLen, plaintext, plaintextLen);
     delete ctx;
 
     ctx = CreateAsymmetricDecryptionContext(invalidPrivateKey, privateKeyPassphrase);
-    result = result & RunTest("Test asymmetric decryption with invalid key should fail", DecryptData, ctx, asymmetricCiphertext, asymmetricCipherLen, nullptr, -1);
+    result = result & RunTest("Test asymmetric decryption with invalid key should fail", Run, ctx, asymmetricCiphertext, asymmetricCipherLen, nullptr, -1);
     delete ctx;
 
     ctx = CreateAsymmetricDecryptionContext(otherPrivateKey);
-    result = result & RunTest("Test asymmetric decryption with other key should fail", DecryptData, ctx, asymmetricCiphertext, asymmetricCipherLen, nullptr, -1);
+    result = result & RunTest("Test asymmetric decryption with other key should fail", Run, ctx, asymmetricCiphertext, asymmetricCipherLen, nullptr, -1);
     delete ctx;
 
     ctx = CreateAsymmetricDecryptionContext(privateKey, privateKeyPassphrase);
-    result = result & RunTest("Test asymmetric decryption with invalid ciphertext should fail", DecryptData, ctx, invalidAsymmetricCiphertext, invalidAsymmetricCipherLen, nullptr, -1);
+    result = result & RunTest("Test asymmetric decryption with invalid ciphertext should fail", Run, ctx, invalidAsymmetricCiphertext, invalidAsymmetricCipherLen, nullptr, -1);
     delete ctx;
 
     ctx = CreateSymmetricEncryptionContext(symmetricKey);
-    result = result & RunTest("Test symmetric encryption", EncryptData, ctx, plaintext, plaintextLen, nullptr, symmetricCipherLen);
+    result = result & RunTest("Test symmetric encryption", Run, ctx, plaintext, plaintextLen, nullptr, symmetricCipherLen);
     delete ctx;
 
     ctx = CreateSymmetricDecryptionContext(symmetricKey);
-    result = result & RunTest("Test symmetric decryption", DecryptData, ctx, symmetricCiphertext, symmetricCipherLen, plaintext, plaintextLen);
+    result = result & RunTest("Test symmetric decryption", Run, ctx, symmetricCiphertext, symmetricCipherLen, plaintext, plaintextLen);
     delete ctx;
 
     ctx = CreateSymmetricDecryptionContext(otherSymmetricKey);
-    result = result & RunTest("Test symmetric decryption with wrong key should fail", DecryptData, ctx, symmetricCiphertext, symmetricCipherLen, nullptr, -1);
+    result = result & RunTest("Test symmetric decryption with wrong key should fail", Run, ctx, symmetricCiphertext, symmetricCipherLen, nullptr, -1);
     delete ctx;
 
     ctx = CreateSymmetricDecryptionContext(otherSymmetricKey);
-    result = result & RunTest("Test symmetric decryption with invalid ciphertext should fail", DecryptData, ctx, invalidSymmetricCiphertext, invalidSymmetricCipherLen, nullptr, -1);
+    result = result & RunTest("Test symmetric decryption with invalid ciphertext should fail", Run, ctx, invalidSymmetricCiphertext, invalidSymmetricCipherLen, nullptr, -1);
     delete ctx;
 
     ctx = CreateSignatureContext(privateKey, privateKeyPassphrase);
-    result = result & RunTest("Test signature", SignData, ctx, plaintext, plaintextLen, nullptr, signedDatalen);
+    result = result & RunTest("Test signature", Run, ctx, plaintext, plaintextLen, nullptr, signedDatalen);
     delete ctx;
 
     ctx = CreateSignatureContext(invalidPrivateKey, privateKeyPassphrase);
-    result = result & RunTest("Test signature with invalid key should fail", SignData, ctx, plaintext, plaintextLen, nullptr, -1);
+    result = result & RunTest("Test signature with invalid key should fail", Run, ctx, plaintext, plaintextLen, nullptr, -1);
     delete ctx;
 
     ctx = CreateVerificationContext(publicKey);
-    result = result & RunTest("Test signature verification", VerifySignature, ctx, signedData, signedDatalen, true);
+    result = result & RunTest("Test signature verification", RunVerification, ctx, signedData, signedDatalen, true);
     delete ctx;
 
     ctx = CreateVerificationContext(invalidPublicKey);
-    result = result & RunTest("Test signature verification with invalid key should fail", VerifySignature, ctx, signedData, signedDatalen, false);
+    result = result & RunTest("Test signature verification with invalid key should fail", RunVerification, ctx, signedData, signedDatalen, false);
     delete ctx;
 
     ctx = CreateVerificationContext(invalidPublicKey);
-    result = result & RunTest("Test signature verification with invalid signed data should fail", VerifySignature, ctx, invalidSignedData, invalidSignedDatalen, false);
+    result = result & RunTest("Test signature verification with invalid signed data should fail", RunVerification, ctx, invalidSignedData, invalidSignedDatalen, false);
     delete ctx;
 
     bool t;
