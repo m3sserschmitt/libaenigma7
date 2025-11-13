@@ -5,26 +5,24 @@
 
 class EncrypterResult : public EncrypterData
 {
+private:
     bool ok;
 
-    EncrypterResult(const EncrypterResult &);
-    const EncrypterResult &operator=(const EncrypterResult &);
-
 public:
-    EncrypterResult(const unsigned char *data, unsigned int datalen) : EncrypterData(data, datalen)
+    EncrypterResult(const unsigned char *data, unsigned int dataLen) : EncrypterData(data, dataLen)
     {
         this->ok = true;
     }
 
-    EncrypterResult(bool ok) : EncrypterData(nullptr, 0)
+    explicit EncrypterResult(bool ok) : EncrypterData(nullptr, 0)
     {
         this->ok = ok;
     }
 
-    bool isError() const override
-    {
-        return not this->ok;
-    }
+    EncrypterResult(const EncrypterResult &) = delete;
+    const EncrypterResult &operator=(const EncrypterResult &) = delete;
+
+    [[nodiscard]] bool isError() const override { return not this->ok; }
 };
 
 #endif

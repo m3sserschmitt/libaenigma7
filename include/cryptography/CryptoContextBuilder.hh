@@ -30,29 +30,34 @@ private:
         CryptoContext *ctx;
 
     public:
-        Impl() { this->ctx = nullptr; }
+        Impl()
+        {
+            this->ctx = nullptr;
+            this->key = nullptr;
+            error = false;
+        }
 
-        ~Impl()
+        ~Impl() override
         {
             delete this->ctx;
             this->ctx = nullptr;
         }
 
-        ICryptoContextBuilder *setKey(const unsigned char *key) override
+        ICryptoContextBuilder *setKey(const unsigned char *keyData) override
         {
-            error &= this->key->setKeyData(key, SYMMETRIC_KEY_SIZE);
+            error &= this->key->setKeyData(keyData, SYMMETRIC_KEY_SIZE, nullptr);
             return this;
         }
 
-        ICryptoContextBuilder *setKey(const char *key) override
+        ICryptoContextBuilder *setKey(const char *keyData) override
         {
-            error &= this->key->setKeyData((const unsigned char *)key, strlen(key));
+            error &= this->key->setKeyData((const unsigned char *)keyData, strlen(keyData), nullptr);
             return this;
         }
 
-        ICryptoContextBuilder *setKey(const char *key, const char *passphrase) override
+        ICryptoContextBuilder *setKey(const char *keyData, const char *passphrase) override
         {
-            error &= this->key->setKeyData((const unsigned char *)key, strlen(key), passphrase);
+            error &= this->key->setKeyData((const unsigned char *)keyData, strlen(keyData), passphrase);
             return this;
         }
 
@@ -64,7 +69,7 @@ private:
 
         ICryptoContextBuilder *readKeyData(const char *path) override
         {
-            error &= this->key->readKeyFile(path);
+            error &= this->key->readKeyFile(path, nullptr);
             return this;
         }
 
@@ -158,23 +163,16 @@ private:
 
         CryptoContext *build() override
         {
-            CryptoContext *context = this->ctx;
+            CryptoContext *tempCtx = this->ctx;
             this->ctx = nullptr;
-            this->key = nullptr;
-            error = false;
-            return error ? nullptr : context;
+            return error ? nullptr : tempCtx;
         }
     };
-
-    CryptoContextBuilder() {}
-    CryptoContextBuilder(const CryptoContextBuilder &);
-    const CryptoContextBuilder &operator=(const CryptoContextBuilder &);
-
 public:
-    static ICryptoContextBuilderType *Create()
-    {
-        return new Impl();
-    }
+    CryptoContextBuilder(const CryptoContextBuilder &) = delete;
+    const CryptoContextBuilder &operator=(const CryptoContextBuilder &) = delete;
+
+    static ICryptoContextBuilderType *Create() { return new Impl(); }
 };
 
 #endif

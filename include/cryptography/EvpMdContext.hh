@@ -5,37 +5,34 @@
 
 class EvpMdContext : public EvpContext
 {
+private:
     void *mdContext;
 
     unsigned char *inSig;
-    unsigned int inSiglen;
-
-    bool notNullInSig() const { return this->inSig != nullptr; }
+    unsigned int inSigLen;
 
     void freeInSig()
     {
         if (this->inSig)
         {
-            memset(this->inSig, 0, this->inSiglen);
+            memset(this->inSig, 0, this->inSigLen);
             delete[] this->inSig;
             this->inSig = nullptr;
         }
     }
 
-    bool allocateInSig(unsigned int len)
+    void allocateInSig(unsigned int len)
     {
         this->freeInSig();
         this->inSig = new unsigned char[len + 1];
-
-        return this->notNullInSig();
     }
 
-    bool writeInSig(const unsigned char *inSig, unsigned int len)
+    bool writeInSig(const unsigned char *inSigData, unsigned int len)
     {
-        if (inSig and this->inSig)
+        if (inSigData and this->inSig)
         {
-            memcpy(this->inSig, inSig, len);
-            this->inSiglen = len;
+            memcpy(this->inSig, inSigData, len);
+            this->inSigLen = len;
             return true;
         }
 
@@ -62,26 +59,27 @@ class EvpMdContext : public EvpContext
      * @brief Read a byte array resulted from createSignedData and initializes internal structures
      *
      * @param in structure containing data do be verified and its size
-     * @param datasize if successful it contains the data size
+     * @param dataSize if successful it contains the data size
      * @return const unsigned char * pointer to data
      */
-    const unsigned char *readSignedData(const EncrypterData *in, int &datasize);
-
-    bool notNullMdContext() const { return this->mdContext != nullptr; }
+    const unsigned char *readSignedData(const EncrypterData *in, int &dataSize);
 
 public:
-    EvpMdContext(Key *key) : EvpContext(key)
+    explicit EvpMdContext(Key *key) : EvpContext(key)
     {
         this->mdContext = nullptr;
         this->inSig = nullptr;
-        this->inSiglen = 0;
+        this->inSigLen = 0;
     }
 
-    ~EvpMdContext()
+    ~EvpMdContext() override
     {
         this->freeInSig();
         this->freeMdContext();
     }
+
+    EvpMdContext(const EvpMdContext &) = delete;
+    const EvpMdContext &operator=(const EvpMdContext &) = delete;
 
     EncrypterResult *encrypt(const EncrypterData *in) override;
 

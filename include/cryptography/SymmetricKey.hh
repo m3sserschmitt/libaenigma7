@@ -2,67 +2,63 @@
 #define SYMMETRIC_KEY_HH
 
 #include "Key.hh"
+#include "Constants.hh"
+#include <cstring>
 
 class SymmetricKey : public Key
 {
-    unsigned char *keyData;
-
-    SymmetricKey(const SymmetricKey &);
-
-    const SymmetricKey &operator=(const SymmetricKey &);
+private:
+    unsigned char *key;
 
     bool writeKeyData(const unsigned char *keyData)
     {
-        if (keyData and this->keyData)
+        if (keyData and this->key)
         {
-            memcpy(this->keyData, keyData, SYMMETRIC_KEY_SIZE);
+            memcpy(this->key, keyData, SYMMETRIC_KEY_SIZE);
             return true;
         }
 
         return false;
     }
 
-    void cleanKeyData()
+    void zeroKeyData()
     {
         if (this->notNullKeyData())
         {
-            memset(this->keyData, 0, SYMMETRIC_KEY_SIZE);
+            memset(this->key, 0, SYMMETRIC_KEY_SIZE);
         }
     }
 
+    void cleanup() { this->freeKey(); }
+
 public:
-    ~SymmetricKey() { this->freeKey(); }
+    SymmetricKey(const SymmetricKey &) = delete;
 
-    SymmetricKey() : Key()
-    {
-        this->keyData = new unsigned char[SYMMETRIC_KEY_SIZE];
-    }
+    const SymmetricKey &operator=(const SymmetricKey &) = delete;
 
-    SymmetricKey(const unsigned char *keyData) : Key()
+    ~SymmetricKey() override { this->cleanup(); }
+
+    SymmetricKey() : Key() { this->key = new unsigned char[SYMMETRIC_KEY_SIZE]; }
+
+    explicit SymmetricKey(const unsigned char *keyData) : Key()
     {
-        this->keyData = new unsigned char[SYMMETRIC_KEY_SIZE];
+        this->key = new unsigned char[SYMMETRIC_KEY_SIZE];
         this->writeKeyData(keyData);
     }
 
-    bool setKeyData(const unsigned char *keyData, unsigned int keylen, const char *passphrase = nullptr) override
-    {
-        return this->writeKeyData(keyData);
-    }
+    bool setKeyData(const unsigned char *keyData, unsigned int keyLen, const char *passphrase) override { return this->writeKeyData(keyData); }
 
-    bool readKeyFile(const char *path, const char *passphrase = nullptr) override
-    {
-        return false;
-    }
+    bool readKeyFile(const char *path, const char *passphrase) override { return false; }
 
-    const void *getKeyData() const override { return this->keyData; }
+    [[nodiscard]] const void *getKeyData() const override { return this->key; }
 
-    int getSize() const override { return this->notNullKeyData() ? SYMMETRIC_KEY_SIZE : -1; }
+    [[nodiscard]] int getSize() const override { return this->notNullKeyData() ? SYMMETRIC_KEY_SIZE : -1; }
 
     void freeKey() override
     {
-        this->cleanKeyData();
-        delete[] this->keyData;
-        this->keyData = nullptr;
+        this->zeroKeyData();
+        delete[] this->key;
+        this->key = nullptr;
     }
 };
 

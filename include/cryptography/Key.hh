@@ -4,14 +4,13 @@
 class Key
 {
 protected:
-    bool notNullKeyData() const { return this->getKeyData() != nullptr; }
+    [[nodiscard]] bool notNullKeyData() const { return this->getKeyData() != nullptr; }
 
 public:
-    virtual ~Key() {}
-    Key() {}
+    virtual ~Key() = default;
 
     /**
-     * @brief Initialize encryption / decryption key from buffer. This method should be overriden into any derived class
+     * @brief Initialize encryption / decryption key from buffer. This method should be overridden into any derived class
      * to achieve desired behavior.
      *
      * @param keyData Key material for initialization
@@ -20,7 +19,7 @@ public:
      * @return true If initialization successful
      * @return false If initialization failed
      */
-    virtual bool setKeyData(const unsigned char *keyData, unsigned int len, const char *passphrase = nullptr) = 0;
+    virtual bool setKeyData(const unsigned char *keyData, unsigned int len, const char *passphrase) = 0;
 
     /**
      * @brief Read encryption / decryption key material from file (especially useful for public/private key pairs). Override
@@ -31,7 +30,7 @@ public:
      * @return true If initialization successful
      * @return false If initialization failed
      */
-    virtual bool readKeyFile(const char *path, const char *passphrase = nullptr) = 0;
+    virtual bool readKeyFile(const char *path, const char *passphrase) = 0;
 
     /**
      * @brief release all memory related to the key
@@ -45,7 +44,7 @@ public:
      *
      * @return Size Size of the key in bytes
      */
-    virtual int getSize() const = 0;
+    [[nodiscard]] virtual int getSize() const = 0;
 
     /**
      * @brief Returns a pointer to the underlying key structure: for symmetric keys it will be an array of
@@ -53,7 +52,7 @@ public:
      *
      * @return const void* pointer to underlying key structure.
      */
-    virtual const void *getKeyData() const = 0;
+    [[nodiscard]] virtual const void *getKeyData() const = 0;
 };
 
 #endif

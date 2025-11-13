@@ -6,14 +6,12 @@
 
 class CryptoContext
 {
+private:
     Key *key;
     EvpContext *cipher;
     CryptoMachine *cryptoMachine;
 
-    CryptoContext(const CryptoContext &);
-    const CryptoContext &operator=(const CryptoContext &);
-
-    bool notNullCryptoMachine() const { return this->cryptoMachine != nullptr; }
+    [[nodiscard]] bool notNullCryptoMachine() const { return this->cryptoMachine != nullptr; }
 
     void freeKey()
     {
@@ -43,6 +41,9 @@ public:
         this->cipher = cipher;
     }
 
+    CryptoContext(const CryptoContext &) = delete;
+    const CryptoContext &operator=(const CryptoContext &) = delete;
+
     CryptoContext()
     {
         this->cryptoMachine = nullptr;
@@ -50,14 +51,19 @@ public:
         this->cipher = nullptr;
     }
 
-    bool setInput(const unsigned char *data, unsigned int datalen)
+    bool setInput(const unsigned char *data, unsigned int dataLen)
     {
-        return this->notNullCryptoMachine() and this->cryptoMachine->setInput(data, datalen);
+        if (notNullCryptoMachine())
+        {
+            this->cryptoMachine->setInput(data, dataLen);
+            return true;
+        }
+        return false;
     }
 
-    const EncrypterResult *getOutput() const
+    [[nodiscard]] const EncrypterResult *getOutput() const
     {
-        return this->notNullCryptoMachine() ? this->cryptoMachine->getOutput(): nullptr;
+        return this->notNullCryptoMachine() ? this->cryptoMachine->getOutput() : nullptr;
     }
 
     bool run() { return this->notNullCryptoMachine() and this->cryptoMachine->run(); }

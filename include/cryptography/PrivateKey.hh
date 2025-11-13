@@ -5,19 +5,15 @@
 
 class PrivateKey : public AsymmetricKey
 {
-private:
-    PrivateKey(const PrivateKey &);
-    const PrivateKey &operator=(const PrivateKey &);
-
 protected:
-    virtual void setKeyFromBio(void *bio, char *passphrase) override;
+    void setKeyFromBio(void *bio, char *passphrase) override;
 
-    virtual void setKeyFromFile(FILE *file, char *passphrase) override;
+    void setKeyFromFile(FILE *file, char *passphrase) override;
 
 public:
-    virtual ~PrivateKey() {}
-
     PrivateKey() : AsymmetricKey() {}
+    PrivateKey(const PrivateKey &) = delete;
+    const PrivateKey &operator=(const PrivateKey &) = delete;
 };
 
 #endif

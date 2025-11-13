@@ -5,28 +5,18 @@
 
 class CryptoMachine
 {
+private:
     EvpContext *cipher;
 
     const EncrypterData *in;
     const EncrypterResult *out;
 
-    CryptoMachine(const CryptoMachine &);
-    const CryptoMachine &operator=(const CryptoMachine &);
-
-    void setIn(const EncrypterData *in)
-    {
-        this->in = in;
-    }
+    void setIn(const EncrypterData *inData) { this->in = inData; }
 
     void freeIn()
     {
         delete this->getIn();
         this->setIn(nullptr);
-    }
-
-    void setCipher(EvpContext *cipher)
-    {
-        this->cipher = cipher;
     }
 
 protected:
@@ -35,33 +25,25 @@ protected:
         delete this->getOut();
         this->setOut(nullptr);
     }
-    
-    const EncrypterData *getIn() const
-    {
-        return this->in;
-    }
 
-    void setOut(const EncrypterResult *out)
-    {
-        this->out = out;
-    }
+    [[nodiscard]] const EncrypterData *getIn() const { return this->in; }
 
-    const EncrypterResult *getOut() const
-    {
-        return this->out;
-    }
+    void setOut(const EncrypterResult *outData) { this->out = outData; }
 
-    bool notNullIn() const { return this->in != nullptr; }
+    [[nodiscard]] const EncrypterResult *getOut() const { return this->out; }
 
     EvpContext *getCipher() { return this->cipher; }
 
 public:
-    CryptoMachine(EvpContext *cipher)
+    explicit CryptoMachine(EvpContext *c)
     {
-        this->setIn(nullptr);
-        this->setOut(nullptr);
-        this->setCipher(cipher);
+        this->in = nullptr;
+        this->out = nullptr;
+        this->cipher = c;
     }
+
+    CryptoMachine(const CryptoMachine &) = delete;
+    const CryptoMachine &operator=(const CryptoMachine &) = delete;
 
     virtual ~CryptoMachine()
     {
@@ -71,17 +53,13 @@ public:
 
     virtual bool run() = 0;
 
-    bool setInput(const unsigned char *data, unsigned int datalen)
+    void setInput(const unsigned char *data, unsigned int dataLen)
     {
         this->freeIn();
-        this->setIn(new EncrypterData(data, datalen));
-        return this->notNullIn();
+        this->setIn(new EncrypterData(data, dataLen));
     }
 
-    const EncrypterResult *getOutput() const
-    {
-        return this->out;
-    }
+    [[nodiscard]] const EncrypterResult *getOutput() const { return this->out; }
 };
 
 #endif

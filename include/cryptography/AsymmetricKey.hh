@@ -6,16 +6,13 @@
 
 class AsymmetricKey : public Key
 {
+private:
     void *key;
 
-    AsymmetricKey(const AsymmetricKey &);
-
-    const AsymmetricKey &operator=(const AsymmetricKey &);
+    void cleanup() { this->freeKey(); }
 
 protected:
-    void *getKey() { return this->key; }
-
-    void setKey(void *key) { this->key = key; }
+    void setKey(void *keyData) { this->key = keyData; }
 
     static char *AllocatePassphraseBuffer(const char *passphrase, int &outSize);
 
@@ -24,17 +21,21 @@ protected:
     virtual void setKeyFromFile(FILE *file, char *passphrase) = 0;
 
 public:
-    ~AsymmetricKey() { this->freeKey(); }
+    ~AsymmetricKey() override { this->cleanup(); }
 
     AsymmetricKey() : Key() { this->key = nullptr; }
 
-    bool setKeyData(const unsigned char *keyData, unsigned int len, const char *passphrase = nullptr) override;
+    AsymmetricKey(const AsymmetricKey &) = delete;
 
-    bool readKeyFile(const char *path, const char *passphrase = nullptr) override;
+    const AsymmetricKey &operator=(const AsymmetricKey &) = delete;
 
-    int getSize() const override;
+    bool setKeyData(const unsigned char *keyData, unsigned int len, const char *passphrase) override;
 
-    const void *getKeyData() const override { return this->key; }
+    bool readKeyFile(const char *path, const char *passphrase) override;
+
+    [[nodiscard]] int getSize() const override;
+
+    [[nodiscard]] const void *getKeyData() const override { return this->key; }
 
     void freeKey() override;
 };

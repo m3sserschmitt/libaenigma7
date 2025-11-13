@@ -39,7 +39,7 @@ extern "C"
 
     bool RunVerification(CryptoContext *ctx, const unsigned char *in, unsigned int outLen);
 
-    int GetAesGcmCiphertextSize(unsigned int plaintext);
+    unsigned int GetAesGcmCiphertextSize(unsigned int plaintext);
 
     int GetAesGcmPlaintextSize(unsigned int ciphertext);
 

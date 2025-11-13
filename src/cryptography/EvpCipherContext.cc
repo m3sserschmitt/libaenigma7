@@ -9,10 +9,8 @@ void EvpCipherContext::freeCipherContext()
     this->cipherContext = nullptr;
 }
 
-bool EvpCipherContext::allocateCipherContext()
+void EvpCipherContext::allocateCipherContext()
 {
     this->freeCipherContext();
     this->cipherContext = EVP_CIPHER_CTX_new();
-
-    return this->getCipherContext() != nullptr;
 }

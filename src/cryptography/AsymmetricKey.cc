@@ -12,7 +12,7 @@ char *AsymmetricKey::AllocatePassphraseBuffer(const char *passphrase, int &outSi
         return nullptr;
     }
 
-    outSize = strlen(passphrase);
+    outSize = (int)strlen(passphrase);
     char *newBuffer = new char[outSize + 1];
     strncpy(newBuffer, passphrase, outSize);
     newBuffer[outSize] = 0;
@@ -24,7 +24,7 @@ bool AsymmetricKey::setKeyData(const unsigned char *keyData, unsigned int len, c
 {
     this->freeKey();
 
-    BIO *bio = BIO_new_mem_buf((const char *)keyData, len);
+    BIO *bio = BIO_new_mem_buf((const char *)keyData, (int)len);
 
     if (not bio)
     {

@@ -40,10 +40,10 @@ static int GetOnionSize(unsigned int plaintextLen, const char *key)
     return envelopeSize < 0 ? -1 : envelopeSize + ONION_LENGTH_BYTES;
 }
 
-static bool Seal(const unsigned char *in, unsigned int inlen, const char *key, const char *address, unsigned char *out, int &outlen)
+static bool Seal(const unsigned char *in, unsigned int inLen, const char *key, const char *address, unsigned char *out, int &outLen)
 {
     CryptoContext *ctx = nullptr;
-    outlen = -1;
+    outLen = -1;
 
     if (!key || !address || !(ctx = CreateAsymmetricEncryptionContext(key)))
     {
@@ -55,9 +55,9 @@ static bool Seal(const unsigned char *in, unsigned int inlen, const char *key, c
         FreeContext(ctx);
         return false;
     }
-    memcpy(out + ADDRESS_SIZE, in, inlen);
+    memcpy(out + ADDRESS_SIZE, in, inLen);
 
-    const EncrypterResult *result = RunEx(ctx, out, inlen + ADDRESS_SIZE);
+    const EncrypterResult *result = RunEx(ctx, out, inLen + ADDRESS_SIZE);
 
     if (result->isError())
     {
@@ -65,7 +65,7 @@ static bool Seal(const unsigned char *in, unsigned int inlen, const char *key, c
         return false;
     }
 
-    outlen = result->getDataSize() + ONION_LENGTH_BYTES;
+    outLen = (int)result->getDataSize() + ONION_LENGTH_BYTES;
     memcpy(out + ONION_LENGTH_BYTES, result->getData(), result->getDataSize());
     EncodeOnionSize(result->getDataSize(), out);
 
@@ -209,7 +209,7 @@ extern "C" const unsigned char *Run(CryptoContext *ctx, const unsigned char *in,
         return nullptr;
     }
 
-    outLen = ciphertext->getDataSize();
+    outLen = (int)ciphertext->getDataSize();
     return ciphertext->getData();
 }
 
@@ -230,7 +230,7 @@ extern "C" unsigned int DecodeOnionSize(const unsigned char *onion)
     unsigned int size = 0;
     for (int i = 0; i < ONION_LENGTH_BYTES; i++)
     {
-        size += onion[i] * pow(256, ONION_LENGTH_BYTES - i - 1);
+        size += (unsigned int)onion[i] * (unsigned int)pow(256, ONION_LENGTH_BYTES - i - 1);
     }
 
     return size;
@@ -250,7 +250,7 @@ extern "C" const unsigned char *UnsealOnion(CryptoContext *ctx, const unsigned c
     return Run(ctx, ciphertext, cipherLen, plaintextLen);
 }
 
-extern "C" const unsigned char *SealOnion(const unsigned char *plaintext, unsigned int plaintextLen, const char **keys, const char **addresses, unsigned int count, int &outlen)
+extern "C" const unsigned char *SealOnion(const unsigned char *plaintext, unsigned int plaintextLen, const char **keys, const char **addresses, unsigned int count, int &outLen)
 {
     unsigned char *out = nullptr;
     for (int i = 0; i < count; i++)
@@ -260,36 +260,36 @@ extern "C" const unsigned char *SealOnion(const unsigned char *plaintext, unsign
         if (onionSize < 0 || !addresses[i])
         {
             i > 0 ? delete[] plaintext : void();
-            outlen = -1;
+            outLen = -1;
             return nullptr;
         }
 
         out = new unsigned char[onionSize];
 
-        if (!Seal(plaintext, plaintextLen, keys[i], addresses[i], out, outlen) || outlen < 0)
+        if (!Seal(plaintext, plaintextLen, keys[i], addresses[i], out, outLen) || outLen < 0)
         {
             delete[] out;
             i > 0 ? delete[] plaintext : void();
-            outlen = -1;
+            outLen = -1;
             return nullptr;
         }
 
         i > 0 ? delete[] plaintext : void();
         plaintext = out;
-        plaintextLen = outlen;
+        plaintextLen = outLen;
     }
 
     return out;
 }
 
-extern "C" int GetAesGcmCiphertextSize(unsigned int plaintext)
+extern "C" unsigned int GetAesGcmCiphertextSize(unsigned int plaintext)
 {
     return plaintext + IV_SIZE + TAG_SIZE;
 }
 
 extern "C" int GetAesGcmPlaintextSize(unsigned int ciphertext)
 {
-    return ciphertext - TAG_SIZE - IV_SIZE;
+    return (int)ciphertext - TAG_SIZE - IV_SIZE;
 }
 
 extern "C" int GetPKeySize(const char *publicKey)
@@ -300,12 +300,7 @@ extern "C" int GetPKeySize(const char *publicKey)
     }
 
     Key *key = new PublicKey();
-    key->setKeyData((const unsigned char *)publicKey, strlen(publicKey));
-
-    if (not key)
-    {
-        return -1;
-    }
+    key->setKeyData((const unsigned char *)publicKey, strlen(publicKey), nullptr);
 
     int keySize = key->getSize();
     delete key;
@@ -316,17 +311,17 @@ extern "C" int GetPKeySize(const char *publicKey)
 extern "C" int GetEnvelopeSize(unsigned int plaintextLen, const char *publicKey)
 {
     int pKeySize = GetPKeySize(publicKey);
-    return pKeySize < 0 ? -1 : pKeySize + IV_SIZE + TAG_SIZE + plaintextLen;
+    return pKeySize < 0 ? -1 : pKeySize + IV_SIZE + TAG_SIZE + (int)plaintextLen;
 }
 
 extern "C" int GetOpenEnvelopeSize(unsigned int envelopeSize, const char *publicKey)
 {
     int pKeySize = GetPKeySize(publicKey);
-    return pKeySize < 0 ? -1 : envelopeSize - pKeySize - IV_SIZE - TAG_SIZE;
+    return pKeySize < 0 ? -1 : (int)envelopeSize - pKeySize - IV_SIZE - TAG_SIZE;
 }
 
 extern "C" int GetSignedDataSize(unsigned int dataSize, const char *publicKey)
 {
     int pKeySize = GetPKeySize(publicKey);
-    return pKeySize < 0 ? -1 : pKeySize + dataSize;
+    return pKeySize < 0 ? -1 : pKeySize + (int)dataSize;
 }
