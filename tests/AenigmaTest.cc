@@ -377,6 +377,12 @@ int main()
     result = result & RunTest("Test asymmetric encryption with invalid key should fail", Run, ctx, plaintext, plaintextLen, nullptr, -1);
     delete ctx;
 
+    SetMasterPassphraseName("AenigmaTestMasterPassphrase");
+    CreateMasterPassphrase(privateKeyPassphrase);
+    ctx = CreateAsymmetricDecryptionContext(privateKey, nullptr);
+    result = result & RunTest("Test asymmetric decryption with master passphrase", Run, ctx, asymmetricCiphertext, asymmetricCipherLen, plaintext, plaintextLen);
+    delete ctx;
+    
     ctx = CreateAsymmetricDecryptionContext(privateKey, privateKeyPassphrase);
     result = result & RunTest("Test asymmetric decryption", Run, ctx, asymmetricCiphertext, asymmetricCipherLen, plaintext, plaintextLen);
     delete ctx;

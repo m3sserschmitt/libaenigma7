@@ -73,6 +73,18 @@ static bool Seal(const unsigned char *in, unsigned int inLen, const char *key, c
     return true;
 }
 
+#ifndef __ANDROID__
+extern "C" bool SetMasterPassphraseName(const char *name)
+{
+    return PrivateKey::setMasterPassphraseName(name, strnlen(name, MASTER_PASSPHRASE_MAX_NAME_SIZE));
+}
+
+extern "C" int CreateMasterPassphrase(const char *passphrase)
+{
+    return PrivateKey::createMasterPassphrase(passphrase, strnlen(passphrase, MAX_KERNEL_KEY_SIZE));
+}
+#endif
+
 extern "C" CryptoContext *CreateSymmetricEncryptionContext(const unsigned char *key)
 {
     ICryptoContextBuilderType *builder = CryptoContextBuilder::Create();

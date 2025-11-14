@@ -5,6 +5,11 @@
 
 extern "C"
 {
+#ifndef __ANDROID__
+    bool SetMasterPassphraseName(const char *name);
+
+    int CreateMasterPassphrase(const char *passphrase);
+#endif
     CryptoContext *CreateSymmetricEncryptionContext(const unsigned char *key);
 
     CryptoContext *CreateSymmetricDecryptionContext(const unsigned char *key);
