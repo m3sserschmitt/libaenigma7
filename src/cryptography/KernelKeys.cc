@@ -10,21 +10,21 @@ int CreateKernelKey(const char *keyMaterial, unsigned int keyMaterialSize, const
 {
     if (keyMaterial == NULL || keyMaterialSize == 0 || description == NULL || keyMaterialSize > MAX_KERNEL_KEY_SIZE)
     {
-        return false;
+        return -1;
     }
 
     key_serial_t keyHandle = add_key(KERNEL_KEY_TYPE, description, keyMaterial, keyMaterialSize, ringId);
 
     if (keyHandle < 0)
     {
-        return false;
+        return -1;
     }
 
     if (keyctl_setperm(keyHandle, KEY_POS_ALL) != 0)
     {
         keyctl(KEYCTL_UNLINK, keyHandle);
 
-        return false;
+        return -1;
     }
 
     return keyHandle;

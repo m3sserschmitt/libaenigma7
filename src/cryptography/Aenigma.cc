@@ -337,3 +337,8 @@ extern "C" int GetSignedDataSize(unsigned int dataSize, const char *publicKey)
     int pKeySize = GetPKeySize(publicKey);
     return pKeySize < 0 ? -1 : pKeySize + (int)dataSize;
 }
+
+extern "C" int GetAddressSize()
+{
+    return ADDRESS_SIZE;
+}

@@ -55,5 +55,7 @@ extern "C"
     int GetSignedDataSize(unsigned int dataSize, const char *publicKey);
 
     int GetPKeySize(const char *publicKey);
+
+    int GetAddressSize();
 }
 #endif
