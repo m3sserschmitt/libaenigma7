@@ -7,7 +7,9 @@ class PrivateKey : public AsymmetricKey
 {
 private:
 #ifndef __ANDROID__
-    static char privateKeyMasterPassphraseName[];
+    static char masterPassphraseName[];
+
+    static int masterPassphraseHandle;
 
     static int readMasterPassphraseCallback(char *buf, int size, int rwflag, void *u);
 #endif

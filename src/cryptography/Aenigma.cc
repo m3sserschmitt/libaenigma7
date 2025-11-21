@@ -1,6 +1,7 @@
 #include "cryptography/Aenigma.hh"
 #include "cryptography/PublicKey.hh"
 #include "cryptography/CryptoContextBuilder.hh"
+#include <cmath>
 
 static bool Sha256HexToBytes(const char *sha246Hex, unsigned char *out)
 {

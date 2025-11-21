@@ -9,32 +9,29 @@
 #ifndef __ANDROID__
 #include "cryptography/KernelKeys.hh"
 
-char PrivateKey::privateKeyMasterPassphraseName[MASTER_PASSPHRASE_MAX_NAME_SIZE + 1] = MASTER_PASSPHRASE_DEFAULT_NAME;
+char PrivateKey::masterPassphraseName[MASTER_PASSPHRASE_MAX_NAME_SIZE + 1] = MASTER_PASSPHRASE_DEFAULT_NAME;
+
+int PrivateKey::masterPassphraseHandle = -1;
 
 int PrivateKey::readMasterPassphraseCallback(char *buf, int size, int rwflag, void *u)
 {
-    int keyId = SearchKernelKey(privateKeyMasterPassphraseName, KERNEL_KEY_KEYRING);
-    if (keyId < 0)
-    {
-        return -1;
-    }
-    return ReadKernelKey(keyId, buf);
+    return masterPassphraseHandle < 0 ? -1 : ReadKernelKey(masterPassphraseHandle, buf);
 }
 
 bool PrivateKey::setMasterPassphraseName(const char *name, size_t len)
 {
-    if(len > MASTER_PASSPHRASE_MAX_NAME_SIZE)
+    if (len > MASTER_PASSPHRASE_MAX_NAME_SIZE)
     {
         return false;
     }
-    strncpy(privateKeyMasterPassphraseName, name, len);
-    privateKeyMasterPassphraseName[len] = 0;
+    strncpy(masterPassphraseName, name, len);
+    masterPassphraseName[len] = 0;
     return true;
 }
 
 int PrivateKey::createMasterPassphrase(const char *passphrase, size_t len)
 {
-    return CreateKernelKey(passphrase, len, privateKeyMasterPassphraseName, KERNEL_KEY_KEYRING);
+    return (masterPassphraseHandle = CreateKernelKey(passphrase, len, masterPassphraseName, KERNEL_KEY_KEYRING));
 }
 
 void PrivateKey::setKeyFromBio(void *bio, char *passphrase)

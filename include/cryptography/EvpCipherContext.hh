@@ -71,14 +71,7 @@ protected:
         }
     }
 
-    bool generateIV()
-    {
-        const unsigned char * randomData = RandomDataGenerator::generate(IV_SIZE);
-        bool ok = this->writeIV(randomData);
-        delete[] randomData;
-
-        return ok;
-    }
+    bool generateIV();
 
     void freeTag()
     {

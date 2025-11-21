@@ -13,21 +13,26 @@ int CreateKernelKey(const char *keyMaterial, unsigned int keyMaterialSize, const
         return -1;
     }
 
-    key_serial_t keyHandle = add_key(KERNEL_KEY_TYPE, description, keyMaterial, keyMaterialSize, ringId);
+    key_serial_t ring = keyctl_get_keyring_ID(ringId, 1);
 
-    if (keyHandle < 0)
+    if (ring < 0)
     {
         return -1;
     }
 
-    if (keyctl_setperm(keyHandle, KEY_POS_ALL) != 0)
-    {
-        keyctl(KEYCTL_UNLINK, keyHandle);
+    key_serial_t handle = add_key(KERNEL_KEY_TYPE, description, keyMaterial, keyMaterialSize, ring);
 
+    if (handle < 0)
+    {
         return -1;
     }
 
-    return keyHandle;
+    if (keyctl(KEYCTL_LINK, handle, ring) == -1)
+    {
+        return -1;
+    }
+
+    return handle;
 }
 
 int ReadKernelKey(int keyId, char *data)
@@ -73,14 +78,16 @@ int SearchKernelKey(const char *description, int ringId)
         return -1;
     }
 
-    key_serial_t keyId = keyctl_search(ringId, KERNEL_KEY_TYPE, description, 0);
+    key_serial_t ring = keyctl_get_keyring_ID(ringId, 1);
 
-    if (keyId < 0)
+    if (ring < 0)
     {
         return -1;
     }
 
-    return keyId;
+    key_serial_t keyId = keyctl_search(ring, KERNEL_KEY_TYPE, description, 0);
+
+    return keyId < 0 ? -1 : keyId;
 }
 
 unsigned int GetKernelKeyMaxSize()

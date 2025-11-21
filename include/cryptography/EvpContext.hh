@@ -4,7 +4,6 @@
 #include "Constants.hh"
 #include "EncrypterData.hh"
 #include "EncrypterResult.hh"
-#include "RandomDataGenerator.hh"
 #include "Key.hh"
 
 class EvpContext
