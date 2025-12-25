@@ -379,10 +379,14 @@ int main()
 
     SetMasterPassphraseName("AenigmaTestMasterPassphrase");
     CreateMasterPassphrase(privateKeyPassphrase);
-    ctx = CreateAsymmetricDecryptionContext(privateKey, nullptr);
+    ctx = CreateAsymmetricDecryptionContext(privateKey);
     result = result & RunTest("Test asymmetric decryption with master passphrase", Run, ctx, asymmetricCiphertext, asymmetricCipherLen, plaintext, plaintextLen);
     delete ctx;
-    
+
+    ctx = CreateAsymmetricDecryptionContextFromFile("../tests/private.pem");
+    result = result & RunTest("Create ctx from file; Test asymmetric decryption with master passphrase", Run, ctx, asymmetricCiphertext, asymmetricCipherLen, plaintext, plaintextLen);
+    delete ctx;
+
     ctx = CreateAsymmetricDecryptionContext(privateKey, privateKeyPassphrase);
     result = result & RunTest("Test asymmetric decryption", Run, ctx, asymmetricCiphertext, asymmetricCipherLen, plaintext, plaintextLen);
     delete ctx;
@@ -413,6 +417,14 @@ int main()
 
     ctx = CreateSymmetricDecryptionContext(otherSymmetricKey);
     result = result & RunTest("Test symmetric decryption with invalid ciphertext should fail", Run, ctx, invalidSymmetricCiphertext, invalidSymmetricCipherLen, nullptr, -1);
+    delete ctx;
+
+    ctx = CreateSignatureContext(privateKey);
+    result = result & RunTest("Test signature with master passphrase", Run, ctx, plaintext, plaintextLen, nullptr, signedDatalen);
+    delete ctx;
+
+    ctx = CreateSignatureContextFromFile("../tests/private.pem");
+    result = result & RunTest("Create ctx from file; Test signature with master passphrase", Run, ctx, plaintext, plaintextLen, nullptr, signedDatalen);
     delete ctx;
 
     ctx = CreateSignatureContext(privateKey, privateKeyPassphrase);
