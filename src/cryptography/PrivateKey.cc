@@ -34,6 +34,13 @@ int PrivateKey::createMasterPassphrase(const char *passphrase, size_t len)
     return (masterPassphraseHandle = CreateKernelKey(passphrase, len, masterPassphraseName, KERNEL_KEY_KEYRING));
 }
 
+bool PrivateKey::removeMasterPassphrase()
+{
+    auto result = RemoveKernelKey(masterPassphraseHandle);
+    masterPassphraseHandle = -1;
+    return result;
+}
+
 void PrivateKey::setKeyFromBio(void *bio, char *passphrase)
 {
     this->setKey(PEM_read_bio_PrivateKey((BIO *)bio, nullptr, passphrase ? nullptr : readMasterPassphraseCallback, passphrase));

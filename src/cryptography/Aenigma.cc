@@ -84,6 +84,12 @@ extern "C" int CreateMasterPassphrase(const char *passphrase)
 {
     return PrivateKey::createMasterPassphrase(passphrase, strnlen(passphrase, MAX_KERNEL_KEY_SIZE));
 }
+
+extern "C" bool RemoveMasterPassphrase()
+{
+    return PrivateKey::removeMasterPassphrase();
+}
+
 #endif
 
 extern "C" CryptoContext *CreateSymmetricEncryptionContext(const unsigned char *key)
@@ -342,4 +348,9 @@ extern "C" int GetSignedDataSize(unsigned int dataSize, const char *publicKey)
 extern "C" int GetAddressSize()
 {
     return ADDRESS_SIZE;
+}
+
+extern "C" int GetKernelKeyMaxSize()
+{
+    return MAX_KERNEL_KEY_SIZE;
 }

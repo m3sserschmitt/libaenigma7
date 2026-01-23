@@ -9,6 +9,8 @@ extern "C"
     bool SetMasterPassphraseName(const char *name);
 
     int CreateMasterPassphrase(const char *passphrase);
+
+    bool RemoveMasterPassphrase();
 #endif
     CryptoContext *CreateSymmetricEncryptionContext(const unsigned char *key);
 

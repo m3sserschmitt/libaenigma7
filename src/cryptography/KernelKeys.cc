@@ -90,9 +90,4 @@ int SearchKernelKey(const char *description, int ringId)
     return keyId < 0 ? -1 : keyId;
 }
 
-unsigned int GetKernelKeyMaxSize()
-{
-    return MAX_KERNEL_KEY_SIZE;
-}
-
 #endif
