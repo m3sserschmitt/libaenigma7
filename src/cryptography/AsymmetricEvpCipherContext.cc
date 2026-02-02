@@ -5,7 +5,7 @@
 EncrypterResult *AsymmetricEvpCipherContext::createEnvelope() const
 {
     unsigned int envelopeSize = this->calculateEnvelopeSize();
-    unsigned char * envelope = new unsigned char[envelopeSize + 1];
+    auto *envelope = new unsigned char[envelopeSize + 1];
 
     unsigned int N = this->encryptedKeyLength;
     unsigned int P = this->getOutBufferSize();
@@ -15,7 +15,7 @@ EncrypterResult *AsymmetricEvpCipherContext::createEnvelope() const
     memcpy(envelope + N + IV_SIZE, this->getOutBuffer(), P);
     memcpy(envelope + N + IV_SIZE + P, this->getTag(), TAG_SIZE);
 
-    EncrypterResult *result = new EncrypterResult(envelope, envelopeSize);
+    auto *result = new EncrypterResult(envelope, envelopeSize);
 
     memset(envelope, 0, envelopeSize);
     delete[] envelope;
@@ -23,9 +23,9 @@ EncrypterResult *AsymmetricEvpCipherContext::createEnvelope() const
     return result;
 }
 
-const unsigned char * AsymmetricEvpCipherContext::readEnvelope(const EncrypterData *in, int &cipherlen)
+const unsigned char *AsymmetricEvpCipherContext::readEnvelope(const EncrypterData *in, int &cipherLen)
 {
-    cipherlen = -1;
+    cipherLen = -1;
 
     if (not in or not in->getData())
     {
@@ -34,14 +34,14 @@ const unsigned char * AsymmetricEvpCipherContext::readEnvelope(const EncrypterDa
 
     unsigned int N = this->getKeySize();
     unsigned int envelopeSize = in->getDataSize();
-    const unsigned char * envelope = in->getData();
+    const unsigned char *envelope = in->getData();
 
     if (not this->writeEncryptedKey(envelope) or not this->writeIV(envelope + N) or not this->writeTag(envelope + envelopeSize - TAG_SIZE))
     {
         return nullptr;
     }
 
-    cipherlen = envelopeSize - N - IV_SIZE - TAG_SIZE;
+    cipherLen = (int)envelopeSize - (int)N - IV_SIZE - TAG_SIZE;
     return envelope + N + IV_SIZE;
 }
 
@@ -54,15 +54,12 @@ EncrypterResult *AsymmetricEvpCipherContext::decrypt(const EncrypterData *in)
 
     this->cleanup();
 
-    if (not this->openEnvelopeAllocateMemory(in))
-    {
-        return this->abort();
-    }
+    this->openEnvelopeAllocateMemory(in);
 
-    int cipherlen;
-    const unsigned char * ciphertext = this->readEnvelope(in, cipherlen);
+    int cipherLen;
+    const unsigned char *ciphertext = this->readEnvelope(in, cipherLen);
 
-    if (not ciphertext or cipherlen < 0)
+    if (not ciphertext or cipherLen < 0)
     {
         return this->abort();
     }
@@ -81,7 +78,7 @@ EncrypterResult *AsymmetricEvpCipherContext::decrypt(const EncrypterData *in)
 
     if (EVP_OpenUpdate((EVP_CIPHER_CTX *)this->getCipherContext(),
                        this->getOutBuffer(),
-                       &len, ciphertext, cipherlen) != 1)
+                       &len, ciphertext, cipherLen) != 1)
     {
         return this->abort();
     }
@@ -100,7 +97,7 @@ EncrypterResult *AsymmetricEvpCipherContext::decrypt(const EncrypterData *in)
 
     this->setOutBufferSize(len + len2);
 
-    EncrypterResult *result = new EncrypterResult(this->getOutBuffer(), this->getOutBufferSize());
+    auto *result = new EncrypterResult(this->getOutBuffer(), this->getOutBufferSize());
 
     this->cleanup();
 
@@ -116,19 +113,16 @@ EncrypterResult *AsymmetricEvpCipherContext::encrypt(const EncrypterData *in)
 
     this->cleanup();
 
-    if (not this->sealEnvelopeAllocateMemory(in))
-    {
-        return this->abort();
-    }
+    this->sealEnvelopeAllocateMemory(in);
 
-    EVP_PKEY *pkey = (EVP_PKEY *)this->getKey()->getKeyData();
+    auto *pKey = (EVP_PKEY *)this->getKey()->getKeyData();
 
     if (EVP_SealInit((EVP_CIPHER_CTX *)this->getCipherContext(),
                      EVP_aes_256_gcm(),
                      &this->encryptedKey,
                      &this->encryptedKeyLength,
                      this->getIV(),
-                     &pkey, 1) != 1)
+                     &pKey, 1) != 1)
     {
         return this->abort();
     }

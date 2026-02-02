@@ -5,6 +5,14 @@
 
 #include "contracts/ICryptoContextBuilderType.hh"
 #include "CryptoContext.hh"
+#include "PublicKey.hh"
+#include "PrivateKey.hh"
+#include "SymmetricKey.hh"
+#include "SymmetricEvpCipherContext.hh"
+#include "EncryptionMachine.hh"
+#include "DecryptionMachine.hh"
+#include "AsymmetricEvpCipherContext.hh"
+#include "EvpMdContext.hh"
 
 class CryptoContextBuilder
 {
@@ -12,193 +20,159 @@ private:
     class Impl
         : public ICryptoContextBuilderType,
           public ICryptoContextBuilderRsaOperation,
-          public ICryptoContextBuilderPlaintext,
-          public ICryptoContextBuilderCiphertext,
+          public ICryptoContextBuilderAesOperation,
           public ICryptoContextBuilderKeyData,
           public ICryptoContextBuilder
     {
     private:
-        bool completed;
+        bool error;
+        Key *key;
         CryptoContext *ctx;
 
     public:
         Impl()
         {
-            completed = false;
-            this->ctx = CryptoContext::Factory::CreateCryptoContext();
+            this->ctx = nullptr;
+            this->key = nullptr;
+            error = false;
         }
 
-        ~Impl()
+        ~Impl() override
         {
-            // Important note:
-            // If the user abandons the construction before calling the build() method
-            // and, later on, the Impl object is destroyed, then the CryptoContext object
-            // will remain behind (although partially initialized) with no chance for
-            // further cleanup. Thus, that will cause a memory leak.
-            // We have to release the that memory only if the build() method has not been called,
-            // i.e., the object has not been returned.
-            if (!completed)
-            {
-                delete this->ctx;
-            }
+            delete this->ctx;
+            this->ctx = nullptr;
         }
 
-        ICryptoContextBuilderKeyData *noPlaintext() override
+        ICryptoContextBuilder *setKey(const unsigned char *keyData) override
         {
+            error &= this->key->setKeyData(keyData, SYMMETRIC_KEY_SIZE, nullptr);
             return this;
         }
 
-        ICryptoContextBuilderKeyData *noCiphertext() override
+        ICryptoContextBuilder *setKey(const char *keyData) override
         {
+            error &= this->key->setKeyData((const unsigned char *)keyData, strlen(keyData), nullptr);
             return this;
         }
 
-        ICryptoContextBuilder *setKey256(const unsigned char *key) override
+        ICryptoContextBuilder *setKey(const char *keyData, const char *passphrase) override
         {
-            if (!this->ctx->setKey256(key))
-            {
-                throw InvalidOperation(COULD_NOT_SET_KEY);
-            }
-
-            return this;
-        }
-
-        ICryptoContextBuilder *setKey(const char *key) override
-        {
-            if (!this->ctx->setKeyData(key))
-            {
-                throw InvalidOperation(COULD_NOT_SET_KEY);
-            }
-
-            return this;
-        }
-
-        ICryptoContextBuilder *setKey(const char *key, const char *passphrase) override
-        {
-            if (!this->ctx->setKeyData(key, passphrase))
-            {
-                throw InvalidOperation(COULD_NOT_SET_KEY);
-            }
-
+            error &= this->key->setKeyData((const unsigned char *)keyData, strlen(keyData), passphrase);
             return this;
         }
 
         ICryptoContextBuilder *readKeyData(const char *path, const char *passphrase) override
         {
-            if (!this->ctx->readKeyFile(path, passphrase))
-            {
-                throw InvalidOperation(COULD_NOT_SET_KEY);
-            }
-
+            error &= this->key->readKeyFile(path, passphrase);
             return this;
         }
 
         ICryptoContextBuilder *readKeyData(const char *path) override
         {
-            if (!this->ctx->readKeyFile(path))
-            {
-                throw InvalidOperation(COULD_NOT_SET_KEY);
-            }
-
-            return this;
-        }
-
-        ICryptoContextBuilderKeyData *setPlaintext(const unsigned char *data, unsigned int datalen) override
-        {
-            if (!this->ctx->setPlaintext(data, datalen))
-            {
-                throw InvalidOperation(COULD_NOT_SET_PLAINTEXT);
-            }
-
-            return this;
-        }
-
-        ICryptoContextBuilderKeyData *setCiphertext(const unsigned char *data, unsigned int datalen) override
-        {
-            if (!this->ctx->setCiphertext(data, datalen))
-            {
-                throw InvalidOperation(COULD_NOT_SET_CIPHERTEXT);
-            }
-
+            error &= this->key->readKeyFile(path, nullptr);
             return this;
         }
 
         ICryptoContextBuilderRsaOperation *useRsa() override
         {
-            this->ctx->setCryptoType(AsymmetricCryptography);
+            this->key = nullptr;
+            this->ctx = nullptr;
+            error = false;
             return this;
         }
 
-        ICryptoContextBuilderOperation *useAes() override
+        ICryptoContextBuilderAesOperation *useAes() override
         {
-            this->ctx->setCryptoType(SymmetricCryptography);
+            this->key = nullptr;
+            this->ctx = nullptr;
+            error = false;
             return this;
         }
 
-        ICryptoContextBuilderPlaintext *useEncryption() override
+        ICryptoContextBuilderKeyData *useEncryption() override
         {
-            this->ctx->setCryptoOp(Encrypt);
-
-            if (!this->ctx->allocateMemory())
+            if(error)
             {
-                throw InvalidOperation(COULD_NOT_INITIALIZE_CONTEXT);
+                return this;
             }
-
+            this->key = new SymmetricKey();
+            EvpContext *cipher = new SymmetricEvpCipherContext(this->key);
+            this->ctx = new CryptoContext(this->key, cipher, new EncryptionMachine(cipher));
             return this;
         }
 
-        ICryptoContextBuilderCiphertext *useDecryption() override
+        ICryptoContextBuilderKeyData *useDecryption() override
         {
-            this->ctx->setCryptoOp(Decrypt);
-
-            if (!this->ctx->allocateMemory())
+            if(error)
             {
-                throw InvalidOperation(COULD_NOT_INITIALIZE_CONTEXT);
+                return this;
             }
-
+            this->key = new SymmetricKey();
+            EvpContext *cipher = new SymmetricEvpCipherContext(this->key);
+            this->ctx = new CryptoContext(this->key, cipher, new DecryptionMachine(cipher));
             return this;
         }
 
-        ICryptoContextBuilderPlaintext *useSignature() override
+        ICryptoContextBuilderKeyData *useSignature() override
         {
-            this->ctx->setCryptoOp(Sign);
-
-            if (!this->ctx->allocateMemory())
+            if(error)
             {
-                throw InvalidOperation(COULD_NOT_INITIALIZE_CONTEXT);
+                return this;
             }
-
+            this->key = new PrivateKey();
+            EvpContext *cipher = new EvpMdContext(this->key);
+            this->ctx = new CryptoContext(this->key, cipher, new EncryptionMachine(cipher));
             return this;
         }
 
-        ICryptoContextBuilderCiphertext *useSignatureVerification() override
+        ICryptoContextBuilderKeyData *useSignatureVerification() override
         {
-            this->ctx->setCryptoOp(SignVerify);
-
-            if (!this->ctx->allocateMemory())
+            if(error)
             {
-                throw InvalidOperation(COULD_NOT_INITIALIZE_CONTEXT);
+                return this;
             }
+            this->key = new PublicKey();
+            EvpContext *cipher = new EvpMdContext(this->key);
+            this->ctx = new CryptoContext(this->key, cipher, new DecryptionMachine(cipher));
+            return this;
+        }
 
+        ICryptoContextBuilderKeyData *useSealing() override
+        {
+            if(error)
+            {
+                return this;
+            }
+            this->key = new PublicKey();
+            EvpContext *cipher = new AsymmetricEvpCipherContext(this->key);
+            this->ctx = new CryptoContext(this->key, cipher, new EncryptionMachine(cipher));
+            return this;
+        }
+
+        ICryptoContextBuilderKeyData *useUnsealing() override
+        {
+            if(error)
+            {
+                return this;
+            }
+            this->key = new PrivateKey();
+            EvpContext *cipher = new AsymmetricEvpCipherContext(this->key);
+            this->ctx = new CryptoContext(this->key, cipher, new DecryptionMachine(cipher));
             return this;
         }
 
         CryptoContext *build() override
         {
-            completed = true;
-            return this->ctx;
+            CryptoContext *tempCtx = this->ctx;
+            this->ctx = nullptr;
+            return error ? nullptr : tempCtx;
         }
     };
-
-    CryptoContextBuilder() {}
-    CryptoContextBuilder(const CryptoContextBuilder &);
-    const CryptoContextBuilder &operator=(const CryptoContextBuilder &);
-
 public:
-    static ICryptoContextBuilderType *Create()
-    {
-        return new Impl();
-    }
+    CryptoContextBuilder(const CryptoContextBuilder &) = delete;
+    const CryptoContextBuilder &operator=(const CryptoContextBuilder &) = delete;
+
+    static ICryptoContextBuilderType *Create() { return new Impl(); }
 };
 
 #endif

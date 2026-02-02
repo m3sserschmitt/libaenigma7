@@ -5,11 +5,9 @@
 
 class AsymmetricEvpCipherContext : public EvpCipherContext
 {
+private:
     unsigned char *encryptedKey;
     int encryptedKeyLength;
-
-    AsymmetricEvpCipherContext(const AsymmetricEvpCipherContext &);
-    const AsymmetricEvpCipherContext *operator=(const AsymmetricEvpCipherContext &);
 
     void freeEncryptedKey()
     {
@@ -24,26 +22,26 @@ class AsymmetricEvpCipherContext : public EvpCipherContext
 
     bool allocateEncryptedKey()
     {
-        int pkeySize = this->getKeySize();
+        int pKeySize = this->getKeySize();
 
-        if (pkeySize <= 0)
+        if (pKeySize <= 0)
         {
             return false;
         }
 
         this->freeEncryptedKey();
-        this->encryptedKey = new unsigned char[pkeySize + 1];
+        this->encryptedKey = new unsigned char[pKeySize + 1];
         this->encryptedKeyLength = 0;
 
-        return this->encryptedKey != nullptr;
+        return true;
     }
 
-    bool writeEncryptedKey(const unsigned char *encryptedKey)
+    bool writeEncryptedKey(const unsigned char *key)
     {
-        if (encryptedKey and this->encryptedKey)
+        if (key and this->encryptedKey)
         {
-            unsigned int encryptedKeySize = this->getKeySize();
-            memcpy(this->encryptedKey, encryptedKey, encryptedKeySize);
+            int encryptedKeySize = this->getKeySize();
+            memcpy(this->encryptedKey, key, encryptedKeySize);
             this->encryptedKeyLength = encryptedKeySize;
             return true;
         }
@@ -51,18 +49,26 @@ class AsymmetricEvpCipherContext : public EvpCipherContext
         return false;
     }
 
-    bool sealEnvelopeAllocateMemory(const EncrypterData *in)
+    void sealEnvelopeAllocateMemory(const EncrypterData *in)
     {
-        return this->allocateCipherContext() and this->allocateEncryptedKey() and this->allocateIV() and this->allocateOutBuffer(in->getDataSize()) and this->allocateTag();
+        this->allocateCipherContext();
+        this->allocateEncryptedKey();
+        this->allocateIV();
+        this->allocateOutBuffer(in->getDataSize());
+        this->allocateTag();
     }
 
-    bool openEnvelopeAllocateMemory(const EncrypterData *in)
+    void openEnvelopeAllocateMemory(const EncrypterData *in)
     {
         unsigned int outBufferSize = in->getDataSize() - this->getKeySize() - IV_SIZE - TAG_SIZE;
-        return this->allocateCipherContext() and this->allocateEncryptedKey() and this->allocateIV() and this->allocateOutBuffer(outBufferSize) and this->allocateTag();
+        this->allocateCipherContext();
+        this->allocateEncryptedKey();
+        this->allocateIV();
+        this->allocateOutBuffer(outBufferSize);
+        this->allocateTag();
     }
 
-    unsigned int calculateEnvelopeSize() const
+    [[nodiscard]] unsigned int calculateEnvelopeSize() const
     {
         return this->encryptedKeyLength + IV_SIZE + this->getOutBufferSize() + TAG_SIZE;
     }
@@ -83,26 +89,30 @@ class AsymmetricEvpCipherContext : public EvpCipherContext
      *
      * @return EncrypterResult* Structure containing envelope data and size;
      */
-    EncrypterResult *createEnvelope() const;
+    [[nodiscard]] EncrypterResult *createEnvelope() const;
 
     /**
      * @brief Read a byte array created by createEnvelope method and initializes internal structures
      * i.e. initialization vector (IV), encrypted key (EK) and tag (T)
      *
      * @param in Structure containing envelope data and size
-     * @param cipherlen if successful it contains the calculated size of ciphertext (C)
+     * @param cipherLen if successful it contains the calculated size of ciphertext (C)
      * @return const unsigned char * pointer to the ciphertext (C)
      */
-    const unsigned char *readEnvelope(const EncrypterData *in, int &cipherlen);
+    const unsigned char *readEnvelope(const EncrypterData *in, int &cipherLen);
 
 public:
-    AsymmetricEvpCipherContext(Key *key) : EvpCipherContext(key)
+    explicit AsymmetricEvpCipherContext(Key *key) : EvpCipherContext(key)
     {
         this->encryptedKey = nullptr;
         this->encryptedKeyLength = 0;
     }
 
-    ~AsymmetricEvpCipherContext() { this->freeEncryptedKey(); }
+    ~AsymmetricEvpCipherContext() override { this->freeEncryptedKey(); }
+
+    AsymmetricEvpCipherContext(const AsymmetricEvpCipherContext &) = delete;
+
+    const AsymmetricEvpCipherContext *operator=(const AsymmetricEvpCipherContext &) = delete;
 
     EncrypterResult *encrypt(const EncrypterData *in) override;
 
@@ -113,18 +123,6 @@ public:
         EvpCipherContext::cleanup();
         this->freeEncryptedKey();
     }
-
-    class Factory
-    {
-    public:
-        /**
-         * @brief Creates a new AsymmetricEvpCipherContext.
-         *
-         * @param key Initialized AsymmetricKey object
-         * @return EvpContext* Newly created AsymmetricEvpCipherContext
-         */
-        static AsymmetricEvpCipherContext *create(Key *key) { return new AsymmetricEvpCipherContext(key); }
-    };
 };
 
 #endif

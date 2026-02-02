@@ -5,6 +5,7 @@
 
 class EvpCipherContext : public EvpContext
 {
+private:
     void *cipherContext;
 
     unsigned char * iv;
@@ -15,18 +16,18 @@ protected:
 
     void freeCipherContext();
 
-    bool allocateCipherContext();
+    void allocateCipherContext();
 
     unsigned char * getTag() { return this->tag; }
 
-    const unsigned char * getTag() const { return this->tag; }
+    [[nodiscard]] const unsigned char * getTag() const { return this->tag; }
 
-    bool writeTag(const unsigned char * tag)
+    bool writeTag(const unsigned char * tagData)
     {
         unsigned char * localTag = this->getTag();
-        if (tag and localTag)
+        if (tagData and localTag)
         {
-            memcpy(localTag, tag, TAG_SIZE);
+            memcpy(localTag, tagData, TAG_SIZE);
             return true;
         }
 
@@ -35,15 +36,15 @@ protected:
 
     unsigned char * getIV() { return this->iv; }
 
-    const unsigned char * getIV() const { return this->iv; }
+    [[nodiscard]] const unsigned char * getIV() const { return this->iv; }
 
-    bool writeIV(const unsigned char * iv)
+    bool writeIV(const unsigned char * ivData)
     {
         unsigned char * localIV = this->getIV();
 
-        if (localIV and iv)
+        if (localIV and ivData)
         {
-            memcpy(localIV, iv, IV_SIZE);
+            memcpy(localIV, ivData, IV_SIZE);
             return true;
         }
 
@@ -52,70 +53,58 @@ protected:
 
     void freeIV()
     {
-        unsigned char * iv = this->getIV();
+        unsigned char * ivData = this->getIV();
 
-        if (iv)
+        if (ivData)
         {
-            memset(iv, 0, IV_SIZE);
-            delete[] iv;
+            memset(ivData, 0, IV_SIZE);
+            delete[] ivData;
             this->iv = nullptr;
         }
     }
 
-    bool allocateIV()
+    void allocateIV()
     {
         if (not this->getIV())
         {
             this->iv = new unsigned char[IV_SIZE + 1];
-            return this->getIV() != nullptr;
         }
-
-        return true;
     }
 
-    bool generateIV()
-    {
-        const unsigned char * randomData = RandomDataGenerator::generate(IV_SIZE);
-        bool ok = this->writeIV(randomData);
-        delete[] randomData;
-
-        return ok;
-    }
+    bool generateIV();
 
     void freeTag()
     {
-        unsigned char * tag = this->getTag();
+        unsigned char * tagData = this->getTag();
 
-        if (tag)
+        if (tagData)
         {
-            memset(tag, 0, TAG_SIZE);
-            delete[] tag;
+            memset(tagData, 0, TAG_SIZE);
+            delete[] tagData;
             this->tag = nullptr;
         }
     }
 
-    bool allocateTag()
+    void allocateTag()
     {
         if (not this->getTag())
         {
             this->tag = new unsigned char[TAG_SIZE + 1];
-
-            return this->getTag() != nullptr;
         }
-
-        return true;
     }
 
 public:
-
-    EvpCipherContext(Key *key) : EvpContext(key)
+    explicit EvpCipherContext(Key *key) : EvpContext(key)
     {
         this->cipherContext = nullptr;
         this->iv = nullptr;
         this->tag = nullptr;
     }
 
-    ~EvpCipherContext()
+    EvpCipherContext(const EvpCipherContext &) = delete;
+    const EvpCipherContext& operator=(const EvpCipherContext &) = delete;
+
+    ~EvpCipherContext() override
     {
         this->freeCipherContext();
         this->freeIV();

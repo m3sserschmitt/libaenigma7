@@ -4,11 +4,11 @@
 #include "Constants.hh"
 #include "EncrypterData.hh"
 #include "EncrypterResult.hh"
-#include "RandomDataGenerator.hh"
 #include "Key.hh"
 
 class EvpContext
 {
+private:
     Key *key;
 
     unsigned char *outBuffer;
@@ -17,42 +17,38 @@ class EvpContext
 protected:
     Key *getKey() { return this->key; }
 
-    int getKeySize() const { return this->key->getSize(); }
+    [[nodiscard]] int getKeySize() const { return this->key->getSize(); }
 
     unsigned char *getOutBuffer() { return this->outBuffer; }
 
-    const unsigned char *getOutBuffer() const { return this->outBuffer; }
+    [[nodiscard]] const unsigned char *getOutBuffer() const { return this->outBuffer; }
 
-    void setOutBuffer(unsigned char *outBuffer) { this->outBuffer = outBuffer; }
+    void setOutBuffer(unsigned char *outBufferData) { this->outBuffer = outBufferData; }
 
-    void setOutBufferSize(unsigned int outBufferSize) { this->outBufferSize = outBufferSize; }
+    void setOutBufferSize(int outBufferLen) { this->outBufferSize = outBufferLen; }
 
-    unsigned int getOutBufferSize() const { return this->outBufferSize; }
+    [[nodiscard]] unsigned int getOutBufferSize() const { return this->outBufferSize; }
 
     void freeOutBuffer()
     {
-        unsigned char *outBuffer = this->getOutBuffer();
+        unsigned char *outBufferData = this->getOutBuffer();
 
-        if (outBuffer)
+        if (outBufferData)
         {
-            memset(outBuffer, 0, this->getOutBufferSize());
-            delete[] outBuffer;
+            memset(outBufferData, 0, this->getOutBufferSize());
+            delete[] outBufferData;
             this->setOutBuffer(nullptr);
             this->setOutBufferSize(0);
         }
     }
 
-    bool allocateOutBuffer(unsigned int len)
+    void allocateOutBuffer(unsigned int len)
     {
         if (not this->getOutBuffer())
         {
             this->setOutBuffer(new unsigned char[len + 1]);
             this->setOutBufferSize(0);
-
-            return this->getOutBuffer() != nullptr;
         }
-
-        return true;
     }
 
     EncrypterResult *abort()
@@ -62,14 +58,17 @@ protected:
     }
 
 public:
-    EvpContext(Key *key)
+    explicit EvpContext(Key *key)
     {
         this->key = key;
-        this->setOutBuffer(nullptr);
-        this->setOutBufferSize(0);
+        this->outBuffer = nullptr;
+        this->outBufferSize = 0;
     }
 
     virtual ~EvpContext() { this->freeOutBuffer(); }
+
+    EvpContext(const EvpContext &) = delete;
+    const EvpContext &operator=(const EvpContext &) = delete;
 
     /**
      * @brief Transform plaintext provided as input into ciphertext.
@@ -87,10 +86,7 @@ public:
      */
     virtual EncrypterResult *decrypt(const EncrypterData *in) = 0;
 
-    virtual void cleanup()
-    {
-        this->freeOutBuffer();
-    }
+    virtual void cleanup() { this->freeOutBuffer(); }
 };
 
 #endif

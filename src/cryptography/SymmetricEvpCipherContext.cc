@@ -7,13 +7,13 @@ EncrypterResult *SymmetricEvpCipherContext::createEncryptedData() const
     unsigned int bufferSize = this->getOutBufferSize();
     unsigned int finalDataSize = bufferSize + IV_SIZE + TAG_SIZE;
 
-    unsigned char * finalData = new unsigned char[finalDataSize + 1];
+    auto *finalData = new unsigned char[finalDataSize + 1];
 
     memcpy(finalData, this->getIV(), IV_SIZE);
     memcpy(finalData + IV_SIZE, this->getOutBuffer(), bufferSize);
     memcpy(finalData + IV_SIZE + bufferSize, this->getTag(), TAG_SIZE);
 
-    EncrypterResult *result = new EncrypterResult(finalData, finalDataSize);
+    auto *result = new EncrypterResult(finalData, finalDataSize);
 
     memset(finalData, 0, finalDataSize);
     delete[] finalData;
@@ -21,9 +21,9 @@ EncrypterResult *SymmetricEvpCipherContext::createEncryptedData() const
     return result;
 }
 
-const unsigned char * SymmetricEvpCipherContext::readEncryptedData(const EncrypterData *in, int &cipherlen)
+const unsigned char *SymmetricEvpCipherContext::readEncryptedData(const EncrypterData *in, int &cipherLen)
 {
-    cipherlen = -1;
+    cipherLen = -1;
 
     if (not in or not in->getData())
     {
@@ -31,14 +31,14 @@ const unsigned char * SymmetricEvpCipherContext::readEncryptedData(const Encrypt
     }
 
     unsigned int dataSize = in->getDataSize();
-    const unsigned char * data = in->getData();
+    const unsigned char *data = in->getData();
 
     if (not this->writeIV(data) or not this->writeTag(data + dataSize - TAG_SIZE))
     {
         return nullptr;
     }
 
-    cipherlen = dataSize - IV_SIZE - TAG_SIZE;
+    cipherLen = (int)dataSize - IV_SIZE - TAG_SIZE;
     return data + IV_SIZE;
 }
 
@@ -51,19 +51,17 @@ EncrypterResult *SymmetricEvpCipherContext::encrypt(const EncrypterData *in)
 
     this->cleanup();
 
-    if (not this->encryptionAllocateMemory(in) or not this->generateIV())
-    {
-        return this->abort();
-    }
+    this->encryptionAllocateMemory(in);
+    this->generateIV();
 
-    if (EVP_EncryptInit_ex((EVP_CIPHER_CTX *)this->getCipherContext(), EVP_aes_256_gcm(), NULL, (const unsigned char *)this->getKey()->getKeyData(), this->getIV()) != 1)
+    if (EVP_EncryptInit_ex((EVP_CIPHER_CTX *)this->getCipherContext(), EVP_aes_256_gcm(), nullptr, (const unsigned char *)this->getKey()->getKeyData(), this->getIV()) != 1)
     {
         return this->abort();
     }
 
     int len;
 
-    if (EVP_EncryptUpdate((EVP_CIPHER_CTX *)this->getCipherContext(), this->getOutBuffer(), &len, in->getData(), in->getDataSize()) != 1)
+    if (EVP_EncryptUpdate((EVP_CIPHER_CTX *)this->getCipherContext(), this->getOutBuffer(), &len, in->getData(), (int)in->getDataSize()) != 1)
     {
         return this->abort();
     }
@@ -97,28 +95,24 @@ EncrypterResult *SymmetricEvpCipherContext::decrypt(const EncrypterData *in)
     }
 
     this->cleanup();
+    this->decryptionAllocateMemory(in);
 
-    if (not this->decryptionAllocateMemory(in))
+    int cipherLen;
+    const unsigned char *ciphertext = this->readEncryptedData(in, cipherLen);
+
+    if (not ciphertext or cipherLen < 0)
     {
         return this->abort();
     }
 
-    int cipherlen;
-    const unsigned char * ciphertext = this->readEncryptedData(in, cipherlen);
-
-    if(not ciphertext or cipherlen < 0)
-    {
-        return this->abort();
-    }
-
-    if (EVP_DecryptInit_ex((EVP_CIPHER_CTX *)this->getCipherContext(), EVP_aes_256_gcm(), NULL, (const unsigned char *)this->getKey()->getKeyData(), this->getIV()) != 1)
+    if (EVP_DecryptInit_ex((EVP_CIPHER_CTX *)this->getCipherContext(), EVP_aes_256_gcm(), nullptr, (const unsigned char *)this->getKey()->getKeyData(), this->getIV()) != 1)
     {
         return this->abort();
     }
 
     int len;
 
-    if (EVP_DecryptUpdate((EVP_CIPHER_CTX *)this->getCipherContext(), this->getOutBuffer(), &len, ciphertext, cipherlen) != 1)
+    if (EVP_DecryptUpdate((EVP_CIPHER_CTX *)this->getCipherContext(), this->getOutBuffer(), &len, ciphertext, cipherLen) != 1)
     {
         return this->abort();
     }
@@ -137,7 +131,7 @@ EncrypterResult *SymmetricEvpCipherContext::decrypt(const EncrypterData *in)
 
     this->setOutBufferSize(len + len2);
 
-    EncrypterResult *result = new EncrypterResult(this->getOutBuffer(), this->getOutBufferSize());
+    auto *result = new EncrypterResult(this->getOutBuffer(), this->getOutBufferSize());
 
     this->cleanup();
 

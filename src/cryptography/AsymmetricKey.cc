@@ -4,17 +4,18 @@
 #include <openssl/bio.h>
 #include <openssl/pem.h>
 
-static char *AllocatePassphraseBuffer(const char *passphrase)
+char *AsymmetricKey::AllocatePassphraseBuffer(const char *passphrase, int &outSize)
 {
+    outSize = 0;
     if (not passphrase)
     {
         return nullptr;
     }
 
-    int size = strlen(passphrase);
-    char *newBuffer = new char[size + 1];
-    strncpy(newBuffer, passphrase, size);
-    newBuffer[size] = 0;
+    outSize = (int)strlen(passphrase);
+    char *newBuffer = new char[outSize + 1];
+    strncpy(newBuffer, passphrase, outSize);
+    newBuffer[outSize] = 0;
 
     return newBuffer;
 }
@@ -23,32 +24,23 @@ bool AsymmetricKey::setKeyData(const unsigned char *keyData, unsigned int len, c
 {
     this->freeKey();
 
-    BIO *bio = BIO_new_mem_buf((const char *)keyData, len);
+    BIO *bio = BIO_new_mem_buf((const char *)keyData, (int)len);
 
     if (not bio)
     {
         return false;
     }
 
-    char *p = nullptr;
-
-    switch (this->getKeyType())
-    {
-    case PublicKey:
-        p = AllocatePassphraseBuffer(passphrase);
-        this->key = PEM_read_bio_PUBKEY(bio, nullptr, nullptr, p);
-        break;
-    case PrivateKey:
-        p = AllocatePassphraseBuffer(passphrase);
-        this->key = PEM_read_bio_PrivateKey(bio, nullptr, nullptr, p);
-        break;
-    default:
-        BIO_free(bio);
-        return false;
-    }
+    int pLen;
+    char *p = AllocatePassphraseBuffer(passphrase, pLen);
+    this->setKeyFromBio(bio, p);
 
     BIO_free(bio);
-    delete[] p;
+    if (p)
+    {
+        memset(p, 0, pLen);
+        delete[] p;
+    }
 
     return this->notNullKeyData();
 }
@@ -64,36 +56,26 @@ bool AsymmetricKey::readKeyFile(const char *path, const char *passphrase)
         return false;
     }
 
-    char *p = nullptr;
-
-    switch (this->getKeyType())
-    {
-    case PublicKey:
-        p = AllocatePassphraseBuffer(passphrase);
-        this->key = PEM_read_PUBKEY(keyFile, nullptr, nullptr, p);
-        break;
-    case PrivateKey:
-        p = AllocatePassphraseBuffer(passphrase);
-        this->key = PEM_read_PrivateKey(keyFile, nullptr, nullptr, p);
-        break;
-    default:
-        fclose(keyFile);
-        return false;
-    }
+    int pLen;
+    char *p = AllocatePassphraseBuffer(passphrase, pLen);
+    this->setKeyFromFile(keyFile, p);
 
     fclose(keyFile);
-    delete[] p;
-
+    if (p)
+    {
+        memset(p, 0, pLen);
+        delete[] p;
+    }
     return this->notNullKeyData();
 }
 
 void AsymmetricKey::freeKey()
 {
-    EVP_PKEY_free((EVP_PKEY *)this->key);
-    this->key = nullptr;
+    EVP_PKEY_free((EVP_PKEY *)this->getKeyData());
+    this->setKey(nullptr);
 }
 
 int AsymmetricKey::getSize() const
 {
-    return this->notNullKeyData() ? EVP_PKEY_size((EVP_PKEY *)this->key) : -1;
+    return this->notNullKeyData() ? EVP_PKEY_size((EVP_PKEY *)this->getKeyData()) : -1;
 }
