@@ -11,6 +11,8 @@ extern "C"
     int CreateMasterPassphrase(const char *passphrase);
 
     bool RemoveMasterPassphrase();
+
+    int GetKernelKeyMaxSize();
 #endif
     CryptoContext *CreateSymmetricEncryptionContext(const unsigned char *key);
 
