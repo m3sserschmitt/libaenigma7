@@ -6,7 +6,7 @@
 #include <keyutils.h>
 #include <cstring>
 
-int CreateKernelKey(const char *keyMaterial, unsigned int keyMaterialSize, const char *description, int ringId)
+extern "C" int CreateKernelKey(const char *keyMaterial, unsigned int keyMaterialSize, const char *description, int ringId)
 {
     if (keyMaterial == NULL || keyMaterialSize == 0 || description == NULL || keyMaterialSize > MAX_KERNEL_KEY_SIZE)
     {
@@ -35,7 +35,7 @@ int CreateKernelKey(const char *keyMaterial, unsigned int keyMaterialSize, const
     return handle;
 }
 
-int ReadKernelKey(int keyId, char *data)
+extern "C" int ReadKernelKey(int keyId, char *data)
 {
     if (keyId < 0 || data == NULL)
     {
@@ -61,7 +61,7 @@ int ReadKernelKey(int keyId, char *data)
     return bytesRead;
 }
 
-bool RemoveKernelKey(int keyId)
+extern "C" bool RemoveKernelKey(int keyId)
 {
     if (keyId < 0)
     {
@@ -71,7 +71,7 @@ bool RemoveKernelKey(int keyId)
     return keyctl(KEYCTL_UNLINK, keyId) != -1;
 }
 
-int SearchKernelKey(const char *description, int ringId)
+extern "C" int SearchKernelKey(const char *description, int ringId)
 {
     if (description == NULL)
     {
@@ -89,5 +89,8 @@ int SearchKernelKey(const char *description, int ringId)
 
     return keyId < 0 ? -1 : keyId;
 }
-
+extern "C" int GetKernelKeyMaxSize()
+{
+    return MAX_KERNEL_KEY_SIZE;
+}
 #endif

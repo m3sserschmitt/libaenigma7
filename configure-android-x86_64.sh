@@ -19,10 +19,18 @@
 # along with Aenigma.  If not, see <https://www.gnu.org/licenses/>.
 
 SCRIPT_PATH=$(dirname "$(realpath "$0")")
-BUILD_DIR="$SCRIPT_PATH/build-arm64"
-TOOLCHAIN_FILE="$SCRIPT_PATH/toolchain-arm64.cmake"
+ANDROID_ABI="x86_64"
+OPENSSL_ROOT_DIR="$SCRIPT_PATH/openssl-android/$ANDROID_ABI"
+BUILD_DIR="$SCRIPT_PATH/build-android-$ANDROID_ABI"
+TOOLCHAIN_FILE="$ANDROID_NDK_ROOT/build/cmake/android.toolchain.cmake"
+ANDROID_PLATFORM="android-26"
 
 cmake -S "$SCRIPT_PATH" \
     -B "$BUILD_DIR" \
     -DCMAKE_TOOLCHAIN_FILE="$TOOLCHAIN_FILE" \
+    -DANDROID_ABI="$ANDROID_ABI" \
+    -DANDROID_PLATFORM="$ANDROID_PLATFORM" \
+    -DOPENSSL_ROOT_DIR="$OPENSSL_ROOT_DIR" \
+    -DANDROID_STL=c++_shared \
+    -DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON \
     -DCMAKE_BUILD_TYPE=Release

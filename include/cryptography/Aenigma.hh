@@ -1,7 +1,8 @@
 #ifndef LIB_AENIGMA_HH
 #define LIB_AENIGMA_HH
 
-#include "CryptoContext.hh"
+#include "cryptography/CryptoContext.hh"
+#include "cryptography/KernelKeys.hh"
 
 extern "C"
 {
@@ -11,8 +12,6 @@ extern "C"
     int CreateMasterPassphrase(const char *passphrase);
 
     bool RemoveMasterPassphrase();
-
-    int GetKernelKeyMaxSize();
 #endif
     CryptoContext *CreateSymmetricEncryptionContext(const unsigned char *key);
 

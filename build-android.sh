@@ -18,11 +18,18 @@
 # You should have received a copy of the GNU General Public License
 # along with Aenigma.  If not, see <https://www.gnu.org/licenses/>.
 
-SCRIPT_PATH=$(dirname "$(realpath "$0")")
-BUILD_DIR="$SCRIPT_PATH/build-arm64"
-TOOLCHAIN_FILE="$SCRIPT_PATH/toolchain-arm64.cmake"
+set -Eeuo pipefail
 
-cmake -S "$SCRIPT_PATH" \
-    -B "$BUILD_DIR" \
-    -DCMAKE_TOOLCHAIN_FILE="$TOOLCHAIN_FILE" \
-    -DCMAKE_BUILD_TYPE=Release
+SCRIPT_PATH=$(dirname "$(realpath "$0")")
+
+$SCRIPT_PATH/configure-android-arm.sh
+$SCRIPT_PATH/build-android-arm.sh
+
+$SCRIPT_PATH/configure-android-arm64.sh
+$SCRIPT_PATH/build-android-arm64.sh
+
+$SCRIPT_PATH/configure-android-x86.sh
+$SCRIPT_PATH/build-android-x86.sh
+
+$SCRIPT_PATH/configure-android-x86_64.sh
+$SCRIPT_PATH/build-android-x86_64.sh

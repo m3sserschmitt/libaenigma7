@@ -89,10 +89,6 @@ extern "C" bool RemoveMasterPassphrase()
 {
     return PrivateKey::removeMasterPassphrase();
 }
-extern "C" int GetKernelKeyMaxSize()
-{
-    return MAX_KERNEL_KEY_SIZE;
-}
 #endif
 
 extern "C" CryptoContext *CreateSymmetricEncryptionContext(const unsigned char *key)

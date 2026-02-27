@@ -18,4 +18,10 @@
 # You should have received a copy of the GNU General Public License
 # along with Aenigma.  If not, see <https://www.gnu.org/licenses/>.
 
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+SCRIPT_PATH=$(dirname "$(realpath "$0")")
+BUILD_DIR="$SCRIPT_PATH/build"
+
+cmake -S "$SCRIPT_PATH" \
+    -B "$BUILD_DIR" \
+    -DCMAKE_BUILD_TYPE=Release
+

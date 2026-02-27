@@ -1,14 +1,13 @@
 #include "cryptography/PrivateKey.hh"
 #include "cryptography/Constants.hh"
 #include "cryptography/Aenigma.hh"
+#include "cryptography/KernelKeys.hh"
 
 #include <cstring>
 #include <openssl/bio.h>
 #include <openssl/pem.h>
 
 #ifndef __ANDROID__
-#include "cryptography/KernelKeys.hh"
-
 char PrivateKey::masterPassphraseName[MASTER_PASSPHRASE_MAX_NAME_SIZE + 1] = MASTER_PASSPHRASE_DEFAULT_NAME;
 
 int PrivateKey::masterPassphraseHandle = -1;
@@ -50,9 +49,7 @@ void PrivateKey::setKeyFromFile(FILE *file, char *passphrase)
 {
     this->setKey(PEM_read_PrivateKey(file, nullptr, passphrase ? nullptr : readMasterPassphraseCallback, passphrase));
 }
-
 #else
-
 void PrivateKey::setKeyFromBio(void *bio, char *passphrase)
 {
     this->setKey(PEM_read_bio_PrivateKey((BIO *)bio, nullptr, nullptr, passphrase));
@@ -62,5 +59,4 @@ void PrivateKey::setKeyFromFile(FILE *file, char *passphrase)
 {
     this->setKey(PEM_read_PrivateKey(file, nullptr, nullptr, passphrase));
 }
-
 #endif
