@@ -60,5 +60,7 @@ extern "C"
     int GetPKeySize(const char *publicKey);
 
     int GetAddressSize();
+
+    const char *GetOpenSslVersion();
 }
 #endif

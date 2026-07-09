@@ -2,6 +2,7 @@
 #include "cryptography/PublicKey.hh"
 #include "cryptography/CryptoContextBuilder.hh"
 #include <cmath>
+#include <openssl/opensslv.h>
 
 static bool Sha256HexToBytes(const char *sha246Hex, unsigned char *out)
 {
@@ -347,4 +348,9 @@ extern "C" int GetSignedDataSize(unsigned int dataSize, const char *publicKey)
 extern "C" int GetAddressSize()
 {
     return ADDRESS_SIZE;
+}
+
+extern "C" const char *GetOpenSslVersion()
+{
+    return OPENSSL_VERSION_TEXT;
 }
