@@ -24,7 +24,7 @@ SCRIPT_PATH=$(dirname "$(realpath "$0")")
 OPENSSL_SOURCE="$SCRIPT_PATH/openssl"
 OPENSSL_URL="https://github.com/openssl/openssl.git"
 OPENSSL_BRANCH="openssl-3.0"
-OPENSSL_TAG="openssl-3.0.19"
+OPENSSL_TAG="openssl-3.0.21"
 OPENSSL_ANDROID="$SCRIPT_PATH/openssl-android"
 ANDROID_API="26"
 CPU_CORES=$(nproc)
@@ -34,6 +34,7 @@ if [ ! -d "$OPENSSL_SOURCE" ]; then
 fi
 
 cd "$OPENSSL_SOURCE"
+git fetch --tags
 git checkout "tags/$OPENSSL_TAG"
 
 mkdir -p "$OPENSSL_ANDROID/armeabi-v7a"
