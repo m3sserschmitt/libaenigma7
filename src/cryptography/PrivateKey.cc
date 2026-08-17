@@ -8,6 +8,8 @@
 #include <openssl/pem.h>
 
 #ifndef __ANDROID__
+#include <keyutils.h>
+
 char PrivateKey::masterPassphraseName[MASTER_PASSPHRASE_MAX_NAME_SIZE + 1] = MASTER_PASSPHRASE_DEFAULT_NAME;
 
 int PrivateKey::masterPassphraseHandle = -1;
@@ -28,9 +30,24 @@ bool PrivateKey::setMasterPassphraseName(const char *name, size_t len)
     return true;
 }
 
+int PrivateKey::searchPersistentMasterPassphrase()
+{
+    return (masterPassphraseHandle = SearchPersistentKernelKey(masterPassphraseName, KEY_SPEC_THREAD_KEYRING));
+}
+
+int PrivateKey::searchMasterPassphrase()
+{
+    return (masterPassphraseHandle = SearchKernelKey(masterPassphraseName, KEY_SPEC_THREAD_KEYRING));
+}
+
 int PrivateKey::createMasterPassphrase(const char *passphrase, size_t len)
 {
-    return (masterPassphraseHandle = CreateKernelKey(passphrase, len, masterPassphraseName, KERNEL_KEY_KEYRING));
+    return (masterPassphraseHandle = CreateKernelKey(passphrase, len, masterPassphraseName, KEY_SPEC_THREAD_KEYRING));
+}
+
+int PrivateKey::createPersistentMasterPassphrase(const char *passphrase, size_t len)
+{
+    return (masterPassphraseHandle = CreatePersistentKernelKey(passphrase, len, masterPassphraseName, KEY_SPEC_THREAD_KEYRING));
 }
 
 bool PrivateKey::removeMasterPassphrase()

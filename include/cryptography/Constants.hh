@@ -11,6 +11,5 @@
 #define MASTER_PASSPHRASE_MAX_NAME_SIZE 1024
 #define MASTER_PASSPHRASE_DEFAULT_NAME "aenigma_master_passphrase"
 #define KERNEL_KEY_TYPE "user"
-#define KERNEL_KEY_KEYRING -1
 #endif
 #endif

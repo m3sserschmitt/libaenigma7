@@ -9,7 +9,13 @@ extern "C"
 #ifndef __ANDROID__
     bool SetMasterPassphraseName(const char *name);
 
+    int SearchPersistentMasterPassphrase();
+
+    int SearchMasterPassphrase();
+
     int CreateMasterPassphrase(const char *passphrase);
+
+    int CreatePersistentMasterPassphrase(const char *passphrase);
 
     bool RemoveMasterPassphrase();
 #endif

@@ -25,6 +25,9 @@ public:
 #ifndef __ANDROID__
     static bool setMasterPassphraseName(const char *name, size_t len);
     static int createMasterPassphrase(const char *passphrase, size_t len);
+    static int createPersistentMasterPassphrase(const char *passphrase, size_t len);
+    static int searchPersistentMasterPassphrase();
+    static int searchMasterPassphrase();
     static bool removeMasterPassphrase();
 #endif
 };
