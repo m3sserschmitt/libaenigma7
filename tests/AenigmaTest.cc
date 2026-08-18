@@ -369,6 +369,8 @@ bool TestOnionUnsealWrongKeyFails()
 
 int main()
 {
+    SetMasterPassphraseName("AenigmaTestMasterPassphrase;");
+
     CryptoContext *ctx = CreateAsymmetricEncryptionContext(publicKey);
     bool result = RunTest("Test asymmetric encryption", Run, ctx, plaintext, plaintextLen, nullptr, asymmetricCipherLen);
     delete ctx;
@@ -377,8 +379,8 @@ int main()
     result = result & RunTest("Test asymmetric encryption with invalid key should fail", Run, ctx, plaintext, plaintextLen, nullptr, -1);
     delete ctx;
 
-    SetMasterPassphraseName("AenigmaTestMasterPassphrase");
     CreateMasterPassphrase(privateKeyPassphrase);
+    cout << "Info: master passphrase key id (ephemeral): " << SearchMasterPassphrase() << ".\n";
     ctx = CreateAsymmetricDecryptionContext(privateKey);
     result = result & RunTest("Test asymmetric decryption with master passphrase", Run, ctx, asymmetricCiphertext, asymmetricCipherLen, plaintext, plaintextLen);
     delete ctx;
@@ -386,6 +388,7 @@ int main()
     ctx = CreateAsymmetricDecryptionContextFromFile("../tests/private.pem");
     result = result & RunTest("Create ctx from file; Test asymmetric decryption with master passphrase", Run, ctx, asymmetricCiphertext, asymmetricCipherLen, plaintext, plaintextLen);
     delete ctx;
+    RemoveMasterPassphrase();
 
     ctx = CreateAsymmetricDecryptionContext(privateKey, privateKeyPassphrase);
     result = result & RunTest("Test asymmetric decryption", Run, ctx, asymmetricCiphertext, asymmetricCipherLen, plaintext, plaintextLen);
@@ -419,6 +422,8 @@ int main()
     result = result & RunTest("Test symmetric decryption with invalid ciphertext should fail", Run, ctx, invalidSymmetricCiphertext, invalidSymmetricCipherLen, nullptr, -1);
     delete ctx;
 
+    CreatePersistentMasterPassphrase(privateKeyPassphrase);
+    cout << "Info: master passphrase key id (persistent): " << SearchMasterPassphrase() << ".\n";
     ctx = CreateSignatureContext(privateKey);
     result = result & RunTest("Test signature with master passphrase", Run, ctx, plaintext, plaintextLen, nullptr, signedDatalen);
     delete ctx;
@@ -426,6 +431,7 @@ int main()
     ctx = CreateSignatureContextFromFile("../tests/private.pem");
     result = result & RunTest("Create ctx from file; Test signature with master passphrase", Run, ctx, plaintext, plaintextLen, nullptr, signedDatalen);
     delete ctx;
+    RemoveMasterPassphrase();
 
     ctx = CreateSignatureContext(privateKey, privateKeyPassphrase);
     result = result & RunTest("Test signature", Run, ctx, plaintext, plaintextLen, nullptr, signedDatalen);

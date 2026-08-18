@@ -81,9 +81,24 @@ extern "C" bool SetMasterPassphraseName(const char *name)
     return PrivateKey::setMasterPassphraseName(name, strnlen(name, MASTER_PASSPHRASE_MAX_NAME_SIZE));
 }
 
+extern "C" int SearchPersistentMasterPassphrase()
+{
+    return PrivateKey::searchPersistentMasterPassphrase();
+}
+
+extern "C" int SearchMasterPassphrase()
+{
+    return PrivateKey::searchMasterPassphrase();
+}
+
 extern "C" int CreateMasterPassphrase(const char *passphrase)
 {
     return PrivateKey::createMasterPassphrase(passphrase, strnlen(passphrase, MAX_KERNEL_KEY_SIZE));
+}
+
+extern "C" int CreatePersistentMasterPassphrase(const char *passphrase)
+{
+    return PrivateKey::createPersistentMasterPassphrase(passphrase, strnlen(passphrase, MAX_KERNEL_KEY_SIZE));
 }
 
 extern "C" bool RemoveMasterPassphrase()
