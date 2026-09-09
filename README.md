@@ -1,4 +1,4 @@
-### Getting Started
+## Getting Started
 
 These instructions will get you a copy of the project up and running on your local
 machine.
@@ -79,6 +79,6 @@ sudo chmod +x ./*.sh
 This project is licensed under the MIT License. Feel free to copy, modify and
 distribute it - see the [LICENSE](LICENSE) file for details.
 
-## Contact
+### Contact
 
 You can report errors or suggest improvements at [contact@aenigma.ro](mailto:contact@aenigma.ro)
