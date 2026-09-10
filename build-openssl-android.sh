@@ -23,8 +23,8 @@ set -Eeuo pipefail
 SCRIPT_PATH=$(dirname "$(realpath "$0")")
 OPENSSL_SOURCE="$SCRIPT_PATH/openssl"
 OPENSSL_URL="https://github.com/openssl/openssl.git"
-OPENSSL_BRANCH="openssl-3.0"
-OPENSSL_TAG="openssl-3.0.21"
+OPENSSL_BRANCH="openssl-3.5"
+OPENSSL_TAG="openssl-3.5.8"
 OPENSSL_ANDROID="$SCRIPT_PATH/openssl-android"
 ANDROID_API="26"
 CPU_CORES=$(nproc)
