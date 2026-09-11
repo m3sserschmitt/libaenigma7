@@ -37,14 +37,13 @@ If you intend to build for Android, make sure to have Android SDK installed on y
 machine and export its location like this
 
 ```bash
-export ANDROID_NDK_ROOT=<sdk-path>/ndk/<ndk-version>
-export PATH=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/<system>/bin:$PATH
+export ANDROID_NDK_ROOT=<ndk-path>
+export PATH=<ndk-path>/toolchains/llvm/prebuilt/<system>/bin:$PATH
 ```
 
->In the previous commands `<ndk-version>` is your installed NDK version,
->`<sdk-path>` is the path of your installed Android SDK and
->`<system>` is your local machine OS: `linux-x86_64`, `darwin-x86_64` `windows-x86_64`
-> or `windows`.
+>In the previous commands `<ndk-path>` is the path of your installed Android NDK and
+>`<system>` is your local machine OS: `linux-x86_64`, `darwin-x86_64`, `windows-x86_64`,
+`windows` etc.
 
 
 ### Building
